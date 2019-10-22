@@ -6,7 +6,6 @@
 #define PROJECT_JJ_DATATYPES_H
 
 #include <cstdint>
-#include "Utils.h"
 
 class Tuple
 {
@@ -18,14 +17,10 @@ public:
     uint64_t getKey() const;
     uint64_t getPayload() const;
 
-};
+    void setKey(uint64_t key);
+    void setPayload(uint64_t payload);
 
-class Relation
-{
-    Tuple *tuples;
-    uint64_t num_tuples;
-
-public:
+    void swap(Tuple* tuple);
 
 };
 
