@@ -9,9 +9,7 @@
 
 #define SIZE 1024
 
-
-
-void Quicksort(uint64_t* A, uint64_t lo, uint64_t hi);
+void Quicksort(Tuple* A, uint64_t lo, uint64_t hi);
 
 Tuple getMatrixSize(const char* fileName);
 

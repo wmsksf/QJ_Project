@@ -7,24 +7,39 @@
 
 #include <cstdint>
 
+#define L1_CACHESIZE 64*1024
+
 class Tuple
 {
     uint64_t key, payload;
 
 public:
-    Tuple(uint64_t key, uint64_t payload);
+    Tuple();
 
     uint64_t getKey() const;
     uint64_t getPayload() const;
 
+    void setKey(uint64_t key);
+    void setPayload(uint64_t payload);
+
+    void swap(Tuple* tuple);
 };
 
 class Relation
 {
-    Tuple *tuples;
-    uint64_t num_tuples;
+    Tuple* tuples;
+    uint64_t numTuples;
 
 public:
+    Relation();
+    ~Relation();
+
+    Tuple *getTuples() const;
+    void initTuples();
+    void initTuplesVal(Relation* R);
+
+    uint64_t getNumTuples() const;
+    void setNumTuples(uint64_t numTuples);
 
 };
 

@@ -10,31 +10,24 @@
 
 #include "Utils.h"
 
-static void swap(uint64_t* a, uint64_t* b)
+static uint64_t partition(Tuple* A, uint64_t p, uint64_t r)
 {
-    uint64_t tmp = *a;
-    *a = *b;
-    *b = tmp;
-}
-
-static uint64_t partition(uint64_t* A, uint64_t p, uint64_t r)
-{
-    uint64_t pivot = A[r];
+    uint64_t pivot = A[r].getKey();
     uint64_t i = p - 1;
 
     for (uint64_t j = p; j < r; j++)
-        if (A[j] <= pivot)
+        if (A[j].getKey() <= pivot)
         {
             i++;
-            swap(&A[i], &A[j]);
+            A[i].swap(&A[j]);
         }
 
-    swap(&A[i+1], &A[r]);
+    A[i + 1].swap(&A[r]);
 
     return i + 1;
 }
 
-void Quicksort(uint64_t* A, uint64_t lo, uint64_t hi)
+void Quicksort(Tuple* A, uint64_t lo, uint64_t hi)
 {
     if (lo < hi)
     {
@@ -44,6 +37,44 @@ void Quicksort(uint64_t* A, uint64_t lo, uint64_t hi)
         Quicksort(A, q + 1, hi);
     }
 }
+
+
+//IN PROCESS...
+void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte = 0, Relation* RR = nullptr)
+{
+    if ((end - start) * sizeof(Tuple) < L1_CACHESIZE)
+    {
+        Quicksort(R->getTuples(), start, end-1);
+        return;
+    }
+
+    if (RR == nullptr)
+    {
+        RR = new Relation;
+        RR->setNumTuples(R->getNumTuples());
+        RR->initTuplesVal(R);
+    }
+
+    uint64_t Hist[256] = {0};
+    if(!current_byte)
+        for (uint64_t i = 0; i < 256; i++)
+            Hist[R->getTuples()[i].getPayload() & 0xff]++;
+    else
+        for (uint64_t i = 0; i < 256; i++)
+            Hist[(R->getTuples()[i].getPayload() >> current_byte) & 0xff]++;
+
+    uint64_t Psum[256] = {0};
+    for (uint64_t i = 1; i < 256; i++)
+    {
+        Psum[i] = Psum[i-1] + Hist[i-1];
+        if ((Psum[i] - Psum[i-1]) * sizeof(Tuple) > L1_CACHESIZE)
+            if (current_byte % 2)
+                Radixsort(RR, Psum[i-1], Psum[i], current_byte+8, R);
+            else
+                Radixsort(R, Psum[i-1], Psum[i], current_byte+8, RR);
+    }
+}
+
 
 Tuple getMatrixSize(const char *fileName) {
 
@@ -81,7 +112,11 @@ Tuple getMatrixSize(const char *fileName) {
 
     fclose(fp);
 
-    return Tuple(columns, lines);
+    Tuple tmp;
+    tmp.setKey(columns);
+    tmp.setPayload(lines);
+
+    return tmp;
 }
 
 //void printA(uint64_t* A, uint64_t size)

@@ -7,7 +7,7 @@
 #include <iostream>
 #include "DataTypes.h"
 
-Tuple::Tuple(uint64_t key, uint64_t payload) : key(key), payload(payload) {}
+Tuple::Tuple() { key = payload = 0; }
 
 uint64_t Tuple::getKey() const {
     return key;
@@ -16,6 +16,78 @@ uint64_t Tuple::getKey() const {
 uint64_t Tuple::getPayload() const {
     return payload;
 }
+
+void Tuple::setKey(uint64_t key_) {
+    key = key_;
+}
+
+void Tuple::setPayload(uint64_t payload_) {
+    payload = payload_;
+}
+
+void Tuple::swap(Tuple* tuple)
+{
+    uint64_t tmp = this->getKey();
+    this->setKey(tuple->getKey());
+    tuple->setKey(tmp);
+
+    tmp = this->getPayload();
+    this->setPayload(tuple->getPayload());
+    tuple->setPayload(tmp);
+}
+
+Relation::Relation() { tuples = nullptr; numTuples = 0; }
+Relation::~Relation() { delete[](tuples); }
+
+void Relation::initTuples()
+{
+    if (!this->getNumTuples())
+    {
+        std::cerr << "Empty Relation object." << std::endl
+                  << "Tip: call setNumTuples() of object first!" << std::endl;
+
+        exit(EXIT_FAILURE);
+    }
+
+    tuples = new Tuple[this->getNumTuples()];
+}
+
+void Relation::initTuplesVal(Relation* R)
+{
+    if (!this->getNumTuples())
+    {
+        std::cerr << "Empty Relation object." << std::endl
+        << "Tip: call setNumTuples() of object first!" << std::endl;
+
+        exit(EXIT_FAILURE);
+    }
+    else if (R->getNumTuples() != this->getNumTuples())
+    {
+        std::cerr << "Relation objects of different size." << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    tuples = new Tuple[this->getNumTuples()];
+    for (uint64_t i = 0; i < this->getNumTuples(); i++)
+    {
+        tuples[i].setKey(R->tuples[i].getKey());
+        tuples[i].setPayload(0);
+    }
+
+}
+
+Tuple* Relation::getTuples() const {
+    return tuples;
+}
+
+uint64_t Relation::getNumTuples() const {
+    return numTuples;
+}
+
+void Relation::setNumTuples(uint64_t numTuples_) {
+    numTuples = numTuples_;
+}
+
 
 Matrix::Matrix(long unsigned int numberOfRows,long unsigned int numberOfColumns)
         :numOfRows(numberOfRows), numOfColumns(numberOfColumns) {
