@@ -1,0 +1,3 @@
+/home/wmsksf/Desktop/project_jj/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/wmsksf/Desktop/project_jj/cmake-build-debug/CMakeFiles/project_jj.dir
+/home/wmsksf/Desktop/project_jj/cmake-build-debug/CMakeFiles/edit_cache.dir

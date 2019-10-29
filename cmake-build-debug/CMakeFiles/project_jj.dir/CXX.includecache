@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/wmsksf/Desktop/project_jj/DataTypes.h
+cstdint
+-
+
+/home/wmsksf/Desktop/project_jj/Utils.cpp
+cstdint
+-
+Utils.h
+/home/wmsksf/Desktop/project_jj/Utils.h
+
+/home/wmsksf/Desktop/project_jj/Utils.h
+DataTypes.h
+/home/wmsksf/Desktop/project_jj/DataTypes.h
+
+/home/wmsksf/Desktop/project_jj/main.cpp
+iostream
+-
+
