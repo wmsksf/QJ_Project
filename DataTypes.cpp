@@ -3,6 +3,7 @@
 //
 
 
+#include <iostream>
 #include "DataTypes.h"
 
 Tuple::Tuple() { key = payload = 0; }
@@ -146,5 +147,5 @@ void Matrix::printMatrix() {
     }
 }
 
-Relation::Relation(Tuple * tuple, int size) :tuples(tuple), num_tuples(size) {
-}
+//Relation::Relation(Tuple * tuple, int size) :tuples(tuple), num_tuples(size) {
+//}

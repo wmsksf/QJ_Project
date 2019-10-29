@@ -2,6 +2,9 @@
 // Created by wmsksf on 16/10/19.
 //
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include "Utils.h"
 
 static uint64_t partition(Tuple* A, uint64_t p, uint64_t r)
