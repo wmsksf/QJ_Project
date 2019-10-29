@@ -6,12 +6,7 @@
 #define PROJECT_JJ_DATATYPES_H
 
 #include <cstdint>
-#include <cstring>
-#include <cstdio>
-#include <cstdlib>
-#include <iostream>
 #include "Utils.h"
-
 
 class Tuple
 {
@@ -32,19 +27,6 @@ class Relation
 
 public:
 
-};
-
-class Matrix
-{
-    int numOfRows;
-    int numOfColumns;
-    uint64_t* data;
-
-public:
-    Matrix(long unsigned int, long unsigned int);
-    ~Matrix();
-    bool setMatrix(const char* fileName);       // Initializes the matrix data, given an input file
-    void printMatrix();
 };
 
 #endif //PROJECT_JJ_DATATYPES_H

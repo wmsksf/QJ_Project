@@ -3,6 +3,7 @@
 //
 
 #include <cstdint>
+//#include <iostream>
 
 #include "Utils.h"
 
@@ -39,44 +40,6 @@ void Quicksort(uint64_t* A, uint64_t lo, uint64_t hi)
         Quicksort(A, lo, q - 1);
         Quicksort(A, q + 1, hi);
     }
-}
-
-Tuple getMatrixSize(const char *fileName) {
-
-    //Opening the input file
-    FILE* fp;
-    char buffer[SIZE + 1], lastchar = '\n';
-    size_t bytes;
-    int lines = 0;
-    int columns = 0;
-    fp = fopen(fileName,"r");     //Opening the file
-
-    if (fp == NULL) {   //checking for error with fopen
-        perror("fopen");
-        exit(EXIT_FAILURE);
-    }
-
-    char c = getc(fp);
-    while(c != '\n'){
-        if(c == '|')
-            columns++;
-        c = getc(fp);
-    }
-    lines++;
-
-    //A look to count the lines in our input file, which will also be the number of rows.
-    while ((bytes = fread(buffer, 1, sizeof(buffer) - 1, fp))) {
-        lastchar = buffer[bytes - 1];
-        for (char *c = buffer; (c = (char*)(memchr(c, '\n', bytes - (c - buffer)))); c++) {
-            lines++;
-        }
-    }
-    if (lastchar != '\n')
-        lines++;  /* Count the last line even if it lacks a newline */
-
-        fclose(fp);
-
-    return Tuple(columns, lines);
 }
 
 
