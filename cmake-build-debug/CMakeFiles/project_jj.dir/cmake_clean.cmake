@@ -1,9 +1,10 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/project_jj.dir/main.cpp.o"
   "CMakeFiles/project_jj.dir/DataTypes.cpp.o"
   "CMakeFiles/project_jj.dir/Utils.cpp.o"
+  "CMakeFiles/project_jj.dir/main.cpp.o"
+  "libproject_jj.dll.a"
+  "project_jj.exe"
   "project_jj.pdb"
-  "project_jj"
 )
 
 # Per-language clean rules from dependency scanning.
