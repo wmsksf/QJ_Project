@@ -13,21 +13,15 @@
   <component name="ChangeListManager">
     <list default="true" id="57fbacda-999f-4f1c-90ed-744ad1b40182" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DataTypes.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/DataTypes.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DataTypes.h" beforeDir="false" afterPath="$PROJECT_DIR$/DataTypes.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Utils.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Utils.cpp" afterDir="false" />
+    </list>
+    <list id="9c5ee638-d51f-4893-84e3-bdc34372fbba" name="Revert &quot;class for matrix, read matrix from file and initialize it&quot;" comment="Revert &quot;class for matrix, read matrix from file and initialize it&quot;&#10;&#10;This reverts commit c169a5b6">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DataTypes.h" beforeDir="false" afterPath="$PROJECT_DIR$/DataTypes.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Utils.h" beforeDir="false" afterPath="$PROJECT_DIR$/Utils.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeCache.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeCache.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/3.13.4/CMakeCCompiler.cmake" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/3.13.4/CMakeCXXCompiler.cmake" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/3.13.4/CMakeDetermineCompilerABI_C.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/3.13.4/CMakeDetermineCompilerABI_CXX.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/3.13.4/CMakeSystem.cmake" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/3.13.4/CompilerIdC/CMakeCCompilerId.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/3.13.4/CompilerIdC/a.out" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/3.13.4/CompilerIdCXX/CMakeCXXCompilerId.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/3.13.4/CompilerIdCXX/a.out" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/CMakeDirectoryInformation.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/CMakeDirectoryInformation.cmake" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/CMakeOutput.log" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/CMakeOutput.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Makefile.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Makefile.cmake" afterDir="false" />
@@ -35,11 +29,6 @@
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/TargetDirectories.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/TargetDirectories.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-environment.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-environment.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-log.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/cmake.check_cache" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/cmake.check_cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/feature_tests.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/feature_tests.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/feature_tests.cxx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/progress.marks" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/progress.marks" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/project_jj.dir/CXX.includecache" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/project_jj.dir/CXX.includecache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/project_jj.dir/DataTypes.cpp.o" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/project_jj.dir/DataTypes.cpp.o" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/project_jj.dir/DependInfo.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/project_jj.dir/DependInfo.cmake" afterDir="false" />
@@ -51,7 +40,6 @@
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/project_jj.dir/flags.make" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/project_jj.dir/flags.make" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/project_jj.dir/link.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/project_jj.dir/link.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/project_jj.dir/main.cpp.o" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/project_jj.dir/main.cpp.o" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/project_jj.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/project_jj.dir/progress.make" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/Makefile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/cmake_install.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/cmake_install.cmake" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/project_jj.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/project_jj.cbp" afterDir="false" />
@@ -68,24 +56,34 @@
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="Git.Settings">
-    <option name="PREVIOUS_COMMIT_AUTHORS">
-      <list>
-        <option value="carolosjk &lt;36304471+carolosjk@users.noreply.github.com&gt;" />
-      </list>
-    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectId" id="1SsCY9V2ErcxwHc5pz9BRfXwu4D" />
+  <component name="LineStatusTrackerManager">
+    <file path="$PROJECT_DIR$/.idea/workspace.xml">
+      <ranges>
+        <range start1="13" end1="14" start2="13" end2="15" changelist="57fbacda-999f-4f1c-90ed-744ad1b40182" />
+        <range start1="21" end1="30" start2="22" end2="22" changelist="57fbacda-999f-4f1c-90ed-744ad1b40182" />
+        <range start1="37" end1="44" start2="29" end2="31" changelist="57fbacda-999f-4f1c-90ed-744ad1b40182" />
+        <range start1="45" end1="46" start2="32" end2="33" changelist="57fbacda-999f-4f1c-90ed-744ad1b40182" />
+        <range start1="48" end1="49" start2="35" end2="36" changelist="57fbacda-999f-4f1c-90ed-744ad1b40182" />
+        <range start1="52" end1="54" start2="39" end2="40" changelist="57fbacda-999f-4f1c-90ed-744ad1b40182" />
+        <range start1="70" end1="75" start2="56" end2="56" changelist="57fbacda-999f-4f1c-90ed-744ad1b40182" />
+        <range start1="77" end1="78" start2="58" end2="58" changelist="9c5ee638-d51f-4893-84e3-bdc34372fbba" />
+        <range start1="80" end1="81" start2="60" end2="60" changelist="9c5ee638-d51f-4893-84e3-bdc34372fbba" />
+        <range start1="83" end1="86" start2="62" end2="62" changelist="9c5ee638-d51f-4893-84e3-bdc34372fbba" />
+        <range start1="87" end1="88" start2="63" end2="63" changelist="9c5ee638-d51f-4893-84e3-bdc34372fbba" />
+        <range start1="117" end1="118" start2="92" end2="93" changelist="9c5ee638-d51f-4893-84e3-bdc34372fbba" />
+        <range start1="129" end1="130" start2="104" end2="104" changelist="9c5ee638-d51f-4893-84e3-bdc34372fbba" />
+        <range start1="178" end1="189" start2="152" end2="152" changelist="9c5ee638-d51f-4893-84e3-bdc34372fbba" />
+        <range start1="195" end1="196" start2="158" end2="160" changelist="57fbacda-999f-4f1c-90ed-744ad1b40182" />
+      </ranges>
+    </file>
+  </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
-    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="node.js.detected.package.eslint" value="true" />
-    <property name="node.js.detected.package.tslint" value="true" />
-    <property name="node.js.path.for.package.eslint" value="project" />
     <property name="node.js.path.for.package.tslint" value="project" />
-    <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
@@ -115,7 +113,7 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="57fbacda-999f-4f1c-90ed-744ad1b40182" name="Default Changelist" comment="" />
+      <changelist id="8e55b0ef-4fd8-4d19-86ae-5db063a8f789" name="Default Changelist" comment="" />
       <created>1571141517976</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
@@ -127,7 +125,6 @@
       <workItem from="1571769193343" duration="12057000" />
       <workItem from="1572005210875" duration="2107000" />
       <workItem from="1572341236773" duration="251000" />
-      <workItem from="1572342965043" duration="8712000" />
     </task>
     <task id="LOCAL-00001" summary="me">
       <created>1571141872224</created>
@@ -177,15 +174,14 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
   </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
-          </value>
-        </entry>
-      </map>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ORDER">
+      <list>
+        <option value="0" />
+        <option value="2" />
+        <option value="3" />
+        <option value="1" />
+      </list>
     </option>
   </component>
   <component name="VcsManagerConfiguration">
@@ -193,6 +189,7 @@
     <MESSAGE value="pdf" />
     <MESSAGE value="quicksort (and few data types)" />
     <MESSAGE value="quicksort for Tuple type ++ median of 3 for quicksort" />
-    <option name="LAST_COMMIT_MESSAGE" value="quicksort for Tuple type ++ median of 3 for quicksort" />
+    <MESSAGE value="class for matrix, read matrix from file and initialize it" />
+    <option name="LAST_COMMIT_MESSAGE" value="class for matrix, read matrix from file and initialize it" />
   </component>
 </project>
