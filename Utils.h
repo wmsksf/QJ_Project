@@ -5,9 +5,11 @@
 #ifndef PROJECT_JJ_UTILS_H
 #define PROJECT_JJ_UTILS_H
 
+#include <cstdint>
 #include "DataTypes.h"
 
 #define SIZE 1024
+class Tuple;
 
 
 

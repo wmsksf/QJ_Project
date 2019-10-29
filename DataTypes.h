@@ -6,6 +6,11 @@
 #define PROJECT_JJ_DATATYPES_H
 
 #include <cstdint>
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
+#include "Utils.h"
 
 class Tuple
 {
@@ -25,6 +30,7 @@ class Relation
     uint64_t num_tuples;
 
 public:
+    Relation(Tuple*, int);
 
 };
 
