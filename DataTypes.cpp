@@ -2,9 +2,7 @@
 // Created by wmsksf on 16/10/19.
 //
 
-#include <cstdio>
-#include <cstdlib>
-#include <iostream>
+
 #include "DataTypes.h"
 
 Tuple::Tuple() { key = payload = 0; }
@@ -116,8 +114,7 @@ bool Matrix::setMatrix(const char* fileName) {
     long int row = 0;
     long int column = 0;
     int counter = 0;
-    while(fscanf(fp,"%lu%c",&number,&c)==2){
-        std:: cout << counter++ << "  " << number << std::endl;
+    while(fscanf(fp,"%llu%c",&number,&c)==2){
         data[row + column*numOfRows] = number;
         column++;
         if(column==numOfColumns){
@@ -147,4 +144,7 @@ void Matrix::printMatrix() {
             column++;
         }
     }
+}
+
+Relation::Relation(Tuple * tuple, int size) :tuples(tuple), num_tuples(size) {
 }
