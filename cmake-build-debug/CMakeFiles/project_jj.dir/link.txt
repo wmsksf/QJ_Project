@@ -1,1 +1,0 @@
-/usr/bin/c++  -g   CMakeFiles/project_jj.dir/main.cpp.o CMakeFiles/project_jj.dir/DataTypes.cpp.o CMakeFiles/project_jj.dir/Utils.cpp.o  -o project_jj 
