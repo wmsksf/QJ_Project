@@ -30,7 +30,10 @@ void Quicksort(Tuple* A, uint64_t lo, uint64_t hi)
     {
         uint64_t q = partition(A, lo, hi);
 
-        Quicksort(A, lo, q - 1);
+        if(q !=0 )
+            Quicksort(A, lo, q - 1);
+        else
+            Quicksort(A, lo, q);
         Quicksort(A, q + 1, hi);
     }
 }
@@ -41,7 +44,7 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte 
 {
     if ((end - start) * sizeof(Tuple) < L1_CACHESIZE)
     {
-        Quicksort(R->getTuples(), start, end-1);
+        Quicksort(R->getTuples(), start, end);
         return;
     }
 
@@ -54,21 +57,44 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte 
 
     uint64_t Hist[256] = {0};
     if(!current_byte)
-        for (uint64_t i = 0; i < 256; i++)
-            Hist[R->getTuples()[i].getPayload() & 0xff]++;
+        for (uint64_t i = start; i <= end; i++)
+            Hist[R->getTuples()[i].getKey() & 0xff]++;
     else
-        for (uint64_t i = 0; i < 256; i++)
-            Hist[(R->getTuples()[i].getPayload() >> current_byte) & 0xff]++;
+        for (uint64_t i = start; i <= end; i++)
+            Hist[(R->getTuples()[i].getKey() >> current_byte) & 0xff]++;
 
     uint64_t Psum[256] = {0};
+
+    for (int i = 1; i < 256; i++){
+        Psum[i] = Psum[i-1] + Hist[i-1];
+    }
+
+    for (uint64_t i = start; i <= end; i++) {
+        Tuple tuple = R->getTuples()[i];
+        uint64_t byte;
+        if(!current_byte)
+            byte = (tuple.getKey() >> current_byte) & 0xff;
+        else
+            byte = tuple.getKey() & 0xff;
+        RR->setTupleVal(Psum[byte]+Hist[byte]-1, tuple.getKey(), tuple.getPayload());
+        Hist[byte]--;
+    }
+
     for (uint64_t i = 1; i < 256; i++)
     {
-        Psum[i] = Psum[i-1] + Hist[i-1];
-        if ((Psum[i] - Psum[i-1]) * sizeof(Tuple) > L1_CACHESIZE)
+        if ((Psum[i] - Psum[i-1]) * sizeof(Tuple) > L1_CACHESIZE) {
             if (current_byte % 2)
-                Radixsort(RR, Psum[i-1], Psum[i], current_byte+8, R);
+                Radixsort(RR, Psum[i - 1], Psum[i]-1, current_byte + 8, R);
             else
-                Radixsort(R, Psum[i-1], Psum[i], current_byte+8, RR);
+                Radixsort(R, Psum[i - 1], Psum[i]-1, current_byte + 8, RR);
+        }
+        else{
+            Quicksort(R->getTuples(), Psum[i-1], Psum[i]);
+        }
+    }
+    if(current_byte%2){
+        R->initTuplesVal(RR);
+        delete RR;
     }
 }
 

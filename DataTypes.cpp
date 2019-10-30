@@ -35,6 +35,10 @@ void Tuple::swap(Tuple* tuple)
     tuple->setPayload(tmp);
 }
 
+void Tuple::print() {
+    std::cout << this->getKey() << "  " << this->getPayload() << std::endl;
+}
+
 Relation::Relation() { tuples = nullptr; numTuples = 0; }
 Relation::~Relation() { delete[](tuples); }
 
@@ -85,6 +89,29 @@ uint64_t Relation::getNumTuples() const {
 
 void Relation::setNumTuples(uint64_t numTuples_) {
     numTuples = numTuples_;
+}
+
+void Relation::setTupleVal(long unsigned int index, uint64_t key, uint64_t payload) {
+    if(index >= this->getNumTuples()){
+        std::cerr << "Index out of boundaries." << std::endl
+                  << "In this Relation object the index can get values from 0 to "
+                  << this->getNumTuples() << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    this->getTuples()[index].setKey(key);
+    this->getTuples()[index].setPayload(payload);
+}
+
+void Relation::print() {
+    if (!this->getNumTuples())
+    {
+        std::cout << "Empty Relation object." << std::endl;
+        return;
+    }
+    uint64_t j = this->getNumTuples();
+    Tuple* t = this->getTuples();
+    for(uint64_t i = 0; i < j;i++ )
+        t[i].print();
 }
 
 
@@ -145,6 +172,23 @@ void Matrix::printMatrix() {
             column++;
         }
     }
+}
+
+Relation *Matrix::getRelation(long unsigned int columnNumber) {
+    if(columnNumber >=numOfColumns) {
+        std::cout << "Out of matrix boundaries. The matrix has only "<< numOfColumns <<
+        " columns.  You tries to access column " << columnNumber << std::endl;
+        return nullptr;
+    }
+
+    long unsigned int offset = columnNumber*numOfRows;
+    auto* R = new Relation();
+    R->setNumTuples(this->numOfRows);
+    R->initTuples();
+    for(uint64_t i = 0; i<numOfRows; i++){
+        R->setTupleVal(i,data[offset+i],i);
+    }
+    return R;
 }
 
 //Relation::Relation(Tuple * tuple, int size) :tuples(tuple), num_tuples(size) {

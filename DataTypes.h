@@ -23,6 +23,7 @@ public:
     void setPayload(uint64_t payload);
 
     void swap(Tuple* tuple);
+    void print();
 };
 
 class Relation
@@ -37,16 +38,17 @@ public:
     Tuple *getTuples() const;
     void initTuples();
     void initTuplesVal(Relation* R);
+    void setTupleVal(long unsigned int, uint64_t, uint64_t);
 
     uint64_t getNumTuples() const;
     void setNumTuples(uint64_t numTuples);
-
+    void print();
 };
 
 class Matrix
 {
-    int numOfRows;
-    int numOfColumns;
+    long unsigned int numOfRows;
+    long unsigned int numOfColumns;
     uint64_t* data;
 
 public:
@@ -54,6 +56,7 @@ public:
     ~Matrix();
     bool setMatrix(const char* fileName);       // Initializes the matrix data, given an input file
     void printMatrix();
+    Relation* getRelation(long unsigned int);
 };
 
 #endif //PROJECT_JJ_DATATYPES_H

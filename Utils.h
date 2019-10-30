@@ -13,6 +13,8 @@ class Tuple;
 
 void Quicksort(Tuple* A, uint64_t lo, uint64_t hi);
 
+void Radixsort(Relation*, uint64_t, uint64_t, uint64_t , Relation* );
+
 Tuple getMatrixSize(const char* fileName);
 
 #endif //PROJECT_JJ_UTILS_H
