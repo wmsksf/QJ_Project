@@ -128,7 +128,7 @@ void Relation::isSorted() {
         uint64_t b = tuples[i].getKey();
         if(a > b){
             std::cout << "Relation is not sorted" << std::endl;
-            break;
+            return;
         }
         a = b;
     }

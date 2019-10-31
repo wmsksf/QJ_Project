@@ -61,8 +61,7 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
     for (uint64_t i = start; i <= end; i++)
         Hist[(R->getTuples()[i].getKey() >> current_byte) & 0xff]++; // for byte 0 same as A[i] & 0xff
 
-    uint64_t Psum[257] = {0};
-    Psum[256] = end;
+    uint64_t Psum[256] = {0};
     for (int i = 1; i < 256; i++)
         Psum[i] = Psum[i-1] + Hist[i-1];
 
@@ -81,23 +80,30 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
 
 
     uint64_t nth_byte = current_byte/8; // switch R, RR after byte checked
-    for (uint64_t i = 1; i < 257; i++)
+    for (uint64_t i = 1; i < 256; i++)
     {
         if ((Psum[i] - Psum[i-1]) * sizeof(Tuple) > L1_CACHESIZE)
         {
-            if (!current_byte)
-            {
-                std::cout << "Too many data to fit in L1 cache" << std::endl;
-                exit(EXIT_FAILURE);
-            }
-            Radixsort(RR, Psum[i - 1], Psum[i]-1, current_byte - 8, R);
+            if (current_byte)
+                Quicksort(RR->getTuples(), Psum[i-1], Psum[i]-1);
+            else
+                Radixsort(RR, Psum[i - 1], Psum[i]-1, current_byte - 8, R);
         }
         else{
-                Quicksort(RR->getTuples(), Psum[i-1], Psum[i]);
+                Quicksort(RR->getTuples(), Psum[i-1], Psum[i]-1);
         }
     }
 
-
+    if ((end - Psum[255]) * sizeof(Tuple) > L1_CACHESIZE)
+    {
+        if (current_byte)
+            Quicksort(RR->getTuples(), Psum[255], end);
+        else
+            Radixsort(RR, Psum[255], end, current_byte - 8, R);
+    }
+    else{
+        Quicksort(RR->getTuples(), Psum[255], end);
+    }
 
     if(nth_byte%2){
         R->initTuplesVal(RR);
@@ -147,4 +153,46 @@ Tuple getMatrixSize(const char *fileName) {
     tmp.setPayload(lines);
 
     return tmp;
+}
+
+Relation* SortMergeJoin(Relation* relA, Relation* relB) {
+    if(relA == nullptr or relB == nullptr){
+        std::cout << "Relations can't be NULL!" << std::endl;
+        return nullptr;
+    }
+    Tuple* tupA = relA->getTuples();
+    Tuple* tupB = relB->getTuples();
+    uint64_t sizeA = relA->getNumTuples();
+    uint64_t sizeB = relB->getNumTuples();
+    if(tupA == nullptr or tupB == nullptr)
+        return nullptr;
+
+    int j=0;
+    int jj=0;
+    int flag = false;
+    for(uint64_t i = 0; i<sizeA; i++){
+        if(tupA[i].getKey() == tupB[j].getKey()){
+            std::cout << tupA[i].getPayload() << "  " << tupB[j].getPayload() << std::endl;
+            while(tupA[i].getKey() == tupB[++j].getKey()){
+                std::cout << tupA[i].getPayload() << "  " << tupB[j].getPayload() << std::endl;
+            }
+            j = jj;
+        }
+        else if(tupA[i].getKey() > tupB[j].getKey()){
+            while(tupA[i].getKey() > tupB[++j].getKey()){
+                if (j == sizeB-1) {
+                    flag = true;
+                    break;
+                }
+            }
+            if(flag == true) break;
+            jj = j--;
+            while(tupA[i].getKey() == tupB[++j].getKey()){
+                std::cout << tupA[i].getPayload() << "  " << tupB[j].getPayload() << std::endl;
+            }
+            j = jj;
+        }
+    }
+
+    return nullptr;
 }
