@@ -7,7 +7,7 @@ int main(int argc, char **argv)
 {
 
 
-    char* file = "r3.tbl";
+    char* file = "t3.txt";
     Tuple a = getMatrixSize(file);
     //cout << a.getKey() << " " << a.getPayload() << endl;
     Matrix* matrix = new Matrix(a.getPayload(),a.getKey());

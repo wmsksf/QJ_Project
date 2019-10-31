@@ -60,7 +60,7 @@ void Relation::initTuplesVal(Relation* R)
     if (!this->getNumTuples())
     {
         std::cerr << "Empty Relation object." << std::endl
-        << "Tip: call setNumTuples() of object first!" << std::endl;
+                  << "Tip: call setNumTuples() of object first!" << std::endl;
 
         exit(EXIT_FAILURE);
     }
@@ -199,7 +199,7 @@ void Matrix::printMatrix() {
 Relation *Matrix::getRelation(long unsigned int columnNumber) {
     if(columnNumber >=numOfColumns) {
         std::cout << "Out of matrix boundaries. The matrix has only "<< numOfColumns <<
-        " columns.  You tries to access column " << columnNumber << std::endl;
+                  " columns.  You tries to access column " << columnNumber << std::endl;
         return nullptr;
     }
 
@@ -213,5 +213,21 @@ Relation *Matrix::getRelation(long unsigned int columnNumber) {
     return R;
 }
 
-//Relation::Relation(Tuple * tuple, int size) :tuples(tuple), num_tuples(size) {
-//}
+Results::Results(){ index = 0; }
+
+void Results::add(uint64_t x, uint64_t y)
+{
+    Buffer[index].setKey(x);
+    Buffer[index].setPayload(y);
+
+    index++;
+}
+
+bool Results::isFull() { return (index == BUFFERSIZE-1); }
+void Results::print()
+{
+    for (uint64_t i = 0; i < BUFFERSIZE; i++)
+        std::cout << Buffer[i].getKey() << "\t" << Buffer->getPayload() << std::endl;
+
+    std::cout << std::endl;
+}

@@ -8,6 +8,7 @@
 #include <cstdint>
 
 #define L1_CACHESIZE 64*1024
+#define BUFFERSIZE (1024*1024)/sizeof(Tuple)
 
 class Tuple
 {
@@ -58,6 +59,19 @@ public:
     bool setMatrix(const char* fileName);       // Initializes the matrix data, given an input file
     void printMatrix();
     Relation* getRelation(long unsigned int);
+};
+
+class Results
+{
+    Tuple Buffer[BUFFERSIZE];
+    uint64_t index = 0;
+
+    public:
+    Results();
+
+    void add(uint64_t x, uint64_t y);
+    bool isFull();
+    void print();
 };
 
 #endif //PROJECT_JJ_DATATYPES_H
