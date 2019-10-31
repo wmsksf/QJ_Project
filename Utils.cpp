@@ -7,6 +7,7 @@
 #include <cstring>
 #include <iostream>
 #include "Utils.h"
+#include "LinkedList.h"
 
 static uint64_t partition(Tuple* A, uint64_t p, uint64_t r)
 {
@@ -43,10 +44,9 @@ void Quicksort(Tuple* A, uint64_t lo, uint64_t hi)
 //IN PROCESS...
 void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte, Relation* RR)
 {
-    if ((end+1 - start) * sizeof(Tuple) < L1_CACHESIZE)
+    if (current_byte == 56 && (end+1 - start) * sizeof(Tuple) < L1_CACHESIZE)
     {
-            Quicksort(R->getTuples(), start, end);
-
+        Quicksort(R->getTuples(), start, end);
         return;
     }
 
