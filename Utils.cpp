@@ -61,7 +61,8 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
     for (uint64_t i = start; i <= end; i++)
         Hist[(R->getTuples()[i].getKey() >> current_byte) & 0xff]++; // for byte 0 same as A[i] & 0xff
 
-    uint64_t Psum[256] = {0};
+    uint64_t Psum[257] = {0};
+    Psum[256] = end;
     for (int i = 1; i < 256; i++)
         Psum[i] = Psum[i-1] + Hist[i-1];
 
@@ -80,7 +81,7 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
 
 
     uint64_t nth_byte = current_byte/8; // switch R, RR after byte checked
-    for (uint64_t i = 1; i < 256; i++)
+    for (uint64_t i = 1; i < 257; i++)
     {
         if ((Psum[i] - Psum[i-1]) * sizeof(Tuple) > L1_CACHESIZE)
         {
@@ -89,32 +90,11 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
                 std::cout << "Too many data to fit in L1 cache" << std::endl;
                 exit(EXIT_FAILURE);
             }
-
-            if (nth_byte % 2)
-                Radixsort(RR, Psum[i - 1], Psum[i]-1, current_byte - 8, R);
-            else
-                Radixsort(RR, Psum[i - 1], Psum[i]-1, current_byte - 8, R);
-
+            Radixsort(RR, Psum[i - 1], Psum[i]-1, current_byte - 8, R);
         }
         else{
-            if (nth_byte % 2)
                 Quicksort(RR->getTuples(), Psum[i-1], Psum[i]);
-            else
-                Quicksort(R->getTuples(), Psum[i-1], Psum[i]);
         }
-    }
-
-    if((end - Psum[255])* sizeof(Tuple) >L1_CACHESIZE){
-        if (nth_byte % 2)
-            Radixsort(RR, Psum[255], end, current_byte - 8, R);
-        else
-            Radixsort(RR, Psum[255], end, current_byte - 8, R);
-    }
-    else{
-        if (nth_byte % 2)
-            Quicksort(RR->getTuples(), Psum[255],end);
-        else
-            Quicksort(R->getTuples(), Psum[255], end);
     }
 
 
