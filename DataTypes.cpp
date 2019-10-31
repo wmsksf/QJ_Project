@@ -88,7 +88,6 @@ uint64_t Relation::getNumTuples() const {
 }
 
 void Relation::setNumTuples(uint64_t numTuples_) {
-    std::cout << "here" << std::endl;
     numTuples = numTuples_;
 }
 
