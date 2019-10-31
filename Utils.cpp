@@ -84,7 +84,7 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
     {
         if ((Psum[i] - Psum[i-1]) * sizeof(Tuple) > L1_CACHESIZE)
         {
-            if (current_byte)
+            if (!current_byte)
                 Quicksort(RR->getTuples(), Psum[i-1], Psum[i]-1);
             else
                 Radixsort(RR, Psum[i - 1], Psum[i]-1, current_byte - 8, R);
