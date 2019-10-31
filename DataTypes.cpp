@@ -66,7 +66,7 @@ void Relation::initTuplesVal(Relation* R)
     }
     else if (R->getNumTuples() != this->getNumTuples())
     {
-        std::cerr << "Relation objects of different size." << std::endl;
+        std::cout << "Relation objects of different size." << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -88,6 +88,7 @@ uint64_t Relation::getNumTuples() const {
 }
 
 void Relation::setNumTuples(uint64_t numTuples_) {
+    std::cout << "here" << std::endl;
     numTuples = numTuples_;
 }
 
@@ -103,15 +104,37 @@ void Relation::setTupleVal(long unsigned int index, uint64_t key, uint64_t paylo
 }
 
 void Relation::print() {
-    if (!this->getNumTuples())
-    {
+    if (!this->getNumTuples()) {
         std::cout << "Empty Relation object." << std::endl;
         return;
     }
     uint64_t j = this->getNumTuples();
-    Tuple* t = this->getTuples();
-    for(uint64_t i = 0; i < j;i++ )
+    Tuple *t = this->getTuples();
+    std::cout << j << std::endl;
+    for (uint64_t i = 0; i < j; i++){
+        std::cout << i << ": ";
         t[i].print();
+    }
+    std::cout << "ENDED" << std::endl;
+}
+
+void Relation::isSorted() {
+    Tuple* tuples = this->getTuples();
+    uint64_t  size = this->getNumTuples();
+    if(size ==0){
+        std::cout << "Relation is empty" << std::endl;
+    }
+    uint64_t a = tuples[0].getKey();
+    for (uint64_t i =1; i<size; i++){
+        uint64_t b = tuples[i].getKey();
+        if(a > b){
+            std::cout << "Relation is not sorted" << std::endl;
+            break;
+        }
+        a = b;
+    }
+    std::cout << "Relation is sorted" << std::endl;
+
 }
 
 

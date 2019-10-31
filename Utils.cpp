@@ -100,8 +100,6 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
 
 
     if(nth_byte%2){
-        std::cout << " RR: " <<  RR->getNumTuples() << " " << current_byte <<  std::endl;
-        std::cout << " R: " <<  R->getNumTuples() << std::endl;
         R->initTuplesVal(RR);
         delete RR;
     }
