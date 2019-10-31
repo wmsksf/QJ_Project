@@ -111,7 +111,6 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
     }
 }
 
-
 Tuple getMatrixSize(const char *fileName) {
 
     //Opening the input file

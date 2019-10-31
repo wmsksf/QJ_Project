@@ -5,7 +5,6 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-
     char* file = "t4.txt";
     Tuple a = getMatrixSize(file);
     //cout << a.getKey() << " " << a.getPayload() << endl;

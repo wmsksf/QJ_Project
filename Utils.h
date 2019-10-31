@@ -20,3 +20,4 @@ Tuple getMatrixSize(const char* fileName);
 Relation* SortMergeJoin(Relation*, Relation*);
 
 #endif //PROJECT_JJ_UTILS_H
+

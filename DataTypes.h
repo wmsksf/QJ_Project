@@ -75,3 +75,4 @@ class Results
 };
 
 #endif //PROJECT_JJ_DATATYPES_H
+
