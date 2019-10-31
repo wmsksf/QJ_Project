@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 #include "Utils.h"
 
 static uint64_t partition(Tuple* A, uint64_t p, uint64_t r)
@@ -30,68 +31,75 @@ void Quicksort(Tuple* A, uint64_t lo, uint64_t hi)
     {
         uint64_t q = partition(A, lo, hi);
 
-        if(q !=0 )
+        if(q)
             Quicksort(A, lo, q - 1);
         else
             Quicksort(A, lo, q);
+
         Quicksort(A, q + 1, hi);
     }
 }
 
 
 //IN PROCESS...
-void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte = 0, Relation* RR = nullptr)
+void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte, Relation* RR)
 {
-    if ((end - start) * sizeof(Tuple) < L1_CACHESIZE)
+    if ((end+1 - start) * sizeof(Tuple) < L1_CACHESIZE)
     {
         Quicksort(R->getTuples(), start, end);
         return;
+    }
+
+    if (current_byte < 0)
+    {
+        std::cout << "Too many data to fit in L1 cache" << std::endl;
+        exit(EXIT_FAILURE);
     }
 
     if (RR == nullptr)
     {
         RR = new Relation;
         RR->setNumTuples(R->getNumTuples());
-        RR->initTuplesVal(R);
+        RR->initTuples();
     }
 
     uint64_t Hist[256] = {0};
-    if(!current_byte)
-        for (uint64_t i = start; i <= end; i++)
-            Hist[R->getTuples()[i].getKey() & 0xff]++;
-    else
-        for (uint64_t i = start; i <= end; i++)
-            Hist[(R->getTuples()[i].getKey() >> current_byte) & 0xff]++;
+    for (uint64_t i = start; i <= end; i++)
+        Hist[(R->getTuples()[i].getKey() >> current_byte) & 0xff]++; // for byte 0 same as A[i] & 0xff
 
     uint64_t Psum[256] = {0};
-
-    for (int i = 1; i < 256; i++){
+    for (int i = 1; i < 256; i++)
         Psum[i] = Psum[i-1] + Hist[i-1];
-    }
 
-    for (uint64_t i = start; i <= end; i++) {
-        Tuple tuple = R->getTuples()[i];
-        uint64_t byte;
-        if(!current_byte)
-            byte = (tuple.getKey() >> current_byte) & 0xff;
-        else
-            byte = tuple.getKey() & 0xff;
-        RR->setTupleVal(Psum[byte]+Hist[byte]-1, tuple.getKey(), tuple.getPayload());
-        Hist[byte]--;
+    // utility in copying R to RR
+    uint64_t tmp[256] = {0};
+    for (uint64_t i = 0; i < 256; i++) tmp[i] = Psum[i];
+
+    Tuple tuple;
+    for (uint64_t i = start; i <= end; i++)
+    {
+        tuple = R->getTuples()[i];
+        uint64_t byte = (tuple.getKey() >> current_byte) & 0xff;
+
+        RR->setTupleVal(tmp[byte]++, tuple.getKey(), tuple.getPayload());
     }
 
     for (uint64_t i = 1; i < 256; i++)
     {
-        if ((Psum[i] - Psum[i-1]) * sizeof(Tuple) > L1_CACHESIZE) {
-            if (current_byte % 2)
-                Radixsort(RR, Psum[i - 1], Psum[i]-1, current_byte + 8, R);
+        if ((Psum[i] - Psum[i-1]) * sizeof(Tuple) > L1_CACHESIZE)
+        {
+            uint64_t nth_byte = current_byte/8; // switch R, RR after byte checked
+            if (nth_byte % 2)
+                Radixsort(RR, Psum[i - 1], Psum[i]-1, current_byte - 8, R);
             else
-                Radixsort(R, Psum[i - 1], Psum[i]-1, current_byte + 8, RR);
+                Radixsort(R, Psum[i - 1], Psum[i]-1, current_byte - 8, RR);
         }
         else{
             Quicksort(R->getTuples(), Psum[i-1], Psum[i]);
         }
     }
+
+//    ???
     if(current_byte%2){
         R->initTuplesVal(RR);
         delete RR;
@@ -141,21 +149,3 @@ Tuple getMatrixSize(const char *fileName) {
 
     return tmp;
 }
-
-//void printA(uint64_t* A, uint64_t size)
-//{
-//    for(uint64_t i = 0; i < size; i++) { std::cout << A[i]; std::cout << " "; }
-//    std::cout << std::endl;
-//}
-//
-//int main()
-//{
-//    uint64_t A[] = {10, 8 ,4 ,112, 45, 22, 1, 8, 3};
-//    uint64_t n = sizeof(A)/ sizeof(uint64_t);
-//
-//    Quicksort(A, 0, n - 1);
-//    std::cout << "Sorted array:" << std::endl;
-//    printA(A, n);
-//
-//    return 0;
-//}

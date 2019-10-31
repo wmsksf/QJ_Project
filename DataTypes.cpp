@@ -74,7 +74,6 @@ void Relation::initTuplesVal(Relation* R)
     for (uint64_t i = 0; i < this->getNumTuples(); i++)
     {
         tuples[i].setKey(R->tuples[i].getKey());
-        tuples[i].setPayload(0);
     }
 
 }
