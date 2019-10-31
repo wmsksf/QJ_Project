@@ -45,9 +45,6 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
 {
     if ((end+1 - start) * sizeof(Tuple) < L1_CACHESIZE)
     {
-        if ((current_byte/8) % 2)
-            Quicksort(RR->getTuples(), start, end);
-        else
             Quicksort(R->getTuples(), start, end);
 
         return;
@@ -96,7 +93,7 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
             if (nth_byte % 2)
                 Radixsort(RR, Psum[i - 1], Psum[i]-1, current_byte - 8, R);
             else
-                Radixsort(R, Psum[i - 1], Psum[i]-1, current_byte - 8, RR);
+                Radixsort(RR, Psum[i - 1], Psum[i]-1, current_byte - 8, R);
 
         }
         else{
@@ -107,7 +104,24 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
         }
     }
 
+    if((end - Psum[255])* sizeof(Tuple) >L1_CACHESIZE){
+        if (nth_byte % 2)
+            Radixsort(RR, Psum[255], end, current_byte - 8, R);
+        else
+            Radixsort(RR, Psum[255], end, current_byte - 8, R);
+    }
+    else{
+        if (nth_byte % 2)
+            Quicksort(RR->getTuples(), Psum[255],end);
+        else
+            Quicksort(R->getTuples(), Psum[255], end);
+    }
+
+
+
     if(nth_byte%2){
+        std::cout << " RR: " <<  RR->getNumTuples() << " " << current_byte <<  std::endl;
+        std::cout << " R: " <<  R->getNumTuples() << std::endl;
         R->initTuplesVal(RR);
         delete RR;
     }
