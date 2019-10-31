@@ -21,4 +21,3 @@ Tuple getMatrixSize(const char* fileName);
 LinkedList* SortMergeJoin(Relation*, Relation*);
 
 #endif //PROJECT_JJ_UTILS_H
-
