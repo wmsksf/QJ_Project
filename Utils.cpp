@@ -154,7 +154,8 @@ Tuple getMatrixSize(const char *fileName) {
     return tmp;
 }
 
-Relation* SortMergeJoin(Relation* relA, Relation* relB) {
+LinkedList* SortMergeJoin(Relation* relA, Relation* relB) {
+
     if(relA == nullptr or relB == nullptr){
         std::cout << "Relations can't be NULL!" << std::endl;
         return nullptr;
@@ -169,29 +170,34 @@ Relation* SortMergeJoin(Relation* relA, Relation* relB) {
     int j=0;
     int jj=0;
     int flag = false;
+    LinkedList *Results = new LinkedList;
     for(uint64_t i = 0; i<sizeA; i++){
+
         if(tupA[i].getKey() == tupB[j].getKey()){
-            std::cout << tupA[i].getPayload() << "  " << tupB[j].getPayload() << std::endl;
+            Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
+
             while(tupA[i].getKey() == tupB[++j].getKey()){
-                std::cout << tupA[i].getPayload() << "  " << tupB[j].getPayload() << std::endl;
+                Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
             }
             j = jj;
         }
         else if(tupA[i].getKey() > tupB[j].getKey()){
+
             while(tupA[i].getKey() > tupB[++j].getKey()){
                 if (j == sizeB-1) {
                     flag = true;
                     break;
                 }
             }
-            if(flag == true) break;
+
+            if(flag) break;
             jj = j--;
             while(tupA[i].getKey() == tupB[++j].getKey()){
-                std::cout << tupA[i].getPayload() << "  " << tupB[j].getPayload() << std::endl;
+                Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
             }
             j = jj;
         }
     }
 
-    return nullptr;
+    return Results;
 }

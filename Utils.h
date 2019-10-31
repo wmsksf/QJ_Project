@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include "DataTypes.h"
+#include "LinkedList.h"
 
 #define SIZE 1024
 class Tuple;
@@ -17,7 +18,7 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte 
 
 Tuple getMatrixSize(const char* fileName);
 
-Relation* SortMergeJoin(Relation*, Relation*);
+LinkedList* SortMergeJoin(Relation*, Relation*);
 
 #endif //PROJECT_JJ_UTILS_H
 

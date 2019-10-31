@@ -5,6 +5,7 @@
 #include <iostream>
 #include "LinkedList.h"
 
+//list for this case at least
 LinkedList::LinkedList()
 {
     head = nullptr;
@@ -13,12 +14,6 @@ LinkedList::LinkedList()
 LinkedList::~LinkedList()
 {
     struct node* tmp = head;
-    if (tmp == nullptr)
-    {
-        std::cout << "Empty LinkedList object." << std::endl;
-        return;
-    }
-
     struct node* next;
     while (tmp != nullptr)
     {

@@ -213,7 +213,7 @@ Relation *Matrix::getRelation(long unsigned int columnNumber) {
     return R;
 }
 
-Results::Results(){ index = 0; }
+Results::Results() { index = 0; }
 
 void Results::add(uint64_t x, uint64_t y)
 {
@@ -226,8 +226,8 @@ void Results::add(uint64_t x, uint64_t y)
 bool Results::isFull() { return (index == BUFFERSIZE-1); }
 void Results::print()
 {
-    for (uint64_t i = 0; i < BUFFERSIZE; i++)
-        std::cout << Buffer[i].getKey() << "\t" << Buffer->getPayload() << std::endl;
+    for (uint64_t i = 0; i < index; i++)
+        std::cout << Buffer[i].getKey() << "\t" << Buffer[i].getPayload() << std::endl;
 
     std::cout << std::endl;
 }
