@@ -163,7 +163,6 @@ bool Matrix::setMatrix(const char* fileName) {
     char c;
     long int row = 0;
     long int column = 0;
-    int counter = 0;
     while(fscanf(fp,"%llu%c",&number,&c)==2){
         data[row + column*numOfRows] = number;
         column++;

@@ -5,7 +5,7 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-    char* file = "t5.txt";
+    char* file = "relB";
     Tuple a = getMatrixSize(file);
     //cout << a.getKey() << " " << a.getPayload() << endl;
     Matrix* matrix = new Matrix(a.getPayload(),a.getKey());

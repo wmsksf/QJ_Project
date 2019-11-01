@@ -8,72 +8,73 @@
 #include <iostream>
 #include "Utils.h"
 #include "LinkedList.h"
-//
-//static uint64_t partition(Tuple* A, uint64_t p, uint64_t r)
-//{
-//    uint64_t pivot = A[r].getKey();
-//    uint64_t i = p - 1;
-//
-//    for (uint64_t j = p; j < r; j++)
-//        if (A[j].getKey() <= pivot)
-//        {
-//            i++;
-//            A[i].swap(&A[j]);
-//        }
-//
-//    A[i + 1].swap(&A[r]);
-//
-//    return i + 1;
-//}
-//
-//void Quicksort(Tuple* A, uint64_t lo, uint64_t hi)
-//{
-//    if (lo < hi)
-//    {
-//        uint64_t q = partition(A, lo, hi);
-//
-//        if(q)
-//            Quicksort(A, lo, q - 1);
-//        else
-//            Quicksort(A, lo, q);
-//
-//        Quicksort(A, q + 1, hi);
-//    }
-//}
 
-// OPT: USING MEDIANOFTHREE AND HOARE PARTITION
 static uint64_t partition(Tuple* A, uint64_t p, uint64_t r)
 {
-    uint64_t x = A[p].getKey(), y = A[(r - p)/2 + p].getKey(), z = A[r - 1].getKey();
-    uint64_t i = p , j = r - 1;
+    uint64_t pivot = A[r].getKey();
+    uint64_t i = p - 1;
 
-    // middle
-    if ((y > x && y < z) || (y > z && y < x) ) x = y;
-    else if ((z > x && z < y) || (z > y && z < x) ) x = z;
+    for (uint64_t j = p; j < r; j++)
+        if (A[j].getKey() <= pivot)
+        {
+            i++;
+            A[i].swap(&A[j]);
+        }
 
-    for(;;)
-    {
-        do {j--;} while (A[j].getKey() < x);
-        do {i++;} while (A[i].getKey() > x);
+    A[i + 1].swap(&A[r]);
 
-        if  (i < j) A[i].swap(&A[j]);
-        else return j+1;
-    }
+    return i + 1;
 }
 
 void Quicksort(Tuple* A, uint64_t lo, uint64_t hi)
 {
-    if (hi - lo < 2) return;
+    if (lo < hi)
+    {
+        uint64_t q = partition(A, lo, hi);
 
-    uint64_t q = partition(A, lo, hi);
-    Quicksort(A, lo, q - 1);
-    Quicksort(A, q + 1 , hi);
+        if(q)
+            Quicksort(A, lo, q - 1);
+        else
+            Quicksort(A, lo, q);
+
+        Quicksort(A, q + 1, hi);
+    }
 }
+
+//// OPT: USING MEDIANOFTHREE AND HOARE PARTITION
+//static uint64_t partition(Tuple* A, uint64_t p, uint64_t r)
+//{
+//    uint64_t x = A[p].getKey(), y = A[(r - p)/2 + p].getKey(), z = A[r - 1].getKey();
+//    uint64_t i = p , j = r - 1;
+//
+//    // middle
+//    if ((y > x && y < z) || (y > z && y < x) ) x = y;
+//    else if ((z > x && z < y) || (z > y && z < x) ) x = z;
+//
+//    for(;;)
+//    {
+//        do {j--;} while (A[j].getKey() < x);
+//        do {i++;} while (A[i].getKey() > x);
+//
+//        if  (i < j) A[i].swap(&A[j]);
+//        else return j+1;
+//    }
+//}
+//
+//void Quicksort(Tuple* A, uint64_t lo, uint64_t hi)
+//{
+//    if (hi - lo < 2) return;
+//
+//    uint64_t q = partition(A, lo, hi);
+//    std::cout << lo << " " << q << " " << hi << std::endl;
+//    Quicksort(A, lo, q - 1);
+//    Quicksort(A, q + 1 , hi);
+//}
 
 //IN PROCESS...
 void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte, Relation* RR)
 {
-    if (current_byte == 56 && (end+1 - start) * sizeof(Tuple) < L1_CACHESIZE)
+    if (current_byte == 56 && (end - start) * sizeof(Tuple) < L1_CACHESIZE)
     {
         Quicksort(R->getTuples(), start, end);
         return;
@@ -113,13 +114,15 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
     {
         if ((Psum[i] - Psum[i-1]) * sizeof(Tuple) > L1_CACHESIZE)
         {
-            if (!current_byte)
-                Quicksort(RR->getTuples(), Psum[i-1], Psum[i]-1);
+            if (!current_byte) {
+                Quicksort(RR->getTuples(), Psum[i - 1], Psum[i] - 1);
+            }
             else
                 Radixsort(RR, Psum[i - 1], Psum[i]-1, current_byte - 8, R);
         }
         else{
-            Quicksort(RR->getTuples(), Psum[i-1], Psum[i]-1);
+            if (Psum[i] > Psum[i - 1])
+                Quicksort(RR->getTuples(), Psum[i-1], Psum[i]-1);
         }
     }
 
@@ -131,10 +134,11 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
             Radixsort(RR, Psum[255], end, current_byte - 8, R);
     }
     else{
-        Quicksort(RR->getTuples(), Psum[255], end);
+        if(end > Psum[255])
+            Quicksort(RR->getTuples(), Psum[255], end);
     }
 
-    if(nth_byte%2){
+    if(nth_byte==7) {
         R->initTuplesVal(RR);
         delete RR;
     }
@@ -157,11 +161,15 @@ Tuple getMatrixSize(const char *fileName) {
     }
 
     char c = getc(fp);
+    char previous;
     while(c != '\n'){
-        if(c == '|')
+        if(c == '|' or c == ',')
             columns++;
+        previous = c;
         c = getc(fp);
     }
+    if(previous <= '9' and previous >= '0')
+        columns++;
     lines++;
 
     //A look to count the lines in our input file, which will also be the number of rows.
