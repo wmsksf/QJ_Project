@@ -44,7 +44,7 @@ public:
     uint64_t getNumTuples() const;
     void setNumTuples(uint64_t numTuples);
     void print();
-    void isSorted();
+    bool isSorted();
 };
 
 class Matrix
@@ -71,6 +71,7 @@ class Results
 
     void add(uint64_t x, uint64_t y);
     bool isFull();
+    bool isEmpty();
     void print();
 };
 

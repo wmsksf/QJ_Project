@@ -114,26 +114,26 @@ void Relation::print() {
         std::cout << i << ": ";
         t[i].print();
     }
-    std::cout << "ENDED" << std::endl;
 }
 
-void Relation::isSorted() {
-    Tuple* tuples = this->getTuples();
+bool Relation::isSorted() {
+    Tuple* tuples_ = this->getTuples();
     uint64_t  size = this->getNumTuples();
     if(size ==0){
         std::cout << "Relation is empty" << std::endl;
+        return false;
     }
-    uint64_t a = tuples[0].getKey();
+    uint64_t a = tuples_[0].getKey();
     for (uint64_t i =1; i<size; i++){
-        uint64_t b = tuples[i].getKey();
+        uint64_t b = tuples_[i].getKey();
         if(a > b){
             std::cout << "Relation is not sorted" << std::endl;
-            return;
+            return false;
         }
         a = b;
     }
     std::cout << "Relation is sorted" << std::endl;
-
+    return true;
 }
 
 
@@ -181,7 +181,8 @@ void Matrix::printMatrix() {
     long int column = 0;
     int counter = 0;
     while (column!= numOfColumns){
-        std::cout << data[row + column*numOfRows] << "|";
+//       !!
+        std::cout << data[row + column*numOfRows] << ",";
         row++;
         counter ++;
         if(counter == numOfColumns) {
@@ -223,6 +224,8 @@ void Results::add(uint64_t x, uint64_t y)
 }
 
 bool Results::isFull() { return (index == BUFFERSIZE-1); }
+bool Results::isEmpty() { return (index == 0); }
+
 void Results::print()
 {
     for (uint64_t i = 0; i < index; i++)

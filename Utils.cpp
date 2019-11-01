@@ -204,6 +204,12 @@ LinkedList* SortMergeJoin(Relation* relA, Relation* relB) {
     if(tupA == nullptr or tupB == nullptr)
         return nullptr;
 
+    Radixsort(relA,0,relA->getNumTuples()-1);
+    Radixsort(relB,0,relB->getNumTuples()-1);
+
+    if (!relA->isSorted() || !relB->isSorted())
+        return nullptr;
+
     int j=0;
     int jj=0;
     int flag = false;

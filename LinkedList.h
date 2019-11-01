@@ -22,6 +22,7 @@ class LinkedList
     ~LinkedList();
 
     void insert(uint64_t x, uint64_t y);
+    bool empty();
     void print();
 
     protected:

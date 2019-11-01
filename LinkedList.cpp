@@ -52,6 +52,12 @@ void LinkedList::insert(uint64_t x, uint64_t y)
     prev->next = overflow_node(x,y);
 }
 
+bool LinkedList::empty()
+{
+    if (head == nullptr || head->Data.isEmpty())
+        return true;
+}
+
 struct node* LinkedList::overflow_node(uint64_t x, uint64_t y)
         {
             struct node* nd = new struct node;
