@@ -11,7 +11,7 @@ Stack::Stack(uint64_t size)
 {
     stack = new uint64_t[size];
     capacity = size;
-    top = -1;
+    top = 0;
 }
 
 Stack::~Stack()
@@ -27,7 +27,7 @@ void Stack::push(uint64_t x)
         exit(EXIT_FAILURE);
     }
 
-    stack[++top] = x;
+    stack[top++] = x;
 }
 
 uint64_t Stack::pop()
@@ -38,13 +38,13 @@ uint64_t Stack::pop()
         exit(EXIT_FAILURE);
     }
 
-    return stack[top--];
+    return stack[--top];
 }
 
 uint64_t Stack::peek()
 {
     if (!isEmpty())
-        return stack[top];
+        return stack[top-1];
     else
     {
         std::cout << "Empty stack object. Nothing to peek!" << std::endl;
@@ -53,6 +53,6 @@ uint64_t Stack::peek()
     }
 }
 
-uint64_t Stack::size() { return top + 1; }
+uint64_t Stack::size() { return top ; }
 bool Stack::isEmpty() { return size() == 0; }
-bool Stack::isFull() { return size() == capacity; }
+bool Stack::isFull() {  return size() == capacity; }

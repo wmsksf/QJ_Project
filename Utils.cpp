@@ -139,6 +139,7 @@ void OptQuicksort(Tuple *A, uint64_t lo, uint64_t hi)
 {
     Stack stack(hi-lo+1);
 
+
     stack.push(lo);
     stack.push(hi);
 
@@ -147,15 +148,18 @@ void OptQuicksort(Tuple *A, uint64_t lo, uint64_t hi)
         hi = stack.pop();
         lo = stack.pop();
 
+
         uint64_t pivot = partition(A, lo, hi);
+
 
 //        >>>>>>>>>>>>>>>>>>>>>>>>
 //        tail recursion to be added after testing of current code is successful
 //        medianofthree might be added as well
 //        >>>>>>>>>>>>>>>>>>>>>>>>
 
+
 //        if elements on left side of pivot, push left side to stack
-        if (pivot - 1 > lo)
+        if ( pivot > 0 and pivot - 1 > lo)
         {
             stack.push(lo);
             stack.push(pivot-1);
@@ -192,7 +196,7 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
     for (uint64_t i = start; i <= end; i++)
         Hist[(R->getTuples()[i].getKey() >> current_byte) & 0xff]++; // for byte 0 same as A[i] & 0xff
 
-    uint64_t Psum[256] = {0};
+    uint64_t Psum[256] = {start};
     for (int i = 1; i < 256; i++)
         Psum[i] = Psum[i-1] + Hist[i-1];
 
@@ -212,7 +216,8 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
     uint64_t nth_byte = current_byte/8; // switch R, RR after byte checked
     for (uint64_t i = 1; i < 256; i++)
     {
-        if (!(Psum[i] - Psum[i-1])) continue;
+        if(Psum[i-1]-1 == end) break;
+        //if (!(Psum[i] - Psum[i-1])) continue;
 
         if ((Psum[i] - Psum[i-1]) * sizeof(Tuple) > L1_CACHESIZE)
         {
@@ -225,24 +230,24 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
                 Radixsort(RR, Psum[i - 1], Psum[i]-1, current_byte - 8, R);
         }
         else{
+            if(Psum[i] > Psum[i-1])
 //                Quicksort(RR->getTuples(), Psum[i-1], Psum[i]-1);
-            OptQuicksort(RR->getTuples(), Psum[i-1], Psum[i]-1);
+                OptQuicksort(RR->getTuples(), Psum[i-1], Psum[i]-1);
 
         }
     }
 
-    if ((end - Psum[255]) * sizeof(Tuple) > L1_CACHESIZE)
-    {
-        if (!current_byte)
+    if(end > Psum[255]) {
+        if ((end - Psum[255]) * sizeof(Tuple) > L1_CACHESIZE) {
+            if (!current_byte)
+//            Quicksort(RR->getTuples(), Psum[255], end);
+                OptQuicksort(RR->getTuples(), Psum[255], end);
+            else
+                Radixsort(RR, Psum[255], end, current_byte - 8, R);
+        } else {
 //            Quicksort(RR->getTuples(), Psum[255], end);
             OptQuicksort(RR->getTuples(), Psum[255], end);
-        else
-            Radixsort(RR, Psum[255], end, current_byte - 8, R);
-    }
-    else{
-        if(end > Psum[255])
-//            Quicksort(RR->getTuples(), Psum[255], end);
-            OptQuicksort(RR->getTuples(), Psum[255], end);
+        }
     }
 
     if(nth_byte==7) {
@@ -311,10 +316,11 @@ LinkedList* SortMergeJoin(Relation* relA, Relation* relB) {
     if(tupA == nullptr or tupB == nullptr)
         return nullptr;
 
-    Radixsort(relA,0,relA->getNumTuples()-1);
-    Radixsort(relB,0,relB->getNumTuples()-1);
+    Radixsort(relA,0,sizeA-1);
+    Radixsort(relB,0,sizeB-1);
 
-    relA->print();relB->print();
+   // relB->print();
+
     if (!relA->isSorted() || !relB->isSorted())
         return nullptr;
 

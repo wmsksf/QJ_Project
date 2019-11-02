@@ -131,7 +131,7 @@ bool Relation::isSorted() {
         if(a > b){
             std::cout << "Relation is not sorted" << std::endl;
 //            >>>>>>>>>>>>>>>>>>>>>>>>> debug usage
-            std::cout << a << " but " << b << std::endl;
+            std::cout << i << std::endl;
 //            >>>>>>>>>>>>>>>>>>>>>>>>> remove comment below after debug usage removed
 //            return false;
         }
