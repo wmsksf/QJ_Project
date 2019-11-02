@@ -125,10 +125,15 @@ bool Relation::isSorted() {
     }
     uint64_t a = tuples_[0].getKey();
     for (uint64_t i =1; i<size; i++){
+//        >>>>>>>>>>>>>>>>>>> debug usage
         uint64_t b = tuples_[i].getKey();
+//        >>>>>>>>>>>>>>>>>>>>>>
         if(a > b){
             std::cout << "Relation is not sorted" << std::endl;
-            return false;
+//            >>>>>>>>>>>>>>>>>>>>>>>>> debug usage
+            std::cout << a << " but " << b << std::endl;
+//            >>>>>>>>>>>>>>>>>>>>>>>>> remove comment below after debug usage removed
+//            return false;
         }
         a = b;
     }

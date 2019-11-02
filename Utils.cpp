@@ -8,6 +8,7 @@
 #include <iostream>
 #include "Utils.h"
 #include "LinkedList.h"
+#include "Stack.h"
 
 //static uint64_t partition(Tuple* A, uint64_t p, uint64_t r)
 //{
@@ -41,75 +42,130 @@
 //    }
 //}
 
-static uint64_t MedianofThree_partition(Tuple* A, uint64_t p, uint64_t r)
+//static uint64_t MedianofThree_partition(Tuple* A, uint64_t p, uint64_t r)
+//{
+//    uint64_t x = A[p].getKey(), y = A[(r - p)/2 + p].getKey(), z = A[r-1].getKey();
+//    uint64_t i, j = r - 1;
+//    if (!p) i = p;
+//    else i = p - 1;
+//
+//    // middle
+//    if ((y > x && y < z) || (y > z && y < x) ) x = y;
+//    else if ((z > x && z < y) || (z > y && z < x) ) x = z;
+//
+////    hoare partition for less swaps
+//    for(;;)
+//    {
+//        do {j--;} while (A[j].getKey() > x);
+//        do {i++;} while (A[i].getKey() < x);
+//
+//        if  (i < j) A[i].swap(&A[j]);
+//        else return j+1;
+//    }
+//
+//}
+//
+//void Insertionsort(Tuple* A, uint64_t lo, uint64_t hi)
+//{
+//    for (uint64_t i = lo + 1; i <= hi; i++)
+//    {
+//        Tuple t = A[i];
+//        uint64_t j = i-1;
+//
+//        while (j >= lo && A[j].getKey() > t.getKey())
+//        {
+//            A[j+1].swap(&A[j]);
+//            j--;
+//        }
+//
+//        A[j+1].swap(&t);
+//    }
+//}
+//
+//void OptQuicksort(Tuple *A, uint64_t lo, uint64_t hi)
+//{
+//    while (lo < hi)
+//    {
+////      insertion sort invoked for small size of array
+//        if (hi - lo < CUTOFF)
+//        {
+//            Insertionsort(A, lo, hi);
+//            break;
+//        }
+//        else
+//        {
+////          median of three
+//            uint64_t pivot = MedianofThree_partition(A, lo, hi);
+////            uint64_t pivot = partition(A, lo, hi);
+//
+////           tail recursion at most O(logn) space to be used
+//            if (pivot - lo < hi - pivot) // recurse into smaller half
+//            {
+//                if (pivot)
+//                    OptQuicksort(A, lo, pivot - 1);
+//                else
+//                    OptQuicksort(A, lo, pivot);
+//
+//                lo = pivot + 1;
+//            }
+//            else
+//            {
+//                OptQuicksort(A, pivot+1, hi);
+//                hi = pivot - 1;
+//            }
+//        }
+//    }
+//}
+
+
+static uint64_t partition(Tuple* A, uint64_t p, uint64_t r)
 {
-    uint64_t x = A[p].getKey(), y = A[(r - p)/2 + p].getKey(), z = A[r].getKey();
-    uint64_t i = p , j = r - 1;
+    uint64_t pivot = A[r].getKey();
+    int64_t i = p - 1;
 
-    // middle
-    if ((y > x && y < z) || (y > z && y < x) ) x = y;
-    else if ((z > x && z < y) || (z > y && z < x) ) x = z;
-
-//    hoare partition for less swaps
-    for(;;)
-    {
-        do {j--;} while (A[j].getKey() > x);
-        do {i++;} while (A[i].getKey() < x);
-
-        if  (i < j) A[i].swap(&A[j]);
-        else return j+1;
-    }
-
-}
-
-void Insertionsort(Tuple* A, uint64_t lo, uint64_t hi)
-{
-    for (uint64_t i = lo + 1; i <= hi; i++)
-    {
-        Tuple t = A[i];
-        uint64_t j = i-1;
-
-        while (j >= lo && A[j].getKey() > t.getKey())
+    for (uint64_t j = p; j < r; j++)
+        if (A[j].getKey() <= pivot)
         {
-            A[j+1].swap(&A[j]);
-            j--;
+            i++;
+            A[i].swap(&A[j]);
         }
 
-        A[j+1].swap(&t);
-    }
+    A[i + 1].swap(&A[r]);
+
+    return i + 1;
 }
 
 void OptQuicksort(Tuple *A, uint64_t lo, uint64_t hi)
 {
-    while (lo < hi)
+    Stack stack(hi-lo+1);
+
+    stack.push(lo);
+    stack.push(hi);
+
+    while (!stack.isEmpty())
     {
-//      insertion sort invoked for small size of array
-        if (hi - lo < CUTOFF)
+        hi = stack.pop();
+        lo = stack.pop();
+
+        uint64_t pivot = partition(A, lo, hi);
+
+//        >>>>>>>>>>>>>>>>>>>>>>>>
+//        tail recursion to be added after testing of current code is successful
+//        medianofthree might be added as well
+//        >>>>>>>>>>>>>>>>>>>>>>>>
+
+//        if elements on left side of pivot, push left side to stack
+        if (pivot - 1 > lo)
         {
-            Insertionsort(A, lo, hi);
-            break;
+            stack.push(lo);
+            stack.push(pivot-1);
         }
-        else
+
+//        if elements on right side of pivot, push right side to stack
+        if (pivot + 1 < hi)
         {
-//          median of three
-            uint64_t pivot = MedianofThree_partition(A, lo, hi);
-//            uint64_t pivot = partition(A, lo, hi);
-
-//           tail recursion at most O(logn) space to be used
-            if (pivot - lo < hi - pivot) // recurse into smaller half
-            {
-                if (pivot)
-                    OptQuicksort(A, lo, pivot - 1);
-                else
-                    OptQuicksort(A, lo, pivot);
-
-                lo = pivot + 1;
-            }
-            else
-            {
-                OptQuicksort(A, pivot+1, hi);
-                hi = pivot - 1;
-            }
+            stack.push(pivot+1);
+            stack.push(hi);
         }
     }
 }
@@ -117,7 +173,7 @@ void OptQuicksort(Tuple *A, uint64_t lo, uint64_t hi)
 //IN PROCESS...
 void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte, Relation* RR)
 {
-    if (current_byte == 56 && (end - start) * sizeof(Tuple) < L1_CACHESIZE)
+    if (current_byte == 56 && (end+1 - start) * sizeof(Tuple) < L1_CACHESIZE)
     {
 //        Quicksort(R->getTuples(), start, end);
         OptQuicksort(R->getTuples(), start, end);
