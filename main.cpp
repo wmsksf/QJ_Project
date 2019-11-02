@@ -18,10 +18,10 @@ int main(int argc, char **argv)
         cout << "success" << endl;
 
     Relation* R1,*R2;
-//    R1 = matrix1->getRelation(0);
-//    R2 = matrix2->getRelation(0);
     R1 = matrix1->getRelation(0);
-    R2 = matrix1->getRelation(1);
+    R2 = matrix2->getRelation(1);
+//    R1 = matrix1->getRelation(0);
+//    R2 = matrix1->getRelation(1);
 
     LinkedList *ResultsList = SortMergeJoin(R1,R2);
     if (!ResultsList)

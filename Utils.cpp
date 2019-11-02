@@ -9,74 +9,119 @@
 #include "Utils.h"
 #include "LinkedList.h"
 
-static uint64_t partition(Tuple* A, uint64_t p, uint64_t r)
-{
-    uint64_t pivot = A[r].getKey();
-    uint64_t i = p - 1;
-
-    for (uint64_t j = p; j < r; j++)
-        if (A[j].getKey() <= pivot)
-        {
-            i++;
-            A[i].swap(&A[j]);
-        }
-
-    A[i + 1].swap(&A[r]);
-
-    return i + 1;
-}
-
-void Quicksort(Tuple* A, uint64_t lo, uint64_t hi)
-{
-    if (lo < hi)
-    {
-        uint64_t q = partition(A, lo, hi);
-
-        if(q)
-            Quicksort(A, lo, q - 1);
-        else
-            Quicksort(A, lo, q);
-
-        Quicksort(A, q + 1, hi);
-    }
-}
-
-//// OPT: USING MEDIANOFTHREE AND HOARE PARTITION
 //static uint64_t partition(Tuple* A, uint64_t p, uint64_t r)
 //{
-//    uint64_t x = A[p].getKey(), y = A[(r - p)/2 + p].getKey(), z = A[r - 1].getKey();
-//    uint64_t i = p , j = r - 1;
+//    uint64_t pivot = A[r].getKey();
+//    uint64_t i = p - 1;
 //
-//    // middle
-//    if ((y > x && y < z) || (y > z && y < x) ) x = y;
-//    else if ((z > x && z < y) || (z > y && z < x) ) x = z;
+//    for (uint64_t j = p; j < r; j++)
+//        if (A[j].getKey() <= pivot)
+//        {
+//            i++;
+//            A[i].swap(&A[j]);
+//        }
 //
-//    for(;;)
-//    {
-//        do {j--;} while (A[j].getKey() < x);
-//        do {i++;} while (A[i].getKey() > x);
+//    A[i + 1].swap(&A[r]);
 //
-//        if  (i < j) A[i].swap(&A[j]);
-//        else return j+1;
-//    }
+//    return i + 1;
 //}
 //
 //void Quicksort(Tuple* A, uint64_t lo, uint64_t hi)
 //{
-//    if (hi - lo < 2) return;
+//    if (lo < hi)
+//    {
+//        uint64_t q = partition(A, lo, hi);
 //
-//    uint64_t q = partition(A, lo, hi);
-//    std::cout << lo << " " << q << " " << hi << std::endl;
-//    Quicksort(A, lo, q - 1);
-//    Quicksort(A, q + 1 , hi);
+//        if(q)
+//            Quicksort(A, lo, q - 1);
+//        else
+//            Quicksort(A, lo, q);
+//
+//        Quicksort(A, q + 1, hi);
+//    }
 //}
+
+static uint64_t MedianofThree_partition(Tuple* A, uint64_t p, uint64_t r)
+{
+    uint64_t x = A[p].getKey(), y = A[(r - p)/2 + p].getKey(), z = A[r].getKey();
+    uint64_t i = p , j = r - 1;
+
+    // middle
+    if ((y > x && y < z) || (y > z && y < x) ) x = y;
+    else if ((z > x && z < y) || (z > y && z < x) ) x = z;
+
+//    hoare partition for less swaps
+    for(;;)
+    {
+        do {j--;} while (A[j].getKey() > x);
+        do {i++;} while (A[i].getKey() < x);
+
+        if  (i < j) A[i].swap(&A[j]);
+        else return j+1;
+    }
+
+}
+
+void Insertionsort(Tuple* A, uint64_t lo, uint64_t hi)
+{
+    for (uint64_t i = lo + 1; i <= hi; i++)
+    {
+        Tuple t = A[i];
+        uint64_t j = i-1;
+
+        while (j >= lo && A[j].getKey() > t.getKey())
+        {
+            A[j+1].swap(&A[j]);
+            j--;
+        }
+
+        A[j+1].swap(&t);
+    }
+}
+
+void OptQuicksort(Tuple *A, uint64_t lo, uint64_t hi)
+{
+    while (lo < hi)
+    {
+//      insertion sort invoked for small size of array
+        if (hi - lo < CUTOFF)
+        {
+            Insertionsort(A, lo, hi);
+            break;
+        }
+        else
+        {
+//          median of three
+            uint64_t pivot = MedianofThree_partition(A, lo, hi);
+//            uint64_t pivot = partition(A, lo, hi);
+
+//           tail recursion at most O(logn) space to be used
+            if (pivot - lo < hi - pivot) // recurse into smaller half
+            {
+                if (pivot)
+                    OptQuicksort(A, lo, pivot - 1);
+                else
+                    OptQuicksort(A, lo, pivot);
+
+                lo = pivot + 1;
+            }
+            else
+            {
+                OptQuicksort(A, pivot+1, hi);
+                hi = pivot - 1;
+            }
+        }
+    }
+}
 
 //IN PROCESS...
 void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte, Relation* RR)
 {
     if (current_byte == 56 && (end - start) * sizeof(Tuple) < L1_CACHESIZE)
     {
-        Quicksort(R->getTuples(), start, end);
+//        Quicksort(R->getTuples(), start, end);
+        OptQuicksort(R->getTuples(), start, end);
+
         return;
     }
 
@@ -108,34 +153,40 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
         RR->setTupleVal(tmp[byte]++, tuple.getKey(), tuple.getPayload());
     }
 
-
     uint64_t nth_byte = current_byte/8; // switch R, RR after byte checked
     for (uint64_t i = 1; i < 256; i++)
     {
+        if (!(Psum[i] - Psum[i-1])) continue;
+
         if ((Psum[i] - Psum[i-1]) * sizeof(Tuple) > L1_CACHESIZE)
         {
             if (!current_byte) {
-                Quicksort(RR->getTuples(), Psum[i - 1], Psum[i] - 1);
+//                Quicksort(RR->getTuples(), Psum[i - 1], Psum[i]-1);
+                OptQuicksort(RR->getTuples(), Psum[i - 1], Psum[i]-1);
+
             }
             else
                 Radixsort(RR, Psum[i - 1], Psum[i]-1, current_byte - 8, R);
         }
         else{
-            if (Psum[i] > Psum[i - 1])
-                Quicksort(RR->getTuples(), Psum[i-1], Psum[i]-1);
+//                Quicksort(RR->getTuples(), Psum[i-1], Psum[i]-1);
+            OptQuicksort(RR->getTuples(), Psum[i-1], Psum[i]-1);
+
         }
     }
 
     if ((end - Psum[255]) * sizeof(Tuple) > L1_CACHESIZE)
     {
         if (!current_byte)
-            Quicksort(RR->getTuples(), Psum[255], end);
+//            Quicksort(RR->getTuples(), Psum[255], end);
+            OptQuicksort(RR->getTuples(), Psum[255], end);
         else
             Radixsort(RR, Psum[255], end, current_byte - 8, R);
     }
     else{
         if(end > Psum[255])
-            Quicksort(RR->getTuples(), Psum[255], end);
+//            Quicksort(RR->getTuples(), Psum[255], end);
+            OptQuicksort(RR->getTuples(), Psum[255], end);
     }
 
     if(nth_byte==7) {
@@ -207,6 +258,7 @@ LinkedList* SortMergeJoin(Relation* relA, Relation* relB) {
     Radixsort(relA,0,relA->getNumTuples()-1);
     Radixsort(relB,0,relB->getNumTuples()-1);
 
+    relA->print();relB->print();
     if (!relA->isSorted() || !relB->isSorted())
         return nullptr;
 
