@@ -40,7 +40,7 @@ void Tuple::print() {
 }
 
 Relation::Relation() { tuples = nullptr; numTuples = 0; }
-Relation::~Relation() { delete[](tuples); }
+Relation::~Relation() { delete[] tuples; }
 
 void Relation::initTuples()
 {

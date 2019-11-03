@@ -9,7 +9,8 @@
 
 class Stack
 {
-    uint64_t *stack, top, capacity;
+    uint64_t *stack, capacity;
+    int64_t top;
 
 public:
     Stack(uint64_t size);

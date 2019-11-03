@@ -326,8 +326,6 @@ LinkedList* SortMergeJoin(Relation* relA, Relation* relB) {
     Radixsort(relA,0,sizeA-1);
     Radixsort(relB,0,sizeB-1);
 
-   //relB->print();
-
     if (!relA->isSorted() || !relB->isSorted())
         return nullptr;
 
@@ -377,4 +375,14 @@ LinkedList* SortMergeJoin(Relation* relA, Relation* relB) {
     }
     std::cout << "Number of tuples after join: " << counter;
     return Results;
+}
+
+void clean_up(Matrix **matrix1, Matrix **matrix2,
+              Relation **R1, Relation **R2, LinkedList **ResultsList)
+{
+    delete *matrix1; *matrix1 = nullptr;
+    delete *matrix2; *matrix2 = nullptr;
+    delete *R1; *R1 = nullptr;
+    delete *R2;  *R2 = nullptr;
+    delete *ResultsList; *ResultsList = nullptr;
 }
