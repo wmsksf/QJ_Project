@@ -95,7 +95,7 @@ void Relation::setTupleVal(long unsigned int index, uint64_t key, uint64_t paylo
     if(index >= this->getNumTuples()){
         std::cerr << "Index out of boundaries." << std::endl
                   << "In this Relation object the index can get values from 0 to "
-                  << this->getNumTuples() << std::endl;
+                  << this->getNumTuples()-1 << std::endl;
         exit(EXIT_FAILURE);
     }
     this->getTuples()[index].setKey(key);
@@ -131,14 +131,43 @@ bool Relation::isSorted() {
         if(a > b){
             std::cout << "Relation is not sorted" << std::endl;
 //            >>>>>>>>>>>>>>>>>>>>>>>>> debug usage
-            std::cout << i << std::endl;
+            std::cout << i << "   " << a << "  " << b <<  std::endl;
 //            >>>>>>>>>>>>>>>>>>>>>>>>> remove comment below after debug usage removed
-//            return false;
+            return false;
         }
         a = b;
     }
     std::cout << "Relation is sorted" << std::endl;
     return true;
+}
+
+void Relation::copyTuplesVal(Relation *R, uint64_t start, uint64_t end) {
+    uint64_t size = this->getNumTuples();
+    if (!size)
+    {
+        std::cerr << "Empty Relation object." << std::endl
+                  << "Tip: call setNumTuples() of object first!" << std::endl;
+
+        exit(EXIT_FAILURE);
+    }
+    else if (R->getNumTuples() != size)
+    {
+        std::cout << "Relation objects of different size." << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    else if(size <= end or size <= start)
+    {
+        std::cout << "start or end value is out of index" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    for (uint64_t i = start; i <= end; i++)
+    {
+        tuples[i].setKey(R->tuples[i].getKey());
+        tuples[i].setPayload(R->tuples[i].getPayload());
+    }
+
+
 }
 
 

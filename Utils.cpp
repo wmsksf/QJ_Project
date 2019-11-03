@@ -137,6 +137,8 @@ static uint64_t partition(Tuple* A, uint64_t p, uint64_t r)
 
 void OptQuicksort(Tuple *A, uint64_t lo, uint64_t hi)
 {
+
+    if (hi == lo) return;
     Stack stack(hi-lo+1);
 
 
@@ -166,7 +168,7 @@ void OptQuicksort(Tuple *A, uint64_t lo, uint64_t hi)
         }
 
 //        if elements on right side of pivot, push right side to stack
-        if (pivot + 1 < hi)
+        if ( pivot + 1 < hi)
         {
             stack.push(pivot+1);
             stack.push(hi);
@@ -217,7 +219,7 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
     for (uint64_t i = 1; i < 256; i++)
     {
         if(Psum[i-1]-1 == end) break;
-        //if (!(Psum[i] - Psum[i-1])) continue;
+        if (!(Psum[i] - Psum[i-1])) continue;
 
         if ((Psum[i] - Psum[i-1]) * sizeof(Tuple) > L1_CACHESIZE)
         {
@@ -249,6 +251,14 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
             OptQuicksort(RR->getTuples(), Psum[255], end);
         }
     }
+
+//    if(start>55000)
+//        for(int i =start; i <= start+20; i++)
+//            std::cout << R->getTuples()[i].getKey() << std::endl;
+
+    if(nth_byte==6 or nth_byte==4 or nth_byte==2 or nth_byte==0)
+        R->copyTuplesVal(RR,start,end);
+
 
     if(nth_byte==7) {
         R->initTuplesVal(RR);
@@ -309,32 +319,41 @@ LinkedList* SortMergeJoin(Relation* relA, Relation* relB) {
         std::cout << "Relations can't be NULL!" << std::endl;
         return nullptr;
     }
-    Tuple* tupA = relA->getTuples();
-    Tuple* tupB = relB->getTuples();
+
     uint64_t sizeA = relA->getNumTuples();
     uint64_t sizeB = relB->getNumTuples();
-    if(tupA == nullptr or tupB == nullptr)
-        return nullptr;
 
     Radixsort(relA,0,sizeA-1);
     Radixsort(relB,0,sizeB-1);
 
-   // relB->print();
+   //relB->print();
 
     if (!relA->isSorted() || !relB->isSorted())
+        return nullptr;
+
+    Tuple* tupA = relA->getTuples();
+    Tuple* tupB = relB->getTuples();
+    if(tupA == nullptr or tupB == nullptr)
         return nullptr;
 
     int j=0;
     int jj=0;
     int flag = false;
+    uint64_t counter = 0;
     LinkedList *Results = new LinkedList;
     for(uint64_t i = 0; i<sizeA; i++){
 
+        // FOR DEBUGGING PURPOSES
+        std::cout << i << std::endl;
+        //REMOVE BEFORE RELEASE
+
         if(tupA[i].getKey() == tupB[j].getKey()){
             Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
+            counter++;
 
             while(tupA[i].getKey() == tupB[++j].getKey()){
                 Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
+                counter++;
             }
             j = jj;
         }
@@ -351,10 +370,11 @@ LinkedList* SortMergeJoin(Relation* relA, Relation* relB) {
             jj = j--;
             while(tupA[i].getKey() == tupB[++j].getKey()){
                 Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
+                counter++;
             }
             j = jj;
         }
     }
-
+    std::cout << "Number of tuples after join: " << counter;
     return Results;
 }

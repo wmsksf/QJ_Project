@@ -18,22 +18,24 @@ int main(int argc, char **argv)
         cout << "success" << endl;
 
     Relation* R1,*R2;
-    R1 = matrix1->getRelation(0);
+    R1 = matrix1->getRelation(1);
     R2 = matrix2->getRelation(1);
-    Radixsort(R2,0,R2->getNumTuples()-1);
+    //Radixsort(R2,0,R2->getNumTuples()-1);
+    //R1->print();
+    //R2->isSorted();
 
-//    LinkedList *ResultsList = SortMergeJoin(R1,R2);
-//    if (!ResultsList)
-//        std::cout << "Sorting failed!" << std::endl;
-//    else
-//        if (ResultsList->empty())
-//            std::cout << "No results!" << std::endl;
-//        else
-//        {
-//            std::cout << "RowIdA\tRowIdB" << std::endl;
-//            ResultsList->print();
-//            delete ResultsList;
-//        }
+    LinkedList *ResultsList = SortMergeJoin(R1,R2);
+    if (!ResultsList)
+        std::cout << "Sorting failed!" << std::endl;
+    else
+        if (ResultsList->empty())
+            std::cout << "No results!" << std::endl;
+        else
+        {
+            //std::cout << "RowIdA\tRowIdB" << std::endl;
+            //ResultsList->print();
+            delete ResultsList;
+        }
 
     return 0;
 }

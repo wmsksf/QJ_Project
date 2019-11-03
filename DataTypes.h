@@ -40,6 +40,7 @@ public:
     void initTuples();
     void initTuplesVal(Relation* R);
     void setTupleVal(long unsigned int, uint64_t, uint64_t);
+    void copyTuplesVal(Relation* R,uint64_t, uint64_t);
 
     uint64_t getNumTuples() const;
     void setNumTuples(uint64_t numTuples);
