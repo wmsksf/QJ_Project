@@ -10,114 +10,6 @@
 #include "LinkedList.h"
 #include "Stack.h"
 
-//static uint64_t partition(Tuple* A, uint64_t p, uint64_t r)
-//{
-//    uint64_t pivot = A[r].getKey();
-//    uint64_t i = p - 1;
-//
-//    for (uint64_t j = p; j < r; j++)
-//        if (A[j].getKey() <= pivot)
-//        {
-//            i++;
-//            A[i].swap(&A[j]);
-//        }
-//
-//    A[i + 1].swap(&A[r]);
-//
-//    return i + 1;
-//}
-//
-//void Quicksort(Tuple* A, uint64_t lo, uint64_t hi)
-//{
-//    if (lo < hi)
-//    {
-//        uint64_t q = partition(A, lo, hi);
-//
-//        if(q)
-//            Quicksort(A, lo, q - 1);
-//        else
-//            Quicksort(A, lo, q);
-//
-//        Quicksort(A, q + 1, hi);
-//    }
-//}
-
-//static uint64_t MedianofThree_partition(Tuple* A, uint64_t p, uint64_t r)
-//{
-//    uint64_t x = A[p].getKey(), y = A[(r - p)/2 + p].getKey(), z = A[r-1].getKey();
-//    uint64_t i, j = r - 1;
-//    if (!p) i = p;
-//    else i = p - 1;
-//
-//    // middle
-//    if ((y > x && y < z) || (y > z && y < x) ) x = y;
-//    else if ((z > x && z < y) || (z > y && z < x) ) x = z;
-//
-////    hoare partition for less swaps
-//    for(;;)
-//    {
-//        do {j--;} while (A[j].getKey() > x);
-//        do {i++;} while (A[i].getKey() < x);
-//
-//        if  (i < j) A[i].swap(&A[j]);
-//        else return j+1;
-//    }
-//
-//}
-//
-//void Insertionsort(Tuple* A, uint64_t lo, uint64_t hi)
-//{
-//    for (uint64_t i = lo + 1; i <= hi; i++)
-//    {
-//        Tuple t = A[i];
-//        uint64_t j = i-1;
-//
-//        while (j >= lo && A[j].getKey() > t.getKey())
-//        {
-//            A[j+1].swap(&A[j]);
-//            j--;
-//        }
-//
-//        A[j+1].swap(&t);
-//    }
-//}
-//
-//void OptQuicksort(Tuple *A, uint64_t lo, uint64_t hi)
-//{
-//    while (lo < hi)
-//    {
-////      insertion sort invoked for small size of array
-//        if (hi - lo < CUTOFF)
-//        {
-//            Insertionsort(A, lo, hi);
-//            break;
-//        }
-//        else
-//        {
-////          median of three
-//            uint64_t pivot = MedianofThree_partition(A, lo, hi);
-////            uint64_t pivot = partition(A, lo, hi);
-//
-////           tail recursion at most O(logn) space to be used
-//            if (pivot - lo < hi - pivot) // recurse into smaller half
-//            {
-//                if (pivot)
-//                    OptQuicksort(A, lo, pivot - 1);
-//                else
-//                    OptQuicksort(A, lo, pivot);
-//
-//                lo = pivot + 1;
-//            }
-//            else
-//            {
-//                OptQuicksort(A, pivot+1, hi);
-//                hi = pivot - 1;
-//            }
-//        }
-//    }
-//}
-
-
 static uint64_t partition(Tuple* A, uint64_t p, uint64_t r)
 {
     uint64_t pivot = A[r].getKey();
@@ -364,10 +256,6 @@ LinkedList* SortMergeJoin(Relation* relA, Relation* relB) {
     LinkedList *Results = new LinkedList;
     for(uint64_t i = 0; i<sizeA; i++){
 
-        // FOR DEBUGGING PURPOSES
-        std::cout << i << std::endl;
-        //REMOVE BEFORE RELEASE
-
         if(tupA[i].getKey() == tupB[j].getKey()){
             //Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
             counter++;
@@ -401,7 +289,7 @@ LinkedList* SortMergeJoin(Relation* relA, Relation* relB) {
             j = jj;
         }
     }
-    std::cout << "Number of tuples after join: " << counter;
+    std::cout << "Number of tuples after join: " << counter << std::endl;
     return Results;
 }
 
@@ -413,4 +301,10 @@ void clean_up(Matrix **matrix1, Matrix **matrix2,
     delete *R1; *R1 = nullptr;
     delete *R2;  *R2 = nullptr;
     delete *ResultsList; *ResultsList = nullptr;
+}
+
+uint64_t mcg64(void)
+{
+    static uint64_t i = 1;
+    return (i = (164603309694725029ull * i) % 14738995463583502973ull);
 }

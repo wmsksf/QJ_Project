@@ -26,4 +26,6 @@ LinkedList* SortMergeJoin(Relation*, Relation*);
 void clean_up(Matrix **matrix1, Matrix **matrix2,
               Relation **R1, Relation **R2, LinkedList **ResultsList);
 
+uint64_t mcg64(void);
+
 #endif //PROJECT_JJ_UTILS_H
