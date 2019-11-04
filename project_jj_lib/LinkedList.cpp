@@ -6,9 +6,10 @@
 #include "LinkedList.h"
 
 //list for this case at least
-LinkedList::LinkedList()
+LinkedList::LinkedList(uint64_t Datasize)
 {
     head = nullptr;
+    this->Datasize = Datasize;
 }
 
 LinkedList::~LinkedList()
@@ -27,6 +28,10 @@ void LinkedList::insert(uint64_t x, uint64_t y)
     if (head == nullptr)
     {
         head = new struct node;
+//        init buffer
+        head->Data.setBuffersize(Datasize);
+        head->Data.initBuffer();
+
         head->Data.add(x,y);
         head->next = nullptr;
 
@@ -61,6 +66,10 @@ bool LinkedList::empty()
 struct node* LinkedList::overflow_node(uint64_t x, uint64_t y)
         {
             struct node* nd = new struct node;
+//            init buffer
+            nd->Data.setBuffersize(Datasize);
+            nd->Data.initBuffer();
+
             nd->Data.add(x,y);
             nd->next = nullptr;
 

@@ -16,9 +16,10 @@ struct node
 class LinkedList
 {
     struct node* head;
+    uint64_t Datasize = 0;
 
     public:
-    LinkedList();
+    LinkedList(uint64_t Datasize);
     ~LinkedList();
 
     void insert(uint64_t x, uint64_t y);

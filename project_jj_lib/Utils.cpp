@@ -253,7 +253,8 @@ LinkedList* SortMergeJoin(Relation* relA, Relation* relB) {
     int jj=0;
     int flag = false;
     uint64_t counter = 0;
-    LinkedList *Results = new LinkedList;
+
+    LinkedList *Results = new LinkedList(BUFFERSIZE);
     for(uint64_t i = 0; i<sizeA; i++){
 
         if(tupA[i].getKey() == tupB[j].getKey()){
