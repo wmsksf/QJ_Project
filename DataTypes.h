@@ -76,5 +76,6 @@ class Results
     void print();
 };
 
+
 #endif //PROJECT_JJ_DATATYPES_H
 

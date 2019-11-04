@@ -179,6 +179,8 @@ void OptQuicksort(Tuple *A, uint64_t lo, uint64_t hi)
 //IN PROCESS...
 void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte, Relation* RR)
 {
+    if(end == 991918)
+        std::cout << std::endl;
     if (current_byte == 56 && (end+1 - start) * sizeof(Tuple) < L1_CACHESIZE)
     {
 //        Quicksort(R->getTuples(), start, end);
@@ -256,12 +258,20 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
 //        for(int i =start; i <= start+20; i++)
 //            std::cout << R->getTuples()[i].getKey() << std::endl;
 
-    if(nth_byte==6 or nth_byte==4 or nth_byte==2 or nth_byte==0)
-        R->copyTuplesVal(RR,start,end);
+//    uint64_t c = 0;
+//    for (uint64_t i =start; i <end+1; i ++){
+//        if(RR->getTuples()[i].getKey() == 18278284510384154391)
+//            c++;
+//    }
+//    std::cout << c << std::endl;
+
+   // if(nth_byte==6 or nth_byte==4 or nth_byte==2 or nth_byte==0) {
+        R->copyTuplesVal(RR, start, end);
+   // }
 
 
     if(nth_byte==7) {
-        R->initTuplesVal(RR);
+        //R->copyTuplesVal(RR,start,end);
         delete RR;
     }
 }
@@ -323,14 +333,31 @@ LinkedList* SortMergeJoin(Relation* relA, Relation* relB) {
     uint64_t sizeA = relA->getNumTuples();
     uint64_t sizeB = relB->getNumTuples();
 
+   // relA->print();
+
+//    uint64_t c = 0;
+//    for (uint64_t i =0; i < sizeA; i ++){
+//        if(relA->getTuples()[i].getKey() == 18278284510384154391)
+//            c++;
+//    }
+//    std::cout << c << std::endl;
+
     Radixsort(relA,0,sizeA-1);
     Radixsort(relB,0,sizeB-1);
 
-    if (!relA->isSorted() || !relB->isSorted())
-        return nullptr;
 
     Tuple* tupA = relA->getTuples();
     Tuple* tupB = relB->getTuples();
+
+//    c = 0;
+//    for (uint64_t i =0; i < sizeA; i ++){
+//        if(tupA[i].getKey() == 18278284510384154391)
+//            c++;
+//    }
+//    std::cout << c << std::endl;
+    if (!relA->isSorted() || !relB->isSorted())
+        return nullptr;
+
     if(tupA == nullptr or tupB == nullptr)
         return nullptr;
 
@@ -346,16 +373,18 @@ LinkedList* SortMergeJoin(Relation* relA, Relation* relB) {
         //REMOVE BEFORE RELEASE
 
         if(tupA[i].getKey() == tupB[j].getKey()){
-            Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
+            //Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
             counter++;
 
             while(tupA[i].getKey() == tupB[++j].getKey()){
-                Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
+               // Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
                 counter++;
+                if(j == sizeB-1) break;
             }
             j = jj;
         }
         else if(tupA[i].getKey() > tupB[j].getKey()){
+
 
             while(tupA[i].getKey() > tupB[++j].getKey()){
                 if (j == sizeB-1) {
@@ -364,10 +393,13 @@ LinkedList* SortMergeJoin(Relation* relA, Relation* relB) {
                 }
             }
 
+            if (j == sizeB-1) {
+                break;
+            }
             if(flag) break;
             jj = j--;
             while(tupA[i].getKey() == tupB[++j].getKey()){
-                Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
+                //Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
                 counter++;
             }
             j = jj;
