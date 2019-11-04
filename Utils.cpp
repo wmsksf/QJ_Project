@@ -254,10 +254,6 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
         }
     }
 
-//    if(start>55000)
-//        for(int i =start; i <= start+20; i++)
-//            std::cout << R->getTuples()[i].getKey() << std::endl;
-
 //    uint64_t c = 0;
 //    for (uint64_t i =start; i <end+1; i ++){
 //        if(RR->getTuples()[i].getKey() == 18278284510384154391)
