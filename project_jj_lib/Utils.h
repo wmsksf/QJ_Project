@@ -21,7 +21,15 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte 
 
 Tuple getMatrixSize(const char* fileName);
 
-LinkedList* SortMergeJoin(Relation*, Relation*);
+static uint64_t temp = 0;       //Used as default parameter given by reference
+LinkedList * JoinSortedRelations(Relation*, Relation*, uint64_t& = temp);
+
+/* Just for testing purposes. It doesn't return a LinkedList* with the results
+ *  from the joined tables. It is only used to get the total row count from the
+ *  two joined tables. */
+void JoinSortedRelationsTest(Relation *, Relation *, uint64_t& );
+
+LinkedList* SortMergeJoin(Relation*, Relation*,uint64_t& = temp, bool = false);
 
 void clean_up(Matrix **matrix1, Matrix **matrix2,
               Relation **R1, Relation **R2, LinkedList **ResultsList);

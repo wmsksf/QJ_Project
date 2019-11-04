@@ -11,29 +11,28 @@
 #define RELSIZE 100000
 #define ONEVALUE 453467
 
-// 4 assertions
-//TEST_CASE("Set matrix object and get relation object from it", "[SETMATRIXANDGETRELATIONBJECTSTEST]")
-//{
-//    SECTION("Get size of matrix object")
-//    {
-//        const char* file = "relA";
-//        Tuple a = getMatrixSize(file);
-//        REQUIRE(a.getKey() != 0);
-//        REQUIRE(a.getPayload() != 0);
-//
-//        SECTION("Set matrix object")
-//        {
-//            Matrix* matrix = new Matrix(a.getPayload(),a.getKey());
-//            REQUIRE(matrix->setMatrix(file) != false);
-//
-//            SECTION("Get relation object from matrix object")
-//            {
-//            Relation *rel = matrix->getRelation(1);
-//            REQUIRE(rel != nullptr);
-//            }
-//        }
-//    }
-//}
+TEST_CASE("Set matrix object and get relation object from it", "[SETMATRIXANDGETRELATIONBJECTSTEST]")
+{
+    SECTION("Get size of matrix object")
+    {
+        const char* file = "relA";
+        Tuple a = getMatrixSize(file);
+        REQUIRE(a.getKey() != 0);
+        REQUIRE(a.getPayload() != 0);
+
+        SECTION("Set matrix object")
+        {
+            Matrix* matrix = new Matrix(a.getPayload(),a.getKey());
+            REQUIRE(matrix->setMatrix(file) != false);
+
+            SECTION("Get relation object from matrix object")
+            {
+            Relation *rel = matrix->getRelation(1);
+            REQUIRE(rel != nullptr);
+            }
+        }
+    }
+}
 
 // BEHAVIOR REGARDING NATURE OF DATA IN ARRAY
 //  CHANGE RELSIZE TO TEST SIZE OF ARRAY
@@ -145,29 +144,6 @@ TEST_CASE("Iterative quick sort with data of single value", "[QUICKONE]")
 
     delete r;
 }
-// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-//
-//TEST_CASE("Radix sort", "[RADIXSORTTEST]")
-//{
-//
-//    const char* file = "relA";
-//    Tuple a = getMatrixSize(file);
-//    Matrix* matrix = new Matrix(a.getPayload(),a.getKey());
-//    Relation *rel = matrix->getRelation(1);
-//
-//    SECTION("Size of relation object")
-//    {
-//        uint64_t size = rel->getNumTuples();
-//        REQUIRE(size != 0);
-//
-//        SECTION("Performance of radix sort")
-//        {
-//            Radixsort(rel, 0, size-1);
-//            REQUIRE(rel->isSorted() != false);
-//        }
-//    }
-//}
-
 
 TEST_CASE("Radix sort test with tiny test files", "[RADIXTINY]")
 {
@@ -367,6 +343,115 @@ TEST_CASE("Radix sort test with medium test files", "[RADIXMEDIUM]")
         count+= R2->getTuples()[i].getPayload();
     }
     REQUIRE( count == (size2*(size2-1)/2));
+
+    delete matrix1;
+    delete matrix2;
+    delete R1;
+    delete R2;
+}
+
+
+TEST_CASE("SortMergeJoin test with tiny test files", "[SMJTINY]")
+{
+
+    const char* file1 = "relA_tiny";
+    Tuple t1 = getMatrixSize(file1);
+    Matrix* matrix1 = new Matrix(t1.getPayload(),t1.getKey());
+    REQUIRE(matrix1->setMatrix(file1));
+
+
+    const char* file2 = "relB_tiny";
+    Tuple t2 = getMatrixSize(file2);
+    Matrix* matrix2 = new Matrix(t2.getPayload(),t2.getKey());
+    REQUIRE(matrix2->setMatrix(file2));
+
+
+    Relation *R1,*R2;
+    R1 = matrix1->getRelation(0);
+    R2 = matrix2->getRelation(0);
+
+    uint64_t size1 = R1->getNumTuples();
+    uint64_t size2 = R2->getNumTuples();
+
+    REQUIRE(size1 == 1000);
+    REQUIRE(size2 == 2000);
+
+    uint64_t count = 0;
+    SortMergeJoin(R1,R2,count);
+
+    REQUIRE(count == 640000);
+
+    delete matrix1;
+    delete matrix2;
+    delete R1;
+    delete R2;
+}
+
+TEST_CASE("SortMergeJoin test with small test files", "[SMJSMALL]")
+{
+
+    const char* file1 = "relA_small";
+    Tuple t1 = getMatrixSize(file1);
+    Matrix* matrix1 = new Matrix(t1.getPayload(),t1.getKey());
+    REQUIRE(matrix1->setMatrix(file1));
+
+
+    const char* file2 = "relB_small";
+    Tuple t2 = getMatrixSize(file2);
+    Matrix* matrix2 = new Matrix(t2.getPayload(),t2.getKey());
+    REQUIRE(matrix2->setMatrix(file2));
+
+
+    Relation *R1,*R2;
+    R1 = matrix1->getRelation(0);
+    R2 = matrix2->getRelation(0);
+
+    uint64_t size1 = R1->getNumTuples();
+    uint64_t size2 = R2->getNumTuples();
+
+    REQUIRE(size1 == 10000);
+    REQUIRE(size2 == 30000);
+
+    uint64_t count = 0;
+    SortMergeJoin(R1,R2,count,true);
+
+    REQUIRE(count == 50000000);
+
+    delete matrix1;
+    delete matrix2;
+    delete R1;
+    delete R2;
+}
+
+TEST_CASE("SortMergeJoin test with medium test files", "[SMJMEDIUM]")
+{
+
+    const char* file1 = "relA";
+    Tuple t1 = getMatrixSize(file1);
+    Matrix* matrix1 = new Matrix(t1.getPayload(),t1.getKey());
+    REQUIRE(matrix1->setMatrix(file1));
+
+
+    const char* file2 = "relB";
+    Tuple t2 = getMatrixSize(file2);
+    Matrix* matrix2 = new Matrix(t2.getPayload(),t2.getKey());
+    REQUIRE(matrix2->setMatrix(file2));
+
+
+    Relation *R1,*R2;
+    R1 = matrix1->getRelation(0);
+    R2 = matrix2->getRelation(0);
+
+    uint64_t size1 = R1->getNumTuples();
+    uint64_t size2 = R2->getNumTuples();
+
+    REQUIRE(size1 == 100000);
+    REQUIRE(size2 == 1000000);
+
+    uint64_t count = 0;
+    SortMergeJoin(R1,R2,count,true);
+
+    REQUIRE(count == 900000000);
 
     delete matrix1;
     delete matrix2;

@@ -27,23 +27,7 @@ int main(int argc, char **argv)
     R1 = matrix1->getRelation(0);
     R2 = matrix2->getRelation(0);
 
-    //Radixsort(R2,0,R2->getNumTuples()-1);
-
-
-    uint64_t count = 0;
-    for( uint64_t i = 0; i<R1->getNumTuples();i++){
-        count+= R1->getTuples()[i].getPayload();
-    }
-    cout << count << endl;
-
-    count = 0;
-    for( uint64_t i = 0; i<R2->getNumTuples();i++){
-        count+= R2->getTuples()[i].getPayload();
-    }
-    cout << count << endl;
-
     LinkedList *ResultsList = SortMergeJoin(R1,R2);
-
 
     if (!ResultsList)
         std::cout << "Sorting failed!" << std::endl;

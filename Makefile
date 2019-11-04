@@ -1,30 +1,46 @@
-#Makefile 
+OBJS	= main.o,project_jj_lib/DataTypes.o,project_jj_lib/Utils.o,project_jj_lib/LinkedList.o,project_jj_lib/Stack.o,Catch_tests/AbsoluteTests.o
+OUT	= project,tests
 
-TARGET_EXEC ?= 
-BUILD_DIR ?= 
-SRC_DIRS ?= 
+OBJS0	= main.o DataTypes.o Utils.o LinkedList.o Stack.o
+SOURCE0	= main.cpp project_jj_lib/DataTypes.cpp project_jj_lib/Utils.cpp project_jj_lib/LinkedList.cpp project_jj_lib/Stack.cpp
+HEADER0	= project_jj_lib/DataTypes.h project_jj_lib/Utils.h project_jj_lib/LinkedList.h project_jj_lib/Stack.h
+OUT0	= project
 
-SRCS := $(shell find $(SRC_DIRS) -name *.cpp)
-OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
-DEPS := $(OBJS:.o=.d)
+OBJS1	= AbsoluteTests.o DataTypes.o Utils.o LinkedList.o Stack.o
+SOURCE1	= Catch_tests/AbsoluteTests.cpp project_jj_lib/DataTypes.cpp project_jj_lib/Utils.cpp project_jj_lib/LinkedList.cpp project_jj_lib/Stack.cpp
+HEADER1	= project_jj_lib/DataTypes.h project_jj_lib/Utils.h project_jj_lib/LinkedList.h project_jj_lib/Stack.h
+OUT1	= tests
 
-INC_DIRS := $(shell find $(SRC_DIRS) -type d)
-INC_FLAGS := $(addprefix -I,$(INC_DIRS))
-CC = g++
-CFLAGS = -std=c11
+CC	 = g++
+FLAGS	 = -g -c -Wall
+LFLAGS	 = 
 
-$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	$(CC) $(OBJS) -o $@ $(LDFLAGS)
+all: project tests
 
-$(BUILD_DIR)/%.cpp.o: %.cpp
-	$(MKDIR_P) $(dir $@)
-	$(CC) -c $< -o $@
+project: $(OBJS0) $(LFLAGS)
+	$(CC) -g $(OBJS0) -o $(OUT0)
 
-.PHONY: clean
+tests: $(OBJS1) $(LFLAGS)
+	$(CC) -g $(OBJS1) -o $(OUT1)
+
+main.o: main.cpp
+	$(CC) $(FLAGS) main.cpp -std=c++14
+
+DataTypes.o: project_jj_lib/DataTypes.cpp
+	$(CC) $(FLAGS) project_jj_lib/DataTypes.cpp -std=c++14
+
+Utils.o: project_jj_lib/Utils.cpp
+	$(CC) $(FLAGS) project_jj_lib/Utils.cpp -std=c++14
+
+LinkedList.o: project_jj_lib/LinkedList.cpp
+	$(CC) $(FLAGS) project_jj_lib/LinkedList.cpp -std=c++14
+
+Stack.o: project_jj_lib/Stack.cpp
+	$(CC) $(FLAGS) project_jj_lib/Stack.cpp -std=c++14
+
+AbsoluteTests.o: Catch_tests/AbsoluteTests.cpp
+	$(CC) $(FLAGS) Catch_tests/AbsoluteTests.cpp -std=c++14
+
 
 clean:
-	$(RM) -r $(BUILD_DIR)
-
--include $(DEPS)
-
-MKDIR_P ?= mkdir -p
+	rm -f $(OBJS) $(OUT)
