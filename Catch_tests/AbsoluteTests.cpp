@@ -167,3 +167,209 @@ TEST_CASE("Iterative quick sort with data of single value", "[QUICKONE]")
 //        }
 //    }
 //}
+
+
+TEST_CASE("Radix sort test with tiny test files", "[RADIXTINY]")
+{
+
+    const char* file1 = "relA_tiny";
+    Tuple t1 = getMatrixSize(file1);
+    Matrix* matrix1 = new Matrix(t1.getPayload(),t1.getKey());
+    REQUIRE(matrix1->setMatrix(file1));
+
+
+    const char* file2 = "relB_tiny";
+    Tuple t2 = getMatrixSize(file2);
+    Matrix* matrix2 = new Matrix(t2.getPayload(),t2.getKey());
+    REQUIRE(matrix2->setMatrix(file2));
+
+
+    Relation *R1,*R2;
+    R1 = matrix1->getRelation(0);
+    R2 = matrix2->getRelation(0);
+
+    uint64_t size1 = R1->getNumTuples();
+    uint64_t size2 = R2->getNumTuples();
+
+    REQUIRE(size1 == 1000);
+    REQUIRE(size2 == 2000);
+
+    Radixsort(R1,0,size1-1);
+
+    uint64_t  a = R1->getTuples()[0].getKey();
+    for (uint64_t i = 1; i <size1 ; i++)
+    {
+        uint64_t b = R1->getTuples()[i].getKey();
+        REQUIRE(a <= b);
+        a = b;
+
+    }
+    uint64_t count = 0;
+
+    for (uint64_t i = 0; i <size1 ; i++)
+    {
+        count+= R1->getTuples()[i].getPayload();
+    }
+    REQUIRE( count == (size1*(size1-1)/2));
+
+
+    Radixsort(R2,0,size2-1);
+
+    a = R2->getTuples()[0].getKey();
+    for (uint64_t i = 1; i < size2; i++)
+    {
+        uint64_t b = R2->getTuples()[i].getKey();
+        REQUIRE(a <= b);
+        a = b;
+
+    }
+
+    count = 0;
+    for (uint64_t i = 0; i <size2 ; i++)
+    {
+        count+= R2->getTuples()[i].getPayload();
+    }
+    REQUIRE( count == (size2*(size2-1)/2));
+
+    delete matrix1;
+    delete matrix2;
+    delete R1;
+    delete R2;
+}
+
+
+TEST_CASE("Radix sort test with small test files", "[RADIXSMALL]")
+{
+
+    const char* file1 = "relA_small";
+    Tuple t1 = getMatrixSize(file1);
+    Matrix* matrix1 = new Matrix(t1.getPayload(),t1.getKey());
+    REQUIRE(matrix1->setMatrix(file1));
+
+
+    const char* file2 = "relB_small";
+    Tuple t2 = getMatrixSize(file2);
+    Matrix* matrix2 = new Matrix(t2.getPayload(),t2.getKey());
+    REQUIRE(matrix2->setMatrix(file2));
+
+
+    Relation *R1,*R2;
+    R1 = matrix1->getRelation(0);
+    R2 = matrix2->getRelation(0);
+
+    uint64_t size1 = R1->getNumTuples();
+    uint64_t size2 = R2->getNumTuples();
+
+    REQUIRE(size1 == 10000);
+    REQUIRE(size2 == 30000);
+
+    Radixsort(R1,0,size1-1);
+
+    uint64_t  a = R1->getTuples()[0].getKey();
+    for (uint64_t i = 1; i <size1 ; i++)
+    {
+        uint64_t b = R1->getTuples()[i].getKey();
+        REQUIRE(a <= b);
+        a = b;
+
+    }
+    uint64_t count = 0;
+
+    for (uint64_t i = 0; i <size1 ; i++)
+    {
+        count+= R1->getTuples()[i].getPayload();
+    }
+    REQUIRE( count == (size1*(size1-1)/2));
+
+
+    Radixsort(R2,0,size2-1);
+
+    a = R2->getTuples()[0].getKey();
+    for (uint64_t i = 1; i < size2; i++)
+    {
+        uint64_t b = R2->getTuples()[i].getKey();
+        REQUIRE(a <= b);
+        a = b;
+
+    }
+
+    count = 0;
+    for (uint64_t i = 0; i <size2 ; i++)
+    {
+        count+= R2->getTuples()[i].getPayload();
+    }
+    REQUIRE( count == (size2*(size2-1)/2));
+
+    delete matrix1;
+    delete matrix2;
+    delete R1;
+    delete R2;
+}
+
+TEST_CASE("Radix sort test with medium test files", "[RADIXMEDIUM]")
+{
+
+    const char* file1 = "relA";
+    Tuple t1 = getMatrixSize(file1);
+    Matrix* matrix1 = new Matrix(t1.getPayload(),t1.getKey());
+    REQUIRE(matrix1->setMatrix(file1));
+
+
+    const char* file2 = "relB";
+    Tuple t2 = getMatrixSize(file2);
+    Matrix* matrix2 = new Matrix(t2.getPayload(),t2.getKey());
+    REQUIRE(matrix2->setMatrix(file2));
+
+
+    Relation *R1,*R2;
+    R1 = matrix1->getRelation(0);
+    R2 = matrix2->getRelation(0);
+
+    uint64_t size1 = R1->getNumTuples();
+    uint64_t size2 = R2->getNumTuples();
+
+    REQUIRE(size1 == 100000);
+    REQUIRE(size2 == 1000000);
+
+    Radixsort(R1,0,size1-1);
+
+    uint64_t  a = R1->getTuples()[0].getKey();
+    for (uint64_t i = 1; i <size1 ; i++)
+    {
+        uint64_t b = R1->getTuples()[i].getKey();
+        REQUIRE(a <= b);
+        a = b;
+
+    }
+    uint64_t count = 0;
+
+    for (uint64_t i = 0; i <size1 ; i++)
+    {
+        count+= R1->getTuples()[i].getPayload();
+    }
+    REQUIRE( count == (size1*(size1-1)/2));
+
+
+    Radixsort(R2,0,size2-1);
+
+    a = R2->getTuples()[0].getKey();
+    for (uint64_t i = 1; i < size2; i++)
+    {
+        uint64_t b = R2->getTuples()[i].getKey();
+        REQUIRE(a <= b);
+        a = b;
+
+    }
+
+    count = 0;
+    for (uint64_t i = 0; i <size2 ; i++)
+    {
+        count+= R2->getTuples()[i].getPayload();
+    }
+    REQUIRE( count == (size2*(size2-1)/2));
+
+    delete matrix1;
+    delete matrix2;
+    delete R1;
+    delete R2;
+}

@@ -258,11 +258,11 @@ LinkedList* SortMergeJoin(Relation* relA, Relation* relB) {
     for(uint64_t i = 0; i<sizeA; i++){
 
         if(tupA[i].getKey() == tupB[j].getKey()){
-            //Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
+            Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
             counter++;
 
             while(tupA[i].getKey() == tupB[++j].getKey()){
-               // Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
+                Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
                 counter++;
                 if(j == sizeB-1) break;
             }
@@ -284,7 +284,7 @@ LinkedList* SortMergeJoin(Relation* relA, Relation* relB) {
             if(flag) break;
             jj = j--;
             while(tupA[i].getKey() == tupB[++j].getKey()){
-                //Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
+                Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
                 counter++;
             }
             j = jj;

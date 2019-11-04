@@ -5,7 +5,7 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-    const char* file1 = "relB_small";
+    const char* file1 = "relB_tiny";
     Tuple a = getMatrixSize(file1);
     Matrix* matrix1 = new Matrix(a.getPayload(),a.getKey());
     if(!matrix1->setMatrix(file1))
@@ -14,7 +14,7 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    const char* file2 = "relA_small";
+    const char* file2 = "relA_tiny";
     Tuple b = getMatrixSize(file2);
     Matrix* matrix2 = new Matrix(b.getPayload(),b.getKey());
     if(!matrix2->setMatrix(file2))
@@ -53,9 +53,8 @@ int main(int argc, char **argv)
             std::cout << "No results!" << std::endl;
         else
         {
-            //std::cout << "RowIdA\tRowIdB" << std::endl;
-            //ResultsList->print();
-            delete ResultsList;
+            std::cout << "RowIdA\tRowIdB" << std::endl;
+            ResultsList->print();
         }
     }
 
