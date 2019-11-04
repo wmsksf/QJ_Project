@@ -35,6 +35,11 @@ void Tuple::swap(Tuple* tuple)
     tuple->setPayload(tmp);
 }
 
+bool Tuple::equal(Tuple x)
+{
+    return (this->getKey() == x.getKey() && this->getPayload() == x.getPayload());
+}
+
 void Tuple::print() {
     std::cout << this->getKey() << "  " << this->getPayload() << std::endl;
 }
@@ -125,14 +130,9 @@ bool Relation::isSorted() {
     }
     uint64_t a = tuples_[0].getKey();
     for (uint64_t i =1; i<size; i++){
-//        >>>>>>>>>>>>>>>>>>> debug usage
         uint64_t b = tuples_[i].getKey();
-//        >>>>>>>>>>>>>>>>>>>>>>
         if(a > b){
             std::cout << "Relation is not sorted" << std::endl;
-//            >>>>>>>>>>>>>>>>>>>>>>>>> debug usage
-            std::cout << i << "   " << a << "  " << b <<  std::endl;
-//            >>>>>>>>>>>>>>>>>>>>>>>>> remove comment below after debug usage removed
             return false;
         }
         a = b;
@@ -247,7 +247,23 @@ Relation *Matrix::getRelation(long unsigned int columnNumber) {
     return R;
 }
 
-Results::Results() { index = 0; }
+Results::Results() { Buffer = nullptr; Buffersize = 0; }
+Results::~Results() { delete[] Buffer; }
+
+void Results::setBuffersize(uint64_t buffersize) { Buffersize = buffersize; }
+
+void Results::initBuffer()
+{
+    if (!Buffersize)
+    {
+        std::cout << "Empty Results object." << std::endl <<
+        "Tip: call setBuffersize() of object first!" << std::endl;
+
+        exit(EXIT_FAILURE);
+    }
+
+    Buffer = new Tuple[Buffersize];
+}
 
 void Results::add(uint64_t x, uint64_t y)
 {
@@ -256,7 +272,6 @@ void Results::add(uint64_t x, uint64_t y)
 
     index++;
 }
-
 bool Results::isFull() { return (index == BUFFERSIZE-1); }
 bool Results::isEmpty() { return (index == 0); }
 

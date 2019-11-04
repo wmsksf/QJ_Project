@@ -24,6 +24,7 @@ public:
     void setPayload(uint64_t payload);
 
     void swap(Tuple* tuple);
+    bool equal(Tuple x);
     void print();
 };
 
@@ -64,11 +65,15 @@ public:
 
 class Results
 {
-    Tuple Buffer[BUFFERSIZE];
-    uint64_t index = 0;
+    Tuple *Buffer;
+    uint64_t index = 0, Buffersize;
 
     public:
     Results();
+    ~Results();
+
+    void setBuffersize(uint64_t buffersize);
+    void initBuffer();
 
     void add(uint64_t x, uint64_t y);
     bool isFull();

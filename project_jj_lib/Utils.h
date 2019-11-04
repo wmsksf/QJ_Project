@@ -28,4 +28,6 @@ void clean_up(Matrix **matrix1, Matrix **matrix2,
 
 uint64_t mcg64(void);
 
+inline void assertions_count(uint64_t x) { std::cout << "count " << x << std::endl;}
+
 #endif //PROJECT_JJ_UTILS_H
