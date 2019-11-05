@@ -14,10 +14,7 @@ Stack::Stack(uint64_t size)
     top = 0;
 }
 
-Stack::~Stack()
-{
-    delete[] stack;
-}
+Stack::~Stack() { delete[] stack; }
 
 void Stack::push(uint64_t x)
 {

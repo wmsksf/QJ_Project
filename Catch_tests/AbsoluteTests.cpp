@@ -11,11 +11,20 @@
 #define RELSIZE 100000
 #define ONEVALUE 453467
 
+#define FILE_A_TINY "../data/Datasets/tiny/relA"
+#define FILE_B_TINY "../data/Datasets/tiny/relB"
+
+#define FILE_A_SMALL "../data/Datasets/small/relA"
+#define FILE_B_SMALL "../data/Datasets/small/relB"
+
+#define FILE_A_MEDIUM "../data/Datasets/medium/relA"
+#define FILE_B_MEDIUM "../data/Datasets/medium/relB"
+
 TEST_CASE("Set matrix object and get relation object from it", "[SETMATRIXANDGETRELATIONBJECTSTEST]")
 {
     SECTION("Get size of matrix object")
     {
-        const char* file = "relA";
+        char* file = FILE_A_SMALL;
         Tuple a = getMatrixSize(file);
         REQUIRE(a.getKey() != 0);
         REQUIRE(a.getPayload() != 0);
@@ -148,13 +157,13 @@ TEST_CASE("Iterative quick sort with data of single value", "[QUICKONE]")
 TEST_CASE("Radix sort test with tiny test files", "[RADIXTINY]")
 {
 
-    const char* file1 = "relA_tiny";
+    char* file1 = FILE_A_TINY;
     Tuple t1 = getMatrixSize(file1);
     Matrix* matrix1 = new Matrix(t1.getPayload(),t1.getKey());
     REQUIRE(matrix1->setMatrix(file1));
 
 
-    const char* file2 = "relB_tiny";
+    char* file2 = FILE_B_TINY;
     Tuple t2 = getMatrixSize(file2);
     Matrix* matrix2 = new Matrix(t2.getPayload(),t2.getKey());
     REQUIRE(matrix2->setMatrix(file2));
@@ -217,13 +226,13 @@ TEST_CASE("Radix sort test with tiny test files", "[RADIXTINY]")
 TEST_CASE("Radix sort test with small test files", "[RADIXSMALL]")
 {
 
-    const char* file1 = "relA_small";
+    char* file1 = FILE_A_SMALL;
     Tuple t1 = getMatrixSize(file1);
     Matrix* matrix1 = new Matrix(t1.getPayload(),t1.getKey());
     REQUIRE(matrix1->setMatrix(file1));
 
 
-    const char* file2 = "relB_small";
+    char* file2 = FILE_B_SMALL;
     Tuple t2 = getMatrixSize(file2);
     Matrix* matrix2 = new Matrix(t2.getPayload(),t2.getKey());
     REQUIRE(matrix2->setMatrix(file2));
@@ -285,13 +294,13 @@ TEST_CASE("Radix sort test with small test files", "[RADIXSMALL]")
 TEST_CASE("Radix sort test with medium test files", "[RADIXMEDIUM]")
 {
 
-    const char* file1 = "relA";
+    char* file1 = FILE_A_MEDIUM;
     Tuple t1 = getMatrixSize(file1);
     Matrix* matrix1 = new Matrix(t1.getPayload(),t1.getKey());
     REQUIRE(matrix1->setMatrix(file1));
 
 
-    const char* file2 = "relB";
+    char* file2 = FILE_B_MEDIUM;
     Tuple t2 = getMatrixSize(file2);
     Matrix* matrix2 = new Matrix(t2.getPayload(),t2.getKey());
     REQUIRE(matrix2->setMatrix(file2));
@@ -354,13 +363,13 @@ TEST_CASE("Radix sort test with medium test files", "[RADIXMEDIUM]")
 TEST_CASE("SortMergeJoin test with tiny test files", "[SMJTINY]")
 {
 
-    const char* file1 = "relA_tiny";
+    char* file1 = FILE_A_TINY;
     Tuple t1 = getMatrixSize(file1);
     Matrix* matrix1 = new Matrix(t1.getPayload(),t1.getKey());
     REQUIRE(matrix1->setMatrix(file1));
 
 
-    const char* file2 = "relB_tiny";
+    char* file2 = FILE_B_TINY;
     Tuple t2 = getMatrixSize(file2);
     Matrix* matrix2 = new Matrix(t2.getPayload(),t2.getKey());
     REQUIRE(matrix2->setMatrix(file2));
@@ -390,13 +399,13 @@ TEST_CASE("SortMergeJoin test with tiny test files", "[SMJTINY]")
 TEST_CASE("SortMergeJoin test with small test files", "[SMJSMALL]")
 {
 
-    const char* file1 = "relA_small";
+    char* file1 = FILE_A_SMALL;
     Tuple t1 = getMatrixSize(file1);
     Matrix* matrix1 = new Matrix(t1.getPayload(),t1.getKey());
     REQUIRE(matrix1->setMatrix(file1));
 
 
-    const char* file2 = "relB_small";
+    char* file2 = FILE_B_SMALL;
     Tuple t2 = getMatrixSize(file2);
     Matrix* matrix2 = new Matrix(t2.getPayload(),t2.getKey());
     REQUIRE(matrix2->setMatrix(file2));
@@ -426,13 +435,13 @@ TEST_CASE("SortMergeJoin test with small test files", "[SMJSMALL]")
 TEST_CASE("SortMergeJoin test with medium test files", "[SMJMEDIUM]")
 {
 
-    const char* file1 = "relA";
+    char* file1 = FILE_A_MEDIUM;
     Tuple t1 = getMatrixSize(file1);
     Matrix* matrix1 = new Matrix(t1.getPayload(),t1.getKey());
     REQUIRE(matrix1->setMatrix(file1));
 
 
-    const char* file2 = "relB";
+    char* file2 = FILE_B_MEDIUM;
     Tuple t2 = getMatrixSize(file2);
     Matrix* matrix2 = new Matrix(t2.getPayload(),t2.getKey());
     REQUIRE(matrix2->setMatrix(file2));

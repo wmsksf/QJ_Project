@@ -27,7 +27,7 @@ public:
     bool equal(Tuple x);
     void print();
 };
-
+//    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 class Relation
 {
     Tuple* tuples;
@@ -48,7 +48,7 @@ public:
     void print();
     bool isSorted();
 };
-
+//    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 class Matrix
 {
     long unsigned int numOfRows;
@@ -58,11 +58,11 @@ class Matrix
 public:
     Matrix(long unsigned int, long unsigned int);
     ~Matrix();
-    bool setMatrix(const char* fileName);       // Initializes the matrix data, given an input file
+    bool setMatrix(char* fileName);       // Initializes the matrix data, given an input file
     void printMatrix();
     Relation* getRelation(long unsigned int);
 };
-
+//    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 class Results
 {
     Tuple *Buffer;
@@ -81,6 +81,4 @@ class Results
     void print();
 };
 
-
 #endif //PROJECT_JJ_DATATYPES_H
-

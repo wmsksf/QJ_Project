@@ -8,21 +8,11 @@
 
 Tuple::Tuple() { key = payload = 0; }
 
-uint64_t Tuple::getKey() const {
-    return key;
-}
+uint64_t Tuple::getKey() const { return key; }
+uint64_t Tuple::getPayload() const { return payload; }
 
-uint64_t Tuple::getPayload() const {
-    return payload;
-}
-
-void Tuple::setKey(uint64_t key_) {
-    key = key_;
-}
-
-void Tuple::setPayload(uint64_t payload_) {
-    payload = payload_;
-}
+void Tuple::setKey(uint64_t key_) { key = key_; }
+void Tuple::setPayload(uint64_t payload_) { payload = payload_; }
 
 void Tuple::swap(Tuple* tuple)
 {
@@ -35,15 +25,10 @@ void Tuple::swap(Tuple* tuple)
     tuple->setPayload(tmp);
 }
 
-bool Tuple::equal(Tuple x)
-{
-    return (this->getKey() == x.getKey() && this->getPayload() == x.getPayload());
-}
+bool Tuple::equal(Tuple x) { return (this->getKey() == x.getKey() && this->getPayload() == x.getPayload()); }
 
-void Tuple::print() {
-    std::cout << this->getKey() << "  " << this->getPayload() << std::endl;
-}
-
+void Tuple::print() { std::cout << this->getKey() << "  " << this->getPayload() << std::endl; }
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 Relation::Relation() { tuples = nullptr; numTuples = 0; }
 Relation::~Relation() { delete[] tuples; }
 
@@ -60,6 +45,7 @@ void Relation::initTuples()
     tuples = new Tuple[this->getNumTuples()];
 }
 
+// copy data from a given relation
 void Relation::initTuplesVal(Relation* R)
 {
     if (!this->getNumTuples())
@@ -84,17 +70,9 @@ void Relation::initTuplesVal(Relation* R)
 
 }
 
-Tuple* Relation::getTuples() const {
-    return tuples;
-}
-
-uint64_t Relation::getNumTuples() const {
-    return numTuples;
-}
-
-void Relation::setNumTuples(uint64_t numTuples_) {
-    numTuples = numTuples_;
-}
+Tuple* Relation::getTuples() const { return tuples; }
+uint64_t Relation::getNumTuples() const { return numTuples; }
+void Relation::setNumTuples(uint64_t numTuples_) { numTuples = numTuples_; }
 
 void Relation::setTupleVal(long unsigned int index, uint64_t key, uint64_t payload) {
     if(index >= this->getNumTuples()){
@@ -166,21 +144,16 @@ void Relation::copyTuplesVal(Relation *R, uint64_t start, uint64_t end) {
         tuples[i].setKey(R->tuples[i].getKey());
         tuples[i].setPayload(R->tuples[i].getPayload());
     }
-
-
 }
-
-
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 Matrix::Matrix(long unsigned int numberOfRows,long unsigned int numberOfColumns)
         :numOfRows(numberOfRows), numOfColumns(numberOfColumns) {
     data= new uint64_t[numberOfColumns*numberOfRows];       //Allocating memory for the matrix data
 }
 
-Matrix::~Matrix() {
-    delete[] data;
-}
+Matrix::~Matrix() { delete[] data; }
 
-bool Matrix::setMatrix(const char* fileName) {
+bool Matrix::setMatrix(char* fileName) {
 
     if(fileName == NULL)
         return false;
@@ -246,7 +219,7 @@ Relation *Matrix::getRelation(long unsigned int columnNumber) {
     }
     return R;
 }
-
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 Results::Results() { Buffer = nullptr; Buffersize = 0; }
 Results::~Results() { delete[] Buffer; }
 

@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <getopt.h>
 #include "Utils.h"
 #include "LinkedList.h"
 #include "Stack.h"
@@ -29,10 +30,8 @@ static uint64_t partition(Tuple* A, uint64_t p, uint64_t r)
 
 void OptQuicksort(Tuple *A, uint64_t lo, uint64_t hi)
 {
-
     if (hi == lo) return;
     Stack stack(hi-lo+1);
-
 
     stack.push(lo);
     stack.push(hi);
@@ -44,13 +43,6 @@ void OptQuicksort(Tuple *A, uint64_t lo, uint64_t hi)
 
 
         uint64_t pivot = partition(A, lo, hi);
-
-
-//        >>>>>>>>>>>>>>>>>>>>>>>>
-//        tail recursion to be added after testing of current code is successful
-//        medianofthree might be added as well
-//        >>>>>>>>>>>>>>>>>>>>>>>>
-
 
 //        if elements on left side of pivot, push left side to stack
         if ( pivot > 0 and pivot - 1 > lo)
@@ -68,13 +60,11 @@ void OptQuicksort(Tuple *A, uint64_t lo, uint64_t hi)
     }
 }
 
-//IN PROCESS...
 void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte, Relation* RR)
 {
     if (current_byte == 56 && (end+1 - start) * sizeof(Tuple) < L1_CACHESIZE)
     {
         OptQuicksort(R->getTuples(), start, end);
-
         return;
     }
 
@@ -93,7 +83,7 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
     for (int i = 1; i < 256; i++)
         Psum[i] = Psum[i-1] + Hist[i-1];
 
-    // utility in copying R to RR
+//    utility in copying R to RR
     uint64_t tmp[256] = {0};
     for (uint64_t i = 0; i < 256; i++) tmp[i] = Psum[i];
 
@@ -106,7 +96,8 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
         RR->setTupleVal(tmp[byte]++, tuple.getKey(), tuple.getPayload());
     }
 
-    uint64_t nth_byte = current_byte/8; // switch R, RR after byte checked
+//    switch R, RR after byte checked
+    uint64_t nth_byte = current_byte/8;
     for (uint64_t i = 1; i < 256; i++)
     {
         if(Psum[i-1]-1 == end) break;
@@ -116,7 +107,6 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
         {
             if (!current_byte) {
                 OptQuicksort(RR->getTuples(), Psum[i - 1], Psum[i]-1);
-
             }
             else
                 Radixsort(RR, Psum[i - 1], Psum[i]-1, current_byte - 8, R);
@@ -124,7 +114,6 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
         else{
             if(Psum[i] > Psum[i-1])
                 OptQuicksort(RR->getTuples(), Psum[i-1], Psum[i]-1);
-
         }
     }
 
@@ -135,7 +124,6 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
             else
                 Radixsort(RR, Psum[255], end, current_byte - 8, R);
         } else {
-//            Quicksort(RR->getTuples(), Psum[255], end);
             OptQuicksort(RR->getTuples(), Psum[255], end);
         }
     }
@@ -146,7 +134,7 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
     }
 }
 
-Tuple getMatrixSize(const char *fileName) {
+Tuple getMatrixSize(char *fileName) {
 
     //Opening the input file
     FILE* fp;
@@ -157,7 +145,6 @@ Tuple getMatrixSize(const char *fileName) {
     fp = fopen(fileName,"r");     //Opening the file
 
     if (fp == NULL) {   //checking for error with fopen
-        printf("here..\n");
         perror("fopen");
         exit(EXIT_FAILURE);
     }
@@ -218,20 +205,16 @@ LinkedList* SortMergeJoin(Relation* relA, Relation* relB, uint64_t& count, bool 
     }
 }
 
-void clean_up(Matrix **matrix1, Matrix **matrix2,
-              Relation **R1, Relation **R2, LinkedList **ResultsList)
+void clean_up(Matrix **matrix1, Matrix **matrix2, Relation **R1, Relation **R2,
+        LinkedList **ResultsList, char **file1, char **file2)
 {
     delete *matrix1; *matrix1 = nullptr;
     delete *matrix2; *matrix2 = nullptr;
     delete *R1; *R1 = nullptr;
     delete *R2;  *R2 = nullptr;
     delete *ResultsList; *ResultsList = nullptr;
-}
-
-uint64_t mcg64(void)
-{
-    static uint64_t i = 1;
-    return (i = (164603309694725029ull * i) % 14738995463583502973ull);
+    delete *file1; *file1 = nullptr;
+    delete *file2; *file2 = nullptr;
 }
 
 LinkedList* JoinSortedRelations(Relation *relA, Relation *relB, uint64_t& count) {
@@ -289,7 +272,6 @@ LinkedList* JoinSortedRelations(Relation *relA, Relation *relB, uint64_t& count)
         }
     }
     count = counter;
-    //std::cout << "Number of tuples after join: " << counter << std::endl;
     return Results;
 }
 
@@ -346,6 +328,51 @@ void JoinSortedRelationsTest(Relation *relA, Relation *relB, uint64_t& count) {
     count = counter;
 }
 
+static char* copy_chars(char *givenChars)
+{
+    char *chars = (char*) malloc((strlen(givenChars) + 1) * sizeof(char));
+    if (chars == NULL)
+    {
+        std::cerr << "Memory allocation for char* failed." << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
+    memcpy(chars, givenChars, (strlen(givenChars) + 1) * sizeof(char));
+    return chars;
+}
 
+void GetfromCmd(int argc, char **argv, char **file1, char **file2, long long unsigned int *rel1, long long unsigned  int *rel2)
+{
+    if (argc < 9) USAGE(argv[0]);
 
+    int opt;
+    struct option long_options[] =
+            {
+                    {"f1", required_argument, nullptr, 'f'},
+                    {"rel1", required_argument, nullptr, 'g'},
+                    {"f2", required_argument, nullptr, 'k'},
+                    {"rel2", required_argument, nullptr, 'l'},
+                    {nullptr, 0, nullptr, 0}
+            };
+
+    while ((opt = getopt_long_only(argc, argv, "", long_options, nullptr)) != -1)
+    {
+        switch (opt)
+        {
+            case 'f':
+                *file1 = copy_chars(optarg);
+                break;
+            case 'g':
+                *rel1 = atoll(optarg);
+                break;
+            case 'k':
+                *file2 = copy_chars(optarg);
+                break;
+            case 'l':
+                *rel2 = atoll(optarg);
+                break;
+            default:
+                USAGE(argv[0]);
+        }
+    }
+}

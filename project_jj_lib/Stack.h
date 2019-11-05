@@ -7,6 +7,7 @@
 
 #include <cstdint>
 
+// Use: iterative Quicksort
 class Stack
 {
     uint64_t *stack, capacity;

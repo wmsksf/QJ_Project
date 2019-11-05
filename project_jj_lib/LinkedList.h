@@ -7,6 +7,7 @@
 
 #include "DataTypes.h"
 
+// USE: storing results, <rowIdR, rowIdS>, given class Results in SortMergeJoin()
 struct node
 {
     Results Data;
