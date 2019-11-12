@@ -251,7 +251,7 @@ bool Results::isEmpty() { return (index == 0); }
 void Results::print()
 {
     for (uint64_t i = 0; i < index; i++)
-        std::cout << Buffer[i].getKey() << "\t" << Buffer[i].getPayload() << std::endl;
+        std::cout << Buffer[i].getKey() << "\t" << Buffer[i].getPayload(); // << std::endl;
 
     std::cout << std::endl;
 }

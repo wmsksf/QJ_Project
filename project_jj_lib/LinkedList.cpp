@@ -8,12 +8,14 @@
 //list for this case at least
 LinkedList::LinkedList(uint64_t Datasize)
 {
-    head = nullptr;
+    head = tail = nullptr;
     this->Datasize = Datasize;
 }
 
 LinkedList::~LinkedList()
 {
+    tail = nullptr;
+
     struct node* tmp = head;
     struct node* next;
     while (tmp != nullptr)
@@ -23,6 +25,7 @@ LinkedList::~LinkedList()
         tmp = next;
     }
 }
+
 void LinkedList::insert(uint64_t x, uint64_t y)
 {
     if (head == nullptr)
@@ -34,27 +37,19 @@ void LinkedList::insert(uint64_t x, uint64_t y)
 
         head->Data.add(x,y);
         head->next = nullptr;
+        tail = head;
 
         return;
     }
 
-    struct node* current = head;
-    struct node* prev = current;
-
-    while(current != nullptr)
+    struct node *last = tail;
+    if (!last->Data.isFull())
     {
-        if (!current->Data.isFull())
-        {
-            current->Data.add(x,y);
-            return;
-        }
-
-        current = current->next;
-        if (current != nullptr)
-            prev = current;
+        last->next = overflow_node(x,y);
+        tail = last->next;
     }
-
-    prev->next = overflow_node(x,y);
+    else
+        last->Data.add(x,y);
 }
 
 bool LinkedList::empty()

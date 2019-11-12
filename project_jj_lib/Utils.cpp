@@ -213,6 +213,7 @@ void clean_up(Matrix **matrix1, Matrix **matrix2, Relation **R1, Relation **R2,
     delete *R1; *R1 = nullptr;
     delete *R2;  *R2 = nullptr;
     delete *ResultsList; *ResultsList = nullptr;
+//  mismatch free in valgrind the two following deletes
     delete *file1; *file1 = nullptr;
     delete *file2; *file2 = nullptr;
 }

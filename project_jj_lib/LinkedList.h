@@ -16,7 +16,7 @@ struct node
 
 class LinkedList
 {
-    struct node* head;
+    struct node *head, *tail;
     uint64_t Datasize = 0;
 
     public:
