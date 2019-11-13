@@ -20,11 +20,14 @@
 #define FILE_A_MEDIUM "../data/Datasets/medium/relA"
 #define FILE_B_MEDIUM "../data/Datasets/medium/relB"
 
-TEST_CASE("Set matrix object and get relation object from it", "[SETMATRIXANDGETRELATIONBJECTSTEST]")
+TEST_CASE("Set matrix object and get relation object from it", "[SETMTRX]")
 {
     SECTION("Get size of matrix object")
     {
-        char* file = FILE_A_SMALL;
+        char *file = (char*) malloc((strlen(FILE_A_SMALL) + 1) * sizeof(char));
+        REQUIRE(file != NULL);
+        memcpy(file, FILE_A_SMALL, (strlen(FILE_A_SMALL) + 1) * sizeof(char));
+
         Tuple a = getMatrixSize(file);
         REQUIRE(a.getKey() != 0);
         REQUIRE(a.getPayload() != 0);
@@ -40,6 +43,8 @@ TEST_CASE("Set matrix object and get relation object from it", "[SETMATRIXANDGET
             REQUIRE(rel != nullptr);
             }
         }
+
+        free(file);
     }
 }
 
@@ -69,10 +74,9 @@ TEST_CASE("Iterative quick sort with random data", "[QUICKRAND]")
     uint64_t a = rel[0].getKey();
     for (uint64_t i = 1; i < RELSIZE-1; i++)
     {
-    uint64_t b = rel[i].getKey();
-    REQUIRE(a <= b);
-    a = b;
-
+        uint64_t b = rel[i].getKey();
+        REQUIRE(a <= b);
+        a = b;
     }
 
     delete r;
@@ -156,18 +160,23 @@ TEST_CASE("Iterative quick sort with data of single value", "[QUICKONE]")
 
 TEST_CASE("Radix sort test with tiny test files", "[RADIXTINY]")
 {
+    char *file1 = (char*) malloc((strlen(FILE_A_TINY) + 1) * sizeof(char));
+    REQUIRE(file1 != NULL);
+    memcpy(file1, FILE_A_TINY, (strlen(FILE_A_TINY) + 1) * sizeof(char));
 
-    char* file1 = FILE_A_TINY;
     Tuple t1 = getMatrixSize(file1);
     Matrix* matrix1 = new Matrix(t1.getPayload(),t1.getKey());
+    REQUIRE(matrix1 != nullptr);
     REQUIRE(matrix1->setMatrix(file1));
 
+    char *file2 = (char*) malloc((strlen(FILE_B_TINY) + 1) * sizeof(char));
+    REQUIRE(file2 != NULL);
+    memcpy(file2, FILE_B_TINY, (strlen(FILE_B_TINY) + 1) * sizeof(char));
 
-    char* file2 = FILE_B_TINY;
     Tuple t2 = getMatrixSize(file2);
     Matrix* matrix2 = new Matrix(t2.getPayload(),t2.getKey());
+    REQUIRE(matrix2 != nullptr);
     REQUIRE(matrix2->setMatrix(file2));
-
 
     Relation *R1,*R2;
     R1 = matrix1->getRelation(0);
@@ -187,16 +196,12 @@ TEST_CASE("Radix sort test with tiny test files", "[RADIXTINY]")
         uint64_t b = R1->getTuples()[i].getKey();
         REQUIRE(a <= b);
         a = b;
-
     }
+
     uint64_t count = 0;
-
     for (uint64_t i = 0; i <size1 ; i++)
-    {
         count+= R1->getTuples()[i].getPayload();
-    }
     REQUIRE( count == (size1*(size1-1)/2));
-
 
     Radixsort(R2,0,size2-1);
 
@@ -206,37 +211,37 @@ TEST_CASE("Radix sort test with tiny test files", "[RADIXTINY]")
         uint64_t b = R2->getTuples()[i].getKey();
         REQUIRE(a <= b);
         a = b;
-
     }
 
     count = 0;
     for (uint64_t i = 0; i <size2 ; i++)
-    {
         count+= R2->getTuples()[i].getPayload();
-    }
     REQUIRE( count == (size2*(size2-1)/2));
 
-    delete matrix1;
-    delete matrix2;
-    delete R1;
-    delete R2;
+    delete matrix1; delete matrix2;
+    delete R1; delete R2;
+    free(file1); free(file2);
 }
-
 
 TEST_CASE("Radix sort test with small test files", "[RADIXSMALL]")
 {
+    char *file1 = (char*) malloc((strlen(FILE_A_SMALL) + 1) * sizeof(char));
+    REQUIRE(file1 != NULL);
+    memcpy(file1, FILE_A_SMALL, (strlen(FILE_A_SMALL) + 1) * sizeof(char));
 
-    char* file1 = FILE_A_SMALL;
     Tuple t1 = getMatrixSize(file1);
     Matrix* matrix1 = new Matrix(t1.getPayload(),t1.getKey());
+    REQUIRE(matrix1 != nullptr);
     REQUIRE(matrix1->setMatrix(file1));
 
+    char *file2 = (char*) malloc((strlen(FILE_B_SMALL) + 1) * sizeof(char));
+    REQUIRE(file2 != NULL);
+    memcpy(file2, FILE_B_SMALL, (strlen(FILE_B_SMALL) + 1) * sizeof(char));
 
-    char* file2 = FILE_B_SMALL;
     Tuple t2 = getMatrixSize(file2);
     Matrix* matrix2 = new Matrix(t2.getPayload(),t2.getKey());
+    REQUIRE(matrix2 != nullptr);
     REQUIRE(matrix2->setMatrix(file2));
-
 
     Relation *R1,*R2;
     R1 = matrix1->getRelation(0);
@@ -256,16 +261,12 @@ TEST_CASE("Radix sort test with small test files", "[RADIXSMALL]")
         uint64_t b = R1->getTuples()[i].getKey();
         REQUIRE(a <= b);
         a = b;
-
     }
+
     uint64_t count = 0;
-
     for (uint64_t i = 0; i <size1 ; i++)
-    {
         count+= R1->getTuples()[i].getPayload();
-    }
     REQUIRE( count == (size1*(size1-1)/2));
-
 
     Radixsort(R2,0,size2-1);
 
@@ -275,36 +276,37 @@ TEST_CASE("Radix sort test with small test files", "[RADIXSMALL]")
         uint64_t b = R2->getTuples()[i].getKey();
         REQUIRE(a <= b);
         a = b;
-
     }
 
     count = 0;
     for (uint64_t i = 0; i <size2 ; i++)
-    {
         count+= R2->getTuples()[i].getPayload();
-    }
     REQUIRE( count == (size2*(size2-1)/2));
 
-    delete matrix1;
-    delete matrix2;
-    delete R1;
-    delete R2;
+    delete matrix1; delete matrix2;
+    delete R1; delete R2;
+    free(file1); free(file2);
 }
 
 TEST_CASE("Radix sort test with medium test files", "[RADIXMEDIUM]")
 {
+    char *file1 = (char*) malloc((strlen(FILE_A_MEDIUM) + 1) * sizeof(char));
+    REQUIRE(file1 != NULL);
+    memcpy(file1, FILE_A_MEDIUM, (strlen(FILE_A_MEDIUM) + 1) * sizeof(char));
 
-    char* file1 = FILE_A_MEDIUM;
     Tuple t1 = getMatrixSize(file1);
     Matrix* matrix1 = new Matrix(t1.getPayload(),t1.getKey());
+    REQUIRE(matrix1 != nullptr);
     REQUIRE(matrix1->setMatrix(file1));
 
+    char *file2 = (char*) malloc((strlen(FILE_B_MEDIUM) + 1) * sizeof(char));
+    REQUIRE(file2 != NULL);
+    memcpy(file2, FILE_B_MEDIUM, (strlen(FILE_B_MEDIUM) + 1) * sizeof(char));
 
-    char* file2 = FILE_B_MEDIUM;
     Tuple t2 = getMatrixSize(file2);
     Matrix* matrix2 = new Matrix(t2.getPayload(),t2.getKey());
+    REQUIRE(matrix2 != nullptr);
     REQUIRE(matrix2->setMatrix(file2));
-
 
     Relation *R1,*R2;
     R1 = matrix1->getRelation(0);
@@ -324,16 +326,12 @@ TEST_CASE("Radix sort test with medium test files", "[RADIXMEDIUM]")
         uint64_t b = R1->getTuples()[i].getKey();
         REQUIRE(a <= b);
         a = b;
-
     }
+
     uint64_t count = 0;
-
     for (uint64_t i = 0; i <size1 ; i++)
-    {
         count+= R1->getTuples()[i].getPayload();
-    }
     REQUIRE( count == (size1*(size1-1)/2));
-
 
     Radixsort(R2,0,size2-1);
 
@@ -343,37 +341,38 @@ TEST_CASE("Radix sort test with medium test files", "[RADIXMEDIUM]")
         uint64_t b = R2->getTuples()[i].getKey();
         REQUIRE(a <= b);
         a = b;
-
     }
 
     count = 0;
     for (uint64_t i = 0; i <size2 ; i++)
-    {
         count+= R2->getTuples()[i].getPayload();
-    }
     REQUIRE( count == (size2*(size2-1)/2));
 
-    delete matrix1;
-    delete matrix2;
-    delete R1;
-    delete R2;
+    delete matrix1; delete matrix2;
+    delete R1; delete R2;
+    free(file1); free(file2);
 }
-
 
 TEST_CASE("SortMergeJoin test with tiny test files", "[SMJTINY]")
 {
 
-    char* file1 = FILE_A_TINY;
+    char *file1 = (char*) malloc((strlen(FILE_A_TINY) + 1) * sizeof(char));
+    REQUIRE(file1 != NULL);
+    memcpy(file1, FILE_A_TINY, (strlen(FILE_A_TINY) + 1) * sizeof(char));
+
     Tuple t1 = getMatrixSize(file1);
     Matrix* matrix1 = new Matrix(t1.getPayload(),t1.getKey());
+    REQUIRE(matrix1 != nullptr);
     REQUIRE(matrix1->setMatrix(file1));
 
+    char *file2 = (char*) malloc((strlen(FILE_B_TINY) + 1) * sizeof(char));
+    REQUIRE(file2 != NULL);
+    memcpy(file2, FILE_B_TINY, (strlen(FILE_B_TINY) + 1) * sizeof(char));
 
-    char* file2 = FILE_B_TINY;
     Tuple t2 = getMatrixSize(file2);
     Matrix* matrix2 = new Matrix(t2.getPayload(),t2.getKey());
+    REQUIRE(matrix2 != nullptr);
     REQUIRE(matrix2->setMatrix(file2));
-
 
     Relation *R1,*R2;
     R1 = matrix1->getRelation(0);
@@ -390,26 +389,30 @@ TEST_CASE("SortMergeJoin test with tiny test files", "[SMJTINY]")
 
     REQUIRE(count == 640000);
 
-    delete matrix1;
-    delete matrix2;
-    delete R1;
-    delete R2;
+    delete matrix1; delete matrix2;
+    delete R1; delete R2;
+    free(file1); free(file2);
 }
 
 TEST_CASE("SortMergeJoin test with small test files", "[SMJSMALL]")
 {
+    char *file1 = (char*) malloc((strlen(FILE_A_SMALL) + 1) * sizeof(char));
+    REQUIRE(file1 != NULL);
+    memcpy(file1, FILE_A_SMALL, (strlen(FILE_A_SMALL) + 1) * sizeof(char));
 
-    char* file1 = FILE_A_SMALL;
     Tuple t1 = getMatrixSize(file1);
     Matrix* matrix1 = new Matrix(t1.getPayload(),t1.getKey());
+    REQUIRE(matrix1 != nullptr);
     REQUIRE(matrix1->setMatrix(file1));
 
+    char *file2 = (char*) malloc((strlen(FILE_B_SMALL) + 1) * sizeof(char));
+    REQUIRE(file2 != NULL);
+    memcpy(file2, FILE_B_SMALL, (strlen(FILE_B_SMALL) + 1) * sizeof(char));
 
-    char* file2 = FILE_B_SMALL;
     Tuple t2 = getMatrixSize(file2);
     Matrix* matrix2 = new Matrix(t2.getPayload(),t2.getKey());
+    REQUIRE(matrix2 != nullptr);
     REQUIRE(matrix2->setMatrix(file2));
-
 
     Relation *R1,*R2;
     R1 = matrix1->getRelation(0);
@@ -426,26 +429,30 @@ TEST_CASE("SortMergeJoin test with small test files", "[SMJSMALL]")
 
     REQUIRE(count == 50000000);
 
-    delete matrix1;
-    delete matrix2;
-    delete R1;
-    delete R2;
+    delete matrix1; delete matrix2;
+    delete R1; delete R2;
+    free(file1); free(file2);
 }
 
 TEST_CASE("SortMergeJoin test with medium test files", "[SMJMEDIUM]")
 {
+    char *file1 = (char*) malloc((strlen(FILE_A_MEDIUM) + 1) * sizeof(char));
+    REQUIRE(file1 != NULL);
+    memcpy(file1, FILE_A_MEDIUM, (strlen(FILE_A_MEDIUM) + 1) * sizeof(char));
 
-    char* file1 = FILE_A_MEDIUM;
     Tuple t1 = getMatrixSize(file1);
     Matrix* matrix1 = new Matrix(t1.getPayload(),t1.getKey());
+    REQUIRE(matrix1 != nullptr);
     REQUIRE(matrix1->setMatrix(file1));
 
+    char *file2 = (char*) malloc((strlen(FILE_B_MEDIUM) + 1) * sizeof(char));
+    REQUIRE(file2 != NULL);
+    memcpy(file2, FILE_B_MEDIUM, (strlen(FILE_B_MEDIUM) + 1) * sizeof(char));
 
-    char* file2 = FILE_B_MEDIUM;
     Tuple t2 = getMatrixSize(file2);
     Matrix* matrix2 = new Matrix(t2.getPayload(),t2.getKey());
+    REQUIRE(matrix2 != nullptr);
     REQUIRE(matrix2->setMatrix(file2));
-
 
     Relation *R1,*R2;
     R1 = matrix1->getRelation(0);
@@ -462,8 +469,7 @@ TEST_CASE("SortMergeJoin test with medium test files", "[SMJMEDIUM]")
 
     REQUIRE(count == 900000000);
 
-    delete matrix1;
-    delete matrix2;
-    delete R1;
-    delete R2;
+    delete matrix1; delete matrix2;
+    delete R1; delete R2;
+    free(file1); free(file2);
 }

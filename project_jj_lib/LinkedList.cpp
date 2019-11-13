@@ -56,23 +56,25 @@ bool LinkedList::empty()
 {
     if (head == nullptr || head->Data.isEmpty())
         return true;
+
+    return false;
 }
 
 struct node* LinkedList::overflow_node(uint64_t x, uint64_t y)
-        {
-            struct node* nd = new struct node;
+{
+    struct node* nd = new struct node;
 //            init buffer
-            nd->Data.setBuffersize(Datasize);
-            nd->Data.initBuffer();
+    nd->Data.setBuffersize(Datasize);
+    nd->Data.initBuffer();
 
-            nd->Data.add(x,y);
-            nd->next = nullptr;
+    nd->Data.add(x,y);
+    nd->next = nullptr;
 
-            return nd;
-        }
+    return nd;
+}
 
-        void LinkedList::print()
-        {
-           for (struct node* tmp = head; tmp != nullptr; tmp = tmp->next)
-               tmp->Data.print();
-        }
+void LinkedList::print()
+{
+    for (struct node* tmp = head; tmp != nullptr; tmp = tmp->next)
+        tmp->Data.print();
+}

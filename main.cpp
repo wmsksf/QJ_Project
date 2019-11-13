@@ -29,7 +29,8 @@ int main(int argc, char **argv)
     R1 = matrix1->getRelation(rel1);
     R2 = matrix2->getRelation(rel2);
 
-    LinkedList *ResultsList = SortMergeJoin(R1,R2);
+    uint64_t count = 0;
+    LinkedList *ResultsList = SortMergeJoin(R1,R2, count);
 
     if (!ResultsList)
         std::cout << "Sorting failed!" << std::endl;

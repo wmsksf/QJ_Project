@@ -213,9 +213,8 @@ void clean_up(Matrix **matrix1, Matrix **matrix2, Relation **R1, Relation **R2,
     delete *R1; *R1 = nullptr;
     delete *R2;  *R2 = nullptr;
     delete *ResultsList; *ResultsList = nullptr;
-//  mismatch free in valgrind the two following deletes
-    delete *file1; *file1 = nullptr;
-    delete *file2; *file2 = nullptr;
+    free(*file1); *file1 = nullptr;
+    free(*file2); *file2 = nullptr;
 }
 
 LinkedList* JoinSortedRelations(Relation *relA, Relation *relB, uint64_t& count) {
@@ -231,9 +230,9 @@ LinkedList* JoinSortedRelations(Relation *relA, Relation *relB, uint64_t& count)
 
     uint64_t sizeA = relA->getNumTuples();
     uint64_t sizeB = relB->getNumTuples();
-    int j=0;
-    int jj=0;
-    int flag = false;
+    uint64_t j=0;
+    uint64_t jj=0;
+    bool flag = false;
     uint64_t counter = 0;
 
     LinkedList *Results = new LinkedList(BUFFERSIZE);
@@ -289,9 +288,9 @@ void JoinSortedRelationsTest(Relation *relA, Relation *relB, uint64_t& count) {
 
     uint64_t sizeA = relA->getNumTuples();
     uint64_t sizeB = relB->getNumTuples();
-    int j=0;
-    int jj=0;
-    int flag = false;
+    uint64_t j=0;
+    uint64_t jj=0;
+    bool flag = false;
     uint64_t counter = 0;
 
     for(uint64_t i = 0; i<sizeA; i++){

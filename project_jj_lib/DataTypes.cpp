@@ -166,10 +166,11 @@ bool Matrix::setMatrix(char* fileName) {
         perror("fopen");
         exit(EXIT_FAILURE);
     }
-    uint64_t number;
+
+    unsigned long long int number;
     char c;
-    long int row = 0;
-    long int column = 0;
+    uint64_t row = 0;
+    uint64_t column = 0;
     while(fscanf(fp,"%llu%c",&number,&c)==2){
         data[row + column*numOfRows] = number;
         column++;
@@ -184,9 +185,9 @@ bool Matrix::setMatrix(char* fileName) {
 }
 
 void Matrix::printMatrix() {
-    long int row = 0;
-    long int column = 0;
-    int counter = 0;
+    uint64_t row = 0;
+    uint64_t column = 0;
+    uint64_t counter = 0;
     while (column!= numOfColumns){
 //       !!
         std::cout << data[row + column*numOfRows] << ",";
@@ -251,7 +252,7 @@ bool Results::isEmpty() { return (index == 0); }
 void Results::print()
 {
     for (uint64_t i = 0; i < index; i++)
-        std::cout << Buffer[i].getKey() << "\t" << Buffer[i].getPayload(); // << std::endl;
+        std::cout << Buffer[i].getKey() << "\t" << Buffer[i].getPayload() << std::endl;
 
     std::cout << std::endl;
 }
