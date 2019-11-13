@@ -43,7 +43,7 @@ void LinkedList::insert(uint64_t x, uint64_t y)
     }
 
     struct node *last = tail;
-    if (!last->Data.isFull())
+    if (last->Data.isFull())
     {
         last->next = overflow_node(x,y);
         tail = last->next;
