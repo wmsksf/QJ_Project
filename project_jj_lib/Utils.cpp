@@ -277,6 +277,7 @@ LinkedList* JoinSortedRelations(Relation *relA, Relation *relB, uint64_t& count)
 
 void JoinSortedRelationsTest(Relation *relA, Relation *relB, uint64_t& count) {
 
+    FILE *file;
     if (!relA->isSorted() || !relB->isSorted())
         return;
 

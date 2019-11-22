@@ -4,6 +4,8 @@
 
 
 #include <iostream>
+#include <sys/mman.h>
+#include <fstream>
 #include "DataTypes.h"
 
 Tuple::Tuple() { key = payload = 0; }
@@ -146,41 +148,28 @@ void Relation::copyTuplesVal(Relation *R, uint64_t start, uint64_t end) {
     }
 }
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-Matrix::Matrix(long unsigned int numberOfRows,long unsigned int numberOfColumns)
-        :numOfRows(numberOfRows), numOfColumns(numberOfColumns) {
-    data= new uint64_t[numberOfColumns*numberOfRows];       //Allocating memory for the matrix data
-}
+Matrix::Matrix() {}
 
-Matrix::~Matrix() { delete[] data; }
+Matrix::~Matrix()
+{ munmap(data, sizeof(uint64_t)*numOfColumns*numOfRows); }
 
-bool Matrix::setMatrix(char* fileName) {
+bool Matrix::setMatrix(char* fileName)
+{
+    std::ifstream infile(fileName, std::ios::binary | std::ios_base::app);
 
-    if(fileName == NULL)
-        return false;
+    infile.read((char*) &numOfRows, sizeof(uint64_t));
+    infile.read((char*) &numOfColumns, sizeof(uint64_t));
 
-    //Opening the input file
-    FILE* fp;
-    fp = fopen(fileName,"r");
-
-    if (fp == NULL) {   //checking for error with fopen
-        perror("fopen");
-        exit(EXIT_FAILURE);
+    data = (uint64_t*) mmap(nullptr, sizeof(uint64_t)*numOfColumns*numOfRows, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (data == MAP_FAILED)
+    {
+        perror("mmap");
+        exit(1);
     }
 
-    unsigned long long int number;
-    char c;
-    uint64_t row = 0;
-    uint64_t column = 0;
-    while(fscanf(fp,"%llu%c",&number,&c)==2){
-        data[row + column*numOfRows] = number;
-        column++;
-        if(column==numOfColumns){
-            row++;
-            column = 0;
-        }
-    }
+    for (int j = 0; j < numOfColumns*numOfRows; j++)
+        infile.read((char*)(data+j), sizeof(uint64_t));
 
-    fclose(fp);
     return true;
 }
 

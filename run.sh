@@ -3,5 +3,7 @@
 mkdir -p build
 mkdir -p build/obj
 
+make
+
 mv *.o build/obj
 mv SortMergeJoin Catch_tests_run build/

@@ -51,12 +51,13 @@ public:
 //    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 class Matrix
 {
-    long unsigned int numOfRows;
-    long unsigned int numOfColumns;
-    uint64_t* data;
+    long unsigned int numOfRows = 0;
+    long unsigned int numOfColumns = 0;
+    uint64_t* data = nullptr;
 
 public:
-    Matrix(long unsigned int, long unsigned int);
+//    Matrix(long unsigned int, long unsigned int);
+    Matrix();
     ~Matrix();
     bool setMatrix(char* fileName);       // Initializes the matrix data, given an input file
     void printMatrix();
