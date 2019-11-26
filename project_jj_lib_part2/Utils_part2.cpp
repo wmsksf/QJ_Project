@@ -78,7 +78,10 @@ Matrix* Get_Relations(uint64_t &size)
     return matrices;
 }
 
-void Parser(char* input){
+Query* Parser(char* input){
+
+    Query* Q;
+
     char* matrices = strtok(input,"|");
     char* predicates = strtok(NULL,"|");
     char* results = strtok(NULL,"");
@@ -88,12 +91,12 @@ void Parser(char* input){
     for(int i = 1; i < strlen(matrices)+1; i++){
         if((matrices[i-1] < '0' or matrices[i-1] > '9') and matrices[i-1] != ' '){
             std::cerr << "Invalid input to parser" << std::endl;
-            return;
+            return Q;
         }
         if(matrices[i-1] >= '0' and matrices[i-1] <= '9' and (matrices[i] == '\0' or matrices[i] == ' '))
             numOfMatrices++;
     }
-    int matrixArray[numOfMatrices];
+    int* matrixArray= new int[numOfMatrices];
     char* tmp = strtok(matrices," ");
     matrixArray[0] = atoi(tmp);
     for(int i =1; i < numOfMatrices; i++){
@@ -101,11 +104,11 @@ void Parser(char* input){
         matrixArray[i] = atoi(tmp);
         if(matrixArray[i] < 0){
             std::cerr << "Invalid input to parser" << std::endl;
-            return;
+            return Q;
         }
         else if(matrixArray[i] == 0 and strcmp(tmp,"0")!=0){
             std::cerr << "Invalid input to parser" <<  std::endl;
-            return;
+            return Q;
         }
     }
 
@@ -113,12 +116,12 @@ void Parser(char* input){
     for(int i = 1; i < strlen(results)+1; i++){
         if((results[i-1] < '0' or results[i-1] > '9') and results[i-1] != ' ' and results[i-1] != '.'){
             std::cerr << "Invalid input to parser" << std::endl;
-            return;
+            return Q;
         }
         if(results[i-1] >= '0' and results[i-1] <= '9' and (results[i] == '\0' or results[i] == ' '))
             numOfResults++;
     }
-    double matrixResults[numOfResults];
+    double* matrixResults= new double[numOfResults];
     tmp = strtok(results," ");
     matrixResults[0] = atof(tmp);
     for(int i =1; i < numOfResults; i++){
@@ -126,19 +129,75 @@ void Parser(char* input){
         matrixResults[i] = atof(tmp);
         if(matrixResults[i] < 0){
             std::cerr << "Invalid input to parser" << std::endl;
+            return Q;
         }
     }
 
     int numOfPredicates = 0;
     for(int i = 1; i < strlen(predicates)+1; i++){
+        // Looking for illegal characters in the predicates
         if((predicates[i-1] < '0' or predicates[i-1] > '9') and predicates[i-1] != '>' and predicates[i-1] != '<'
                 and predicates[i-1] != '=' and predicates[i-1] != '&' and predicates[i-1] != '.'){
             std::cerr << "Invalid input to parser" << std::endl;
-            return;
+            return Q;
         }
+        // Counting the predicates
         if(predicates[i-1] >= '0' and predicates[i-1] <= '9' and (predicates[i] == '\0' or predicates[i] == '&'))
             numOfPredicates++;
     }
 
+    Predicate* predicatesArray = new Predicate[numOfPredicates];
+
+    std::cout << predicates << std::endl;
+
+    char* strArray[numOfPredicates];
+
+    strArray[0] = strtok(predicates,"&"); // reading the 1st predicate
+    for(int i =1; i< numOfPredicates; i++)
+        strArray[i] = strtok(NULL,"&");
+
+    for(int j =0; j<numOfPredicates;j++) {
+        char operation = 'a';
+        bool operationFound = false;
+
+        tmp = strtok(strArray[j],"&");
+
+        for(int i =0; i < strlen(tmp);i++) {
+            //Looking for the operation symbol '>' or '<' or '='
+            if (tmp[i - 1] == '>' or tmp[i - 1] == '=' or tmp[i - 1] == '<') {
+                if (operation == 'a') {  //checking for more than 1 ope
+                    operation = tmp[i - 1];
+                    operationFound = true;
+                } else {
+                    std::cerr << "Invalid input to parser" << std::endl;
+                    return Q;
+                }
+            }
+
+            if (operationFound and tmp[i - 1] == '.')
+                operation = 'j';
+        }
+
+        char del[2] = {operation};
+        if(del[0] == 'j')
+            del[0] = '=';
+
+        tmp = strtok(tmp,".");
+        predicatesArray[j].Matrices[0] = atoi(tmp);
+        tmp = strtok(NULL,del);
+        predicatesArray[j].RowIds[0] = atoi(tmp);
+        if(operation == 'j') {
+            tmp = strtok(NULL,".");
+            predicatesArray[j].Matrices[1] = atoi(tmp);
+            tmp = strtok(NULL, "\0");
+            predicatesArray[j].Matrices[1] = atoi(tmp);
+        }else{
+            tmp = strtok(NULL, "\0");
+            predicatesArray[j].filter = atoll(tmp);
+        }
+
+    }
+
+    Q = new Query(numOfMatrices, numOfPredicates, numOfResults,matrixArray,matrixResults,predicatesArray);
 
 }
