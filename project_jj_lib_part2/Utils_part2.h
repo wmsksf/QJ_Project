@@ -12,4 +12,6 @@
 
 Matrix* Get_Relations(uint64_t &size);
 
+void Parser(char*);
+
 #endif //PROJECT_JJ_UTILS_PART2_H
