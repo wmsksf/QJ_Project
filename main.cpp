@@ -3,14 +3,20 @@
 #include <cstring>
 #include "project_jj_lib/Utils.h"
 #include "project_jj_lib_part2/Utils_part2.h"
+#include "project_jj_lib_part2/MACROS.h"
 
 using namespace std;
 
 int main(int argc, char **argv)
 {
-//    uint64_t matrices_size = 0;
-//    Matrix *matrices = Get_Relations(matrices_size);
-//    std::cout << "total matrices: " << matrices_size << std::endl;
+    Get_Relations();
+//    std::cout << "total matrices: " << MATRICES_SIZE << std::endl;
+//    for (int i = 0; i < MATRICES_SIZE; i++)
+//    {
+//        std::cout << i << " matrix" << std::endl;
+//        MATRICES[i].printMatrix();
+//        std::cout << std::endl << std::endl;
+//    }
 
     char* input = new char[100];
     strcpy(input,"3 0 1|0.2=1.0&0.1=2.0&0.2>3499|1.2 0.1");
@@ -33,6 +39,8 @@ int main(int argc, char **argv)
         std::cout << "rowids[0]: " << q.Predicates[i].RowIds[0] << std::endl;
         std::cout << "rowids[1]: " << q.Predicates[i].RowIds[1] << std::endl;
     }
+
+    q.exec();
 
     return 0;
 }

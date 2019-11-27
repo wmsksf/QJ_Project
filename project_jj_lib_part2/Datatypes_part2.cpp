@@ -136,3 +136,18 @@ void Query::parse(char *inq)
 
     }
 }
+
+int Query::exec()
+{
+//    check for matrix in array of matrices
+    for (int i = 0; i < NumOfMatrices; i++)
+        if (Matrices[i] > MATRICES_SIZE)
+        {
+            std::cerr << "Matrix " << Matrices[i] << std::endl;
+            std::cerr << "No such Matrix object in array of Matrices." << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
+//    TO DO ...
+
+}

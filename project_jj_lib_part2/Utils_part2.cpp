@@ -9,7 +9,10 @@
 #include "Utils_part2.h"
 #include "MACROS.h"
 
-Matrix* Get_Relations(uint64_t &size)
+uint64_t MATRICES_SIZE = 0;
+Matrix *MATRICES = nullptr;
+
+void Get_Relations()
 {
     char **Datasets = nullptr, **More_Datasets = nullptr;
     Datasets = (char**) malloc(sizeof(char*)*MAX_DATASETS);
@@ -46,20 +49,12 @@ Matrix* Get_Relations(uint64_t &size)
 
 //    exclude "DONE"
     relcount--;
-    for(int i =0 ; i< relcount;i++) std::cout << Datasets[i] << std::endl;
 
-    Matrix *matrices = (Matrix*) malloc(sizeof(Matrix)*relcount);
-    ALLOC_CHECK(matrices);
-
-    for (int i = 0; i < relcount; i++)
-        matrices[i].setMatrix(Datasets[i]);
+    MATRICES= (Matrix*) malloc(sizeof(Matrix)*relcount);
+    ALLOC_CHECK(MATRICES);
 
     for (int i = 0; i < relcount; i++)
-    {
-        std::cout << "rel" << i << std::endl;
-        matrices[i].printMatrix();
-    }
+       MATRICES[i].setMatrix(Datasets[i]);
 
-    size = relcount;
-    return matrices;
+    MATRICES_SIZE = relcount;
 }

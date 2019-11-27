@@ -30,4 +30,5 @@ public:
 
     Query();
     void parse(char *inq);
+    int exec();
 };

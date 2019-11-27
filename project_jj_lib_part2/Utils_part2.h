@@ -11,6 +11,6 @@
 
 #define MAX_DATASETS 128
 
-Matrix* Get_Relations(uint64_t &size);
+void Get_Relations();
 
 #endif //PROJECT_JJ_UTILS_PART2_H

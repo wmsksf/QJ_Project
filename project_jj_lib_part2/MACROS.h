@@ -5,6 +5,11 @@
 #ifndef PROJECT_JJ_MACROS_H
 #define PROJECT_JJ_MACROS_H
 
+#include "../project_jj_lib/DataTypes.h"
+
+extern uint64_t MATRICES_SIZE;
+extern Matrix *MATRICES;
+
 #define ALLOC_CHECK(value) \
 ({ \
     void *val = (value); \
