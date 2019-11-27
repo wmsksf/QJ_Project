@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cstring>
 #include "Datatypes_part2.h"
+#include "MACROS.h"
 
 Predicate::Predicate()
 {
@@ -44,6 +45,8 @@ void Query::parse(char *inq)
     }
 //    alloc Matrices and set
     Matrices = new int[NumOfMatrices];
+    ALLOC_CHECK(Matrices);
+
     char* tmp = strtok(matrices," ");
     Matrices[0] = atoi(tmp);
     for(int i =1; i < NumOfMatrices; i++){
@@ -61,6 +64,8 @@ void Query::parse(char *inq)
     }
 //    alloc Results and set
     Results= new double[NumOfResults];
+    ALLOC_CHECK(Results);
+
     tmp = strtok(results," ");
     Results[0] = atof(tmp);
     for(int i =1; i < NumOfResults; i++){
@@ -80,6 +85,7 @@ void Query::parse(char *inq)
     }
 
     Predicates = new Predicate[NumOfPredicates];
+    ALLOC_CHECK(Predicates);
     char* strArray[NumOfPredicates];
 
     strArray[0] = strtok(predicates,"&"); // reading the 1st predicate

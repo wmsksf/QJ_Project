@@ -10,6 +10,7 @@
 #include "Utils.h"
 #include "LinkedList.h"
 #include "Stack.h"
+#include "../project_jj_lib_part2/MACROS.h"
 
 static uint64_t partition(Tuple* A, uint64_t p, uint64_t r)
 {

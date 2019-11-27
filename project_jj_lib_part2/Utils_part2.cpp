@@ -7,6 +7,7 @@
 #include <cstring>
 #include <iostream>
 #include "Utils_part2.h"
+#include "MACROS.h"
 
 Matrix* Get_Relations(uint64_t &size)
 {
@@ -23,13 +24,8 @@ Matrix* Get_Relations(uint64_t &size)
         if (relcount <= MAX_DATASETS)
         {
             Datasets[relcount-1] = (char*) malloc(sizeof(char)*PATH_MAX);
-            if (Datasets[relcount-1] == nullptr)
-            {
-                std::cerr << "Malloc of Datasets[i] failed." << std::endl;
-                exit(1);
-            }
-            else
-                memcpy(Datasets[relcount-1], filename, sizeof(char)*PATH_MAX);
+            ALLOC_CHECK(Datasets[relcount-1]);
+            memcpy(Datasets[relcount-1], filename, sizeof(char)*PATH_MAX);
         }
         else
         {
@@ -37,19 +33,13 @@ Matrix* Get_Relations(uint64_t &size)
             if (More_Datasets != nullptr)
             {
                 More_Datasets[relcount] =  (char*) malloc(sizeof(char)*PATH_MAX);
-                if (More_Datasets[relcount] == nullptr)
-                {
-                    std::cerr << "Malloc of More_Datasets[relcount] failed." << std::endl;
-                    exit(1);
-                }
-                else
-                    memcpy((More_Datasets + relcount), filename, sizeof(char)*PATH_MAX);
+                ALLOC_CHECK(More_Datasets[relcount]);
+                memcpy((More_Datasets + relcount), filename, sizeof(char)*PATH_MAX);
             }
             else
             {
                 free(Datasets);
-                std::cerr << "Malloc of More_Datasets failed." << std::endl;
-                exit(1);
+                ALLOC_CHECK(More_Datasets);
             }
         }
     }
@@ -59,11 +49,7 @@ Matrix* Get_Relations(uint64_t &size)
     for(int i =0 ; i< relcount;i++) std::cout << Datasets[i] << std::endl;
 
     Matrix *matrices = (Matrix*) malloc(sizeof(Matrix)*relcount);
-    if (matrices == nullptr)
-    {
-        std::cerr << "Malloc of array of Matrix objects failed." << std::endl;
-        exit(1);
-    }
+    ALLOC_CHECK(matrices);
 
     for (int i = 0; i < relcount; i++)
         matrices[i].setMatrix(Datasets[i]);

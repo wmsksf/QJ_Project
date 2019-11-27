@@ -37,12 +37,6 @@ inline uint64_t mcg64()
     return (i = (164603309694725029ull * i) % 14738995463583502973ull);
 }
 
-#define USAGE(argv) \
-({ \
-    fprintf(stderr, "Usage %s [-f1 filename1] [-rel1 column of relation1] [–f2 filename2] [–rel2 column of relation2]\n", argv); \
-    exit(EXIT_FAILURE); \
-})
-
 void GetfromCmd(int argc, char **argv, char **file1, char **file2, long long unsigned int *rel1, long long unsigned int *rel2);
 
 #endif //PROJECT_JJ_UTILS_H
