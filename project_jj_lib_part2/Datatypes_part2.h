@@ -15,16 +15,19 @@ public:
     int Matrices[2];
     int RowIds[2];
     uint64_t filter;
+
+    Predicate();
 };
 
 class Query{
 public:
-    int numOfMatrices;
-    int numOfPredicates;
-    int numOfResults;
-    int* matrices;
-    double* results;
-    Predicate* predicates;
+    int NumOfMatrices;
+    int NumOfPredicates;
+    int NumOfResults;
+    int* Matrices;
+    double* Results;
+    Predicate* Predicates;
 
-    Query(int numOfMatrices, int numOfPredices, int numOfResults, int* matrices, double* results, Predicate* predicates);
+    Query();
+    void parse(char *inq);
 };
