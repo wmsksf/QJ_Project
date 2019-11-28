@@ -8,7 +8,6 @@
 #include <iostream>
 #include <getopt.h>
 #include "Utils.h"
-#include "LinkedList.h"
 #include "Stack.h"
 #include "../project_jj_lib_part2/MACROS.h"
 
@@ -63,6 +62,7 @@ void OptQuicksort(Tuple *A, uint64_t lo, uint64_t hi)
 
 void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte, Relation* RR)
 {
+
     if (current_byte == 56 && (end+1 - start) * sizeof(Tuple) < L1_CACHESIZE)
     {
         OptQuicksort(R->getTuples(), start, end);
@@ -89,12 +89,16 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
     for (uint64_t i = 0; i < 256; i++) tmp[i] = Psum[i];
 
     Tuple tuple;
+//    because of push_back of Vector object
+    RR->clean();
     for (uint64_t i = start; i <= end; i++)
     {
         tuple = R->getTuples()[i];
         uint64_t byte = (tuple.getKey() >> current_byte) & 0xff;
 
-        RR->setTupleVal(tmp[byte]++, tuple.getKey(), tuple.getPayload());
+        for (uint64_t j = 0; j < tuple.getPayloads().size(); j++)
+            RR->setTupleVal(tmp[byte], tuple.getKey(), tuple.getPayloads()[j]);
+        tmp[byte]++;
     }
 
 //    switch R, RR after byte checked
@@ -128,7 +132,8 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
             OptQuicksort(RR->getTuples(), Psum[255], end);
         }
     }
-        R->copyTuplesVal(RR, start, end);
+    R->copyTuplesVal(RR, start, end);
+//    std::cout <<"END OF RADIX R\n"; R->print();
 
     if(nth_byte==7) {
         delete RR;
@@ -181,11 +186,11 @@ Tuple getMatrixSize(char *fileName) {
     return tmp;
 }
 
-LinkedList* SortMergeJoin(Relation* relA, Relation* relB, uint64_t& count, bool test) {
+void SortMergeJoin(Relation* relA, Relation* relB, uint64_t& count) {
 
     if(relA == nullptr or relB == nullptr){
         std::cout << "Relations can't be NULL!" << std::endl;
-        return nullptr;
+        exit(EXIT_FAILURE);
     }
 
     uint64_t sizeA = relA->getNumTuples();
@@ -194,91 +199,18 @@ LinkedList* SortMergeJoin(Relation* relA, Relation* relB, uint64_t& count, bool 
     Radixsort(relA,0,sizeA-1);
     Radixsort(relB,0,sizeB-1);
 
-    if(!test) {
-        LinkedList *results = JoinSortedRelations(relA, relB, count);
-        std::cout << "Number of tuples after join: " << count << std::endl;
-        return results;
-    }
-    else{
-        JoinSortedRelationsTest(relA,relB,count);
-        std::cout << "Number of tuples after join: " << count << std::endl;
-        return nullptr;
-    }
+    relA->print(); std::cout << "\n\n\n"; relB->print();
+
+    JoinSortedRelations(relA,relB,count);
+
+    fprintf(stdout, "\n\nAfter radix sort or relations -> error with RowIds\n in file %s on line %d\n", __FILE__, __LINE__);
+    std::cout << std::endl;
+
+    std::cout << "Number of tuples after join: " << count << std::endl;
 }
 
-void clean_up(Matrix **matrix1, Matrix **matrix2, Relation **R1, Relation **R2,
-        LinkedList **ResultsList, char **file1, char **file2)
-{
-    delete *matrix1; *matrix1 = nullptr;
-    delete *matrix2; *matrix2 = nullptr;
-    delete *R1; *R1 = nullptr;
-    delete *R2;  *R2 = nullptr;
-    delete *ResultsList; *ResultsList = nullptr;
-    free(*file1); *file1 = nullptr;
-    free(*file2); *file2 = nullptr;
-}
+void JoinSortedRelations(Relation *relA, Relation *relB, uint64_t& count) {
 
-LinkedList* JoinSortedRelations(Relation *relA, Relation *relB, uint64_t& count) {
-
-    if (!relA->isSorted() || !relB->isSorted())
-        return nullptr;
-
-    Tuple* tupA = relA->getTuples();
-    Tuple* tupB = relB->getTuples();
-
-    if(tupA == nullptr or tupB == nullptr)
-        return nullptr;
-
-    uint64_t sizeA = relA->getNumTuples();
-    uint64_t sizeB = relB->getNumTuples();
-    uint64_t j=0;
-    uint64_t jj=0;
-    bool flag = false;
-    uint64_t counter = 0;
-
-    LinkedList *Results = new LinkedList(BUFFERSIZE);
-    for(uint64_t i = 0; i<sizeA; i++){
-
-        if(tupA[i].getKey() == tupB[j].getKey()){
-            Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
-            counter++;
-
-            while(tupA[i].getKey() == tupB[++j].getKey()){
-                Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
-                counter++;
-                if(j == sizeB-1) break;
-            }
-            j = jj;
-        }
-        else if(tupA[i].getKey() > tupB[j].getKey()){
-
-
-            while(tupA[i].getKey() > tupB[++j].getKey()){
-                if (j == sizeB-1) {
-                    flag = true;
-                    break;
-                }
-            }
-
-            if (j == sizeB-1) {
-                break;
-            }
-            if(flag) break;
-            jj = j--;
-            while(tupA[i].getKey() == tupB[++j].getKey()){
-                Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
-                counter++;
-            }
-            j = jj;
-        }
-    }
-    count = counter;
-    return Results;
-}
-
-void JoinSortedRelationsTest(Relation *relA, Relation *relB, uint64_t& count) {
-
-    FILE *file;
     if (!relA->isSorted() || !relB->isSorted())
         return;
 

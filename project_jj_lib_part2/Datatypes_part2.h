@@ -35,43 +35,39 @@ public:
 };
 
 //---------------------> after setting follows update of class Tuple
-class nTuple
-{
-    uint64_t key;
-    Vector payloads;
-
-    nTuple();
-
-    void setKey(uint64_t key_);
-    uint64_t getKey();
-
-    void setPayload(uint64_t payload_);
-    Vector getPayloads();
-
-    void swap(nTuple *tpl);
-    bool equal(nTuple x);
-};
-
-
-nTuple::nTuple()
-{
-    key = 0;
-    payloads.push_back(0);
-}
-
-void nTuple::setKey(uint64_t key_) { key = key_; }
-uint64_t nTuple::getKey() { return key; }
-
-void nTuple::setPayload(uint64_t payload_) { payloads.push_back(payload_); }
-
-
-void nTuple::swap(nTuple *tpl)
-{
-    uint64_t tmp = key;
-    setKey(tpl->getKey());
-    tpl->setKey(tmp);
-
-    Vector tmpayl = payloads;
-    payloads = tpl->payloads;
-    tpl->payloads = tmpayl;
-}
+//class Tuple
+//{
+//    uint64_t key;
+//    Vector payloads;
+//
+//    Tuple();
+//
+//    void setKey(uint64_t key_);
+//    uint64_t getKey();
+//
+//    void setPayload(uint64_t payload_);
+//    Vector& getPayloads();
+//
+//    void swap(Tuple *tpl);
+//};
+//
+//
+//Tuple::Tuple() { key = 0; }
+//
+//void Tuple::setKey(uint64_t key_) { key = key_; }
+//uint64_t Tuple::getKey() { return key; }
+//
+//void Tuple::setPayload(uint64_t payload_) { payloads.push_back(payload_); }
+//Vector& Tuple::getPayloads() { return payloads; }
+//
+//void Tuple::swap(Tuple *tpl)
+//{
+//    uint64_t tmp = key;
+//    setKey(tpl->getKey());
+//    tpl->setKey(tmp);
+//
+//    Vector tmpayl;
+//    tmpayl = payloads;
+//    payloads = tpl->getPayloads();
+//    tpl->getPayloads() = tmpayl;
+//}

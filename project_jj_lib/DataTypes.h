@@ -6,27 +6,30 @@
 #define PROJECT_JJ_DATATYPES_H
 
 #include <cstdint>
+#include "../project_jj_lib_part2/Vector.h"
 
 #define L1_CACHESIZE 64*1024
 #define BUFFERSIZE (1024*1024)/sizeof(Tuple)
 
 class Tuple
 {
-    uint64_t key, payload;
+    uint64_t key;
+    Vector payloads;
 
 public:
     Tuple();
 
-    uint64_t getKey() const;
-    uint64_t getPayload() const;
+    void setKey(uint64_t key_);
+    uint64_t getKey();
 
-    void setKey(uint64_t key);
-    void setPayload(uint64_t payload);
+    void setPayload(uint64_t payload_);
+    Vector& getPayloads();
 
-    void swap(Tuple* tuple);
-    bool equal(Tuple x);
+    void swap(Tuple *tpl);
+
     void print();
 };
+
 //    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 class Relation
 {
@@ -46,6 +49,7 @@ public:
     uint64_t getNumTuples() const;
     void setNumTuples(uint64_t numTuples);
     void print();
+    void clean();
     bool isSorted();
 };
 //    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
