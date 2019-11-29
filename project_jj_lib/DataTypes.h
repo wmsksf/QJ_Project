@@ -9,24 +9,27 @@
 #include "../project_jj_lib_part2/Vector.h"
 
 #define L1_CACHESIZE 64*1024
+#define BUFFERSIZE (1024*1024)/sizeof(Tuple)
 
 class Tuple
 {
-    uint64_t key, payload;
+    uint64_t key;
+    Vector payloads;
 
 public:
     Tuple();
 
-    uint64_t getKey() const;
-    uint64_t getPayload() const;
+    void setKey(uint64_t key_);
+    uint64_t getKey();
 
-    void setKey(uint64_t key);
-    void setPayload(uint64_t payload);
+    void setPayload(uint64_t payload_);
+    Vector& getPayloads();
 
-    void swap(Tuple* tuple);
-    bool equal(Tuple x);
+    void swap(Tuple *tpl);
+
     void print();
 };
+
 //    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 class Relation
 {
@@ -63,6 +66,24 @@ public:
     bool setMatrix(char* fileName);       // Initializes the matrix data, given an input file
     void printMatrix();
     Relation* getRelation(long unsigned int);
+};
+//    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+class Results
+{
+    Tuple *Buffer;
+    uint64_t index = 0, Buffersize;
+
+    public:
+    Results();
+    ~Results();
+
+    void setBuffersize(uint64_t buffersize);
+    void initBuffer();
+
+    void add(uint64_t x, uint64_t y);
+    bool isFull();
+    bool isEmpty();
+    void print();
 };
 
 #endif //PROJECT_JJ_DATATYPES_H

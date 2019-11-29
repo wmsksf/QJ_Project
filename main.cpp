@@ -45,7 +45,6 @@ int main(int argc, char **argv)
     Relation *R1,*R2;
     R1 = MATRICES[0].getRelation(1);
     R2 = MATRICES[1].getRelation(1);
-
     SortMergeJoin(R1,R2);
 
     return 0;

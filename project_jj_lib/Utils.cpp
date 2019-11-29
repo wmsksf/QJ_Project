@@ -62,6 +62,7 @@ void OptQuicksort(Tuple *A, uint64_t lo, uint64_t hi)
 
 void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte, Relation* RR)
 {
+
     if (current_byte == 56 && (end+1 - start) * sizeof(Tuple) < L1_CACHESIZE)
     {
         OptQuicksort(R->getTuples(), start, end);
@@ -88,12 +89,16 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
     for (uint64_t i = 0; i < 256; i++) tmp[i] = Psum[i];
 
     Tuple tuple;
+//    because of push_back of Vector object
+    RR->clean();
     for (uint64_t i = start; i <= end; i++)
     {
         tuple = R->getTuples()[i];
         uint64_t byte = (tuple.getKey() >> current_byte) & 0xff;
 
-        RR->setTupleVal(tmp[byte]++, tuple.getKey(), tuple.getPayload());
+        for (uint64_t j = 0; j < tuple.getPayloads().size(); j++)
+            RR->setTupleVal(tmp[byte], tuple.getKey(), tuple.getPayloads()[j]);
+        tmp[byte]++;
     }
 
 //    switch R, RR after byte checked
@@ -128,6 +133,7 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
         }
     }
     R->copyTuplesVal(RR, start, end);
+//    std::cout <<"END OF RADIX R\n"; R->print();
 
     if(nth_byte==7) {
         delete RR;
@@ -193,16 +199,18 @@ void SortMergeJoin(Relation* relA, Relation* relB, uint64_t& count) {
     Radixsort(relA,0,sizeA-1);
     Radixsort(relB,0,sizeB-1);
 
-//    relA->print(); std::cout << "\n\n\n"; relB->print();
+    relA->print(); std::cout << "\n\n\n"; relB->print();
 
     JoinSortedRelations(relA,relB,count);
-    std::cout << "Number of tuples after join: " << count << std::endl;
 
+    fprintf(stdout, "\n\nAfter radix sort or relations -> error with RowIds\n in file %s on line %d\n", __FILE__, __LINE__);
+    std::cout << std::endl;
+
+    std::cout << "Number of tuples after join: " << count << std::endl;
 }
 
 void JoinSortedRelations(Relation *relA, Relation *relB, uint64_t& count) {
 
-    FILE *file;
     if (!relA->isSorted() || !relB->isSorted())
         return;
 
