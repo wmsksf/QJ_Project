@@ -13,5 +13,6 @@ while IFS= read -r line; do
 # read each line
 echo "$line"
 done < $work
+echo 'FF'
 
 #./input.sh <filename.init> <filename.work>

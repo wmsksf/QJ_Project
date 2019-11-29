@@ -29,7 +29,11 @@ char** Get_Input(bool flag, uint64_t *size)
         if (!flag)
             std::cin >> filename;
         else
+        {
             std::cin.getline(filename, sizeof(char)*PATH_MAX);
+            if (!strcmp(filename, "FF"))
+                return nullptr;
+        }
         count++;
 
         if (count <= MAX_DATASETS)
@@ -79,18 +83,28 @@ char** Get_Input(bool flag, uint64_t *size)
     }
     else
     {
-        if (std::cin.peek() == EOF)
-            return nullptr;
-
         *size = count;
         return Datasets;
     }
 }
 
+//test
+inline void execQ(char** Q, uint64_t size)
+{
+    std::cout << "total queries in batch: " << size << std::endl;
+    for (uint64_t i = 0; i < size; i++) std::cout << Q[i] << std::endl;
+    std::cout << std::endl;
+
+//        clean test
+    for (int i = 0; i < size; i++) free(Q[i]);
+    free(Q);
+
+//    TO DO ... parsing and execution of each query in specific batch, remove test above, clean is for the end
+}
 
 void Set_output()
 {
-    uint64_t nqueries = 0, count = 0;
+    uint64_t nqueries = 0;
     char **Queries;
     while (1)
     {
@@ -101,14 +115,6 @@ void Set_output()
             break;
         }
 
-        std::cout << "total queries in " << count << " batch: " << nqueries << std::endl;
-        for (uint64_t i = 0; i < nqueries; i++) std::cout << Queries[i] << std::endl;
-        std::cout << std::endl;
-
-        count++;
-
-//        clean test
-        for (int i = 0; i < count; i++) free(Queries[i]);
-        free(Queries);
+        execQ(Queries, nqueries);
     }
 }
