@@ -8,32 +8,28 @@
 #include <fstream>
 #include "DataTypes.h"
 
-Tuple::Tuple() { key = 0; }
+Tuple::Tuple() { key = payload = 0; }
+
+uint64_t Tuple::getKey() const { return key; }
+uint64_t Tuple::getPayload() const { return payload; }
 
 void Tuple::setKey(uint64_t key_) { key = key_; }
-uint64_t Tuple::getKey() { return key; }
+void Tuple::setPayload(uint64_t payload_) { payload = payload_; }
 
-void Tuple::setPayload(uint64_t payload_) { payloads.push_back(payload_); }
-Vector& Tuple::getPayloads() { return payloads; }
-
-void Tuple::swap(Tuple *tpl)
+void Tuple::swap(Tuple* tuple)
 {
-    uint64_t tmp = key;
-    setKey(tpl->getKey());
-    tpl->setKey(tmp);
+    uint64_t tmp = this->getKey();
+    this->setKey(tuple->getKey());
+    tuple->setKey(tmp);
 
-    Vector tmpayl;
-    tmpayl = payloads;
-    payloads = tpl->getPayloads();
-    tpl->getPayloads() = tmpayl;
+    tmp = this->getPayload();
+    this->setPayload(tuple->getPayload());
+    tuple->setPayload(tmp);
 }
 
-void Tuple::print()
-{
-    std::cout << "key: " << key << " payloads: ";
-    for (int i = 0; i < payloads.size(); i++) std::cout << payloads[i] << " ";
-    std::cout << std::endl;
-}
+bool Tuple::equal(Tuple x) { return (this->getKey() == x.getKey() && this->getPayload() == x.getPayload()); }
+
+void Tuple::print() { std::cout << this->getKey() << "  " << this->getPayload() << std::endl; }
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 Relation::Relation() { tuples = nullptr; numTuples = 0; }
 Relation::~Relation() { delete[] tuples; }
@@ -71,8 +67,9 @@ void Relation::initTuplesVal(Relation* R)
     for (uint64_t i = 0; i < this->getNumTuples(); i++)
     {
         tuples[i].setKey(R->tuples[i].getKey());
-        tuples[i].getPayloads() = R->tuples[i].getPayloads();
+        tuples[i].setPayload(R->tuples[i].getPayload());
     }
+
 }
 
 Tuple* Relation::getTuples() const { return tuples; }
@@ -90,14 +87,6 @@ void Relation::setTupleVal(long unsigned int index, uint64_t key, uint64_t paylo
     this->getTuples()[index].setPayload(payload);
 }
 
-void Relation::clean()
-{
-    for (uint64_t i = 0; i < numTuples; i++)
-    {
-        getTuples()[i].setKey(0);
-        getTuples()[i].getPayloads().clear();
-    }
-}
 void Relation::print() {
     if (!this->getNumTuples()) {
         std::cout << "Empty Relation object." << std::endl;
@@ -105,8 +94,11 @@ void Relation::print() {
     }
     uint64_t j = this->getNumTuples();
     Tuple *t = this->getTuples();
-    for (uint64_t i = 0; i < j; i++)
+    std::cout << j << std::endl;
+    for (uint64_t i = 0; i < j; i++){
+        std::cout << i << ": ";
         t[i].print();
+    }
 }
 
 bool Relation::isSorted() {
@@ -152,7 +144,7 @@ void Relation::copyTuplesVal(Relation *R, uint64_t start, uint64_t end) {
     for (uint64_t i = start; i <= end; i++)
     {
         tuples[i].setKey(R->tuples[i].getKey());
-        tuples[i].getPayloads() = R->tuples[i].getPayloads();
+        tuples[i].setPayload(R->tuples[i].getPayload());
     }
 }
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -249,13 +241,7 @@ bool Results::isEmpty() { return (index == 0); }
 void Results::print()
 {
     for (uint64_t i = 0; i < index; i++)
-    {
-        std::cout << Buffer[i].getKey() << "\t";
-        for (uint64_t j = 0; j < Buffer[i].getPayloads().size(); j++)
-            std::cout << Buffer[i].getPayloads()[j] << " ";
-
-        std::cout << std::endl;
-    }
+        std::cout << Buffer[i].getKey() << "\t" << Buffer[i].getPayload() << std::endl;
 
     std::cout << std::endl;
 }

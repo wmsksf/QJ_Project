@@ -13,16 +13,14 @@ class Vector
     uint64_t capacity, index;
 
 public:
-    Vector();
-    Vector(Vector& vec);
-    ~Vector();
+        Vector();
+        ~Vector();
 
-    uint64_t size();
-    void push_back(uint64_t x);
+        uint64_t size();
+        void push_back(uint64_t x);
 
-    uint64_t& operator[] (uint64_t x);
-
-    void clear();
+        uint64_t& operator[] (uint64_t x);
+        Vector& operator= (Vector &vec);
 };
 
 #endif //PROJECT_JJ_VECTOR_H
