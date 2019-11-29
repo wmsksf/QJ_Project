@@ -1,10 +1,17 @@
 #!/bin/bash
 
-filename=$1
+init=$1
+work=$2
+
 while read -r line; do
 # read each line
 echo $line
-done < $filename
+done < $init
+echo 'DONE'
 
-# ./input.sh | ./executable <<(append) output.sh? !but gets r0r1r2.... yet to absorb line by line
+while IFS= read -r line; do
+# read each line
+echo "$line"
+done < $work
 
+#./input.sh <filename.init> <filename.work>

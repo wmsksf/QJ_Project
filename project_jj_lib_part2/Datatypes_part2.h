@@ -8,8 +8,6 @@
 #ifndef PROJECT_JJ_DATATYPES_PART2_H
 #define PROJECT_JJ_DATATYPES_PART2_H
 
-#endif //PROJECT_JJ_DATATYPES_PART2_H
-
 class Predicate{
 public:
     char operation;     //operation can be 'j', '>', '<', '=', ... 'j': join
@@ -33,3 +31,5 @@ public:
     void parse(char *inq);
     int exec();
 };
+
+#endif //PROJECT_JJ_DATATYPES_PART2_H
