@@ -6,6 +6,7 @@
 #include <cstring>
 #include "Datatypes_part2.h"
 #include "MACROS.h"
+#include "../project_jj_lib/Utils.h"
 
 Predicate::Predicate()
 {
@@ -17,12 +18,18 @@ Predicate::Predicate()
     filter = 0;
 }
 
+char Predicate::getOperation() {
+    return operation;
+}
+
 Query::Query()
 {
     NumOfMatrices = NumOfPredicates = NumOfResults = 0;
     Matrices = nullptr;
     Results = nullptr;
     Predicates = nullptr;
+    MatricesData[0] = MatricesData[1] = MatricesData[2] = MatricesData[3] = nullptr;
+    FilteredMatrices[0] = FilteredMatrices[1] = FilteredMatrices[2] = FilteredMatrices[3] = nullptr;
 }
 
 inline void parse_err()
@@ -101,7 +108,7 @@ void Query::parse(char *inq)
         for(int i =0; i < strlen(tmp);i++) {
             //Looking for the operation symbol '>' or '<' or '='
             if (tmp[i - 1] == '>' or tmp[i - 1] == '=' or tmp[i - 1] == '<') {
-//???
+            //More than 1 operation symbol is not allowed within the same predicate
                 if (operation == 'a') {  //checking for more than 1 ope
                     operation = tmp[i - 1];
                     operationFound = true;
@@ -147,7 +154,67 @@ int Query::exec()
             std::cerr << "No such Matrix object in array of Matrices." << std::endl;
             exit(EXIT_FAILURE);
         }
+    // Maybe in some cases the numbers might be bigger than the matrices size? for example 3 matrices with numbers 1-3-5
 
-//    TO DO ...
+    //First we must apply the filters
+    for(int i = 0 ; i < NumOfPredicates; i++){
+        char operation = Predicates[i].getOperation();
+        if(operation != '>' and operation != '=' and operation != '<')  //not a filter operation
+            continue;
 
+        Relation* R = MATRICES[Matrices[Predicates[i].Matrices[0]]].getRelation(Predicates[i].RowIds[0]);
+        auto vector = applyFilter(R,operation,Predicates[i].filter);
+        FilteredMatrices[Predicates[i].Matrices[0]] = vector;
+    }
+
+    //Then we execute the joins
+
+    for(int i = 0 ; i < NumOfPredicates; i++){
+        char operation = Predicates[i].getOperation();
+        if(operation != 'j')  //not a join operation
+            continue;
+
+        Relation* R1 = MATRICES[Matrices[Predicates[i].Matrices[0]]].getRelation(Predicates[i].RowIds[0]);
+        R1->filter(FilteredMatrices[Predicates[i].Matrices[0]]);
+        Radixsort(R1,0,R1->getNumTuples());
+
+        Relation* R2 = MATRICES[Matrices[Predicates[i].Matrices[1]]].getRelation(Predicates[i].RowIds[1]);
+        R2->filter(FilteredMatrices[Predicates[i].Matrices[1]]);
+        Radixsort(R2,0,R2->getNumTuples());
+
+        auto results = SortMergeJoin(R1,R2);
+        results->print();
+    }
+
+
+}
+
+Vector *Query::applyFilter(Relation* R, char operation, uint64_t value) {
+    if(R == nullptr)
+        return nullptr;
+    if(operation != '>' and operation != '=' and operation != '<')
+        return nullptr;
+
+    auto vector = new Vector();
+
+    Tuple* tuples = R->getTuples();
+    uint64_t  numOfTuples = R->getNumTuples();
+
+    if(operation == '>') {  //Greater than value
+        for(int i = 0 ; i < numOfTuples; i++){
+            if(tuples[i].getKey() > value)
+                vector->push_back(tuples[i].getPayload());
+        }
+    }else if(operation == '<') {  //Less than value
+        for(int i = 0 ; i < numOfTuples; i++){
+            if(tuples[i].getKey() < value)
+                vector->push_back(tuples[i].getPayload());
+        }
+    }else  {  //Equal to value
+        for(int i = 0 ; i < numOfTuples; i++){
+            if(tuples[i].getKey()== value)
+                vector->push_back(tuples[i].getPayload());
+        }
+    }
+    return vector;
 }

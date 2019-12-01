@@ -6,6 +6,7 @@
 #define PROJECT_JJ_DATATYPES_H
 
 #include <cstdint>
+#include "../project_jj_lib_part2/Vector.h"
 
 #define L1_CACHESIZE 64*1024
 #define BUFFERSIZE (1024*1024)/sizeof(Tuple)
@@ -47,6 +48,7 @@ public:
     void setNumTuples(uint64_t numTuples);
     void print();
     bool isSorted();
+    void filter(Vector*);
 };
 //    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 class Matrix
@@ -62,6 +64,9 @@ public:
     bool setMatrix(char* fileName);       // Initializes the matrix data, given an input file
     void printMatrix();
     Relation* getRelation(long unsigned int);
+    uint64_t * getData();
+    long unsigned int getNumOfRows();
+    long unsigned int getNumOfColumns();
 };
 //    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 class Results

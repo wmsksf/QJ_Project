@@ -37,7 +37,7 @@ void Vector::push_back(uint64_t x)
     index++;
 }
 
-uint64_t& Vector::operator[](uint64_t indx)
+uint64_t Vector::operator[](uint64_t indx)
 {
     if (indx > capacity)
     {

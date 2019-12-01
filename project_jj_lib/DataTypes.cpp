@@ -147,6 +147,23 @@ void Relation::copyTuplesVal(Relation *R, uint64_t start, uint64_t end) {
         tuples[i].setPayload(R->tuples[i].getPayload());
     }
 }
+
+void Relation::filter(Vector * vector) {
+    if (vector == nullptr)
+        return;
+
+    uint64_t  vectorSize = vector->size();
+    Tuple* tmp = new Tuple[vectorSize];
+    for(int i =0; i<vectorSize;i++){
+        uint64_t row = (*vector)[i];
+        tmp[i].setKey(tuples[row].getKey());
+        tmp[i].setPayload(tuples[row].getPayload());
+    }
+    numTuples = vectorSize;
+    delete tuples;
+    tuples = tmp;
+}
+
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 Matrix::Matrix() {}
 
@@ -209,6 +226,19 @@ Relation *Matrix::getRelation(long unsigned int columnNumber) {
     }
     return R;
 }
+
+long unsigned int Matrix::getNumOfRows() {
+    return numOfRows;
+}
+
+long unsigned int Matrix::getNumOfColumns() {
+    return numOfColumns;
+}
+
+uint64_t *Matrix::getData() {
+    return data;
+}
+
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 Results::Results() { Buffer = nullptr; Buffersize = 0; }
 Results::~Results() { delete[] Buffer; }
