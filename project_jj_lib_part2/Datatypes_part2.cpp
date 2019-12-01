@@ -6,7 +6,6 @@
 #include <cstring>
 #include "Datatypes_part2.h"
 #include "MACROS.h"
-#include "../project_jj_lib/Utils.h"
 
 Predicate::Predicate()
 {
@@ -18,18 +17,12 @@ Predicate::Predicate()
     filter = 0;
 }
 
-char Predicate::getOperation() {
-    return operation;
-}
-
 Query::Query()
 {
     NumOfMatrices = NumOfPredicates = NumOfResults = 0;
     Matrices = nullptr;
     Results = nullptr;
     Predicates = nullptr;
-    MatricesData[0] = MatricesData[1] = MatricesData[2] = MatricesData[3] = nullptr;
-    FilteredMatrices[0] = FilteredMatrices[1] = FilteredMatrices[2] = FilteredMatrices[3] = nullptr;
 }
 
 inline void parse_err()
@@ -108,7 +101,7 @@ void Query::parse(char *inq)
         for(int i =0; i < strlen(tmp);i++) {
             //Looking for the operation symbol '>' or '<' or '='
             if (tmp[i - 1] == '>' or tmp[i - 1] == '=' or tmp[i - 1] == '<') {
-            //More than 1 operation symbol is not allowed within the same predicate
+//???
                 if (operation == 'a') {  //checking for more than 1 ope
                     operation = tmp[i - 1];
                     operationFound = true;
@@ -144,77 +137,67 @@ void Query::parse(char *inq)
     }
 }
 
-int Query::exec()
+Vector* Query::filtering(uint64_t &size)
 {
-//    check for matrix in array of matrices
-    for (int i = 0; i < NumOfMatrices; i++)
-        if (Matrices[i] > MATRICES_SIZE)
+//    calc num of filters
+    uint64_t v = 0;
+    for (uint64_t i = 0; i < NumOfPredicates; i++)
+        if (Predicates[i].filter) v++;
+
+//        filter specific relation of given operator
+    Vector *filters = new Vector[v];
+    ALLOC_CHECK(filters);
+
+    for (uint64_t i = 0, vv = 0; i < NumOfPredicates; i++)
+        if (Predicates[i].filter)
         {
-            std::cerr << "Matrix " << Matrices[i] << std::endl;
-            std::cerr << "No such Matrix object in array of Matrices." << std::endl;
-            exit(EXIT_FAILURE);
+            Relation *rel;
+            rel = MATRICES[Predicates[i].Matrices[0]].getRelation(Predicates[i].RowIds[0]);
+            switch(Predicates[i].operation)
+            {
+                case '>':
+                    for (uint64_t j = 0; j < rel->getNumTuples(); j++)
+                        if (rel->getTuples()[j].getKey() > Predicates[i].filter)
+                            filters[vv].push_back(rel->getTuples()[j].getPayload());
+                    vv++;
+                    break;
+                case '<':
+                    for (uint64_t j = 0; j < rel->getNumTuples(); j++)
+                        if (rel->getTuples()[j].getKey() < Predicates[i].filter)
+                            filters[vv].push_back(rel->getTuples()[j].getPayload());
+                    vv++;
+                    break;
+                case '=':
+                    for (uint64_t j = 0; j < rel->getNumTuples(); j++)
+                        if (rel->getTuples()[j].getKey() == Predicates[i].filter)
+                            filters[vv].push_back(rel->getTuples()[j].getPayload());
+                    vv++;
+                    break;
+                default:
+                    std::cout << "Invalid operation for filtering!" << std::endl;
+                    return nullptr;
+            }
         }
-    // Maybe in some cases the numbers might be bigger than the matrices size? for example 3 matrices with numbers 1-3-5
 
-    //First we must apply the filters
-    for(int i = 0 ; i < NumOfPredicates; i++){
-        char operation = Predicates[i].getOperation();
-        if(operation != '>' and operation != '=' and operation != '<')  //not a filter operation
-            continue;
-
-        Relation* R = MATRICES[Matrices[Predicates[i].Matrices[0]]].getRelation(Predicates[i].RowIds[0]);
-        auto vector = applyFilter(R,operation,Predicates[i].filter);
-        FilteredMatrices[Predicates[i].Matrices[0]] = vector;
-    }
-
-    //Then we execute the joins
-
-    for(int i = 0 ; i < NumOfPredicates; i++){
-        char operation = Predicates[i].getOperation();
-        if(operation != 'j')  //not a join operation
-            continue;
-
-        Relation* R1 = MATRICES[Matrices[Predicates[i].Matrices[0]]].getRelation(Predicates[i].RowIds[0]);
-        R1->filter(FilteredMatrices[Predicates[i].Matrices[0]]);
-        Radixsort(R1,0,R1->getNumTuples());
-
-        Relation* R2 = MATRICES[Matrices[Predicates[i].Matrices[1]]].getRelation(Predicates[i].RowIds[1]);
-        R2->filter(FilteredMatrices[Predicates[i].Matrices[1]]);
-        Radixsort(R2,0,R2->getNumTuples());
-
-        auto results = SortMergeJoin(R1,R2);
-        results->print();
-    }
-
-
+    size = v;
+    return filters;
 }
 
-Vector *Query::applyFilter(Relation* R, char operation, uint64_t value) {
-    if(R == nullptr)
-        return nullptr;
-    if(operation != '>' and operation != '=' and operation != '<')
-        return nullptr;
+int Query::exec()
+{
+//    start with filtering query
+    uint64_t f = 0;
+    Vector *filters = filtering(f);
+    if (filters == nullptr) return -1;
 
-    auto vector = new Vector();
+    std::cout << "after filtering\n";
+    for (uint64_t i = 0; i < f; i++)
+    {
+        std::cout << "filters " << i << std::endl;
+        std::cout << "size " << filters[i].size() << std::endl;
 
-    Tuple* tuples = R->getTuples();
-    uint64_t  numOfTuples = R->getNumTuples();
-
-    if(operation == '>') {  //Greater than value
-        for(int i = 0 ; i < numOfTuples; i++){
-            if(tuples[i].getKey() > value)
-                vector->push_back(tuples[i].getPayload());
-        }
-    }else if(operation == '<') {  //Less than value
-        for(int i = 0 ; i < numOfTuples; i++){
-            if(tuples[i].getKey() < value)
-                vector->push_back(tuples[i].getPayload());
-        }
-    }else  {  //Equal to value
-        for(int i = 0 ; i < numOfTuples; i++){
-            if(tuples[i].getKey()== value)
-                vector->push_back(tuples[i].getPayload());
-        }
+//        for (uint64_t j = 0; j < filters[i].size(); j++)
+//            std::cout << filters[i][j] << std::endl;
+//        std::cout << std::endl << std::endl;
     }
-    return vector;
 }
