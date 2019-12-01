@@ -29,6 +29,7 @@ public:
 
     Query();
     void parse(char *inq);
+    Vector* filtering(uint64_t &filters);
     int exec();
 };
 

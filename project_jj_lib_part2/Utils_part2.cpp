@@ -30,6 +30,11 @@ char** Get_Input(bool flag, uint64_t *size)
             std::cin >> filename;
         else
         {
+            if (!count && std::cin.peek() == '\n')
+            {
+                std::cin.get();
+                continue;
+            }
             std::cin.getline(filename, sizeof(char)*PATH_MAX);
             if (!strcmp(filename, "FF"))
                 return nullptr;
@@ -65,6 +70,10 @@ char** Get_Input(bool flag, uint64_t *size)
 //    exclude end
     count--;
 
+//    clean stream
+    std::cin.clear();
+    std::cin.sync();
+
     if (!flag)
     {
         MATRICES= (Matrix*) malloc(sizeof(Matrix)*count);
@@ -88,18 +97,25 @@ char** Get_Input(bool flag, uint64_t *size)
     }
 }
 
-//test
-inline void execQ(char** Q, uint64_t size)
+void execQ(char** Q, uint64_t size)
 {
     std::cout << "total queries in batch: " << size << std::endl;
-    for (uint64_t i = 0; i < size; i++) std::cout << Q[i] << std::endl;
+    for (uint64_t i = 0; i < size; i++)
+        std::cout << Q[i] << std::endl;
     std::cout << std::endl;
 
-//        clean test
+    Query *q;
+    for (uint64_t i = 0; i < size; i++)
+    {
+        q = new Query;
+        ALLOC_CHECK(q);
+
+        q->parse(Q[i]); q->exec();
+        delete q;
+    }
+
     for (int i = 0; i < size; i++) free(Q[i]);
     free(Q);
-
-//    TO DO ... parsing and execution of each query in specific batch, remove test above, clean is for the end
 }
 
 void Set_output()

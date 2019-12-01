@@ -137,17 +137,67 @@ void Query::parse(char *inq)
     }
 }
 
-int Query::exec()
+Vector* Query::filtering(uint64_t &size)
 {
-//    check for matrix in array of matrices
-    for (int i = 0; i < NumOfMatrices; i++)
-        if (Matrices[i] > MATRICES_SIZE)
+//    calc num of filters
+    uint64_t v = 0;
+    for (uint64_t i = 0; i < NumOfPredicates; i++)
+        if (Predicates[i].filter) v++;
+
+//        filter specific relation of given operator
+    Vector *filters = new Vector[v];
+    ALLOC_CHECK(filters);
+
+    for (uint64_t i = 0, vv = 0; i < NumOfPredicates; i++)
+        if (Predicates[i].filter)
         {
-            std::cerr << "Matrix " << Matrices[i] << std::endl;
-            std::cerr << "No such Matrix object in array of Matrices." << std::endl;
-            exit(EXIT_FAILURE);
+            Relation *rel;
+            rel = MATRICES[Predicates[i].Matrices[0]].getRelation(Predicates[i].RowIds[0]);
+            switch(Predicates[i].operation)
+            {
+                case '>':
+                    for (uint64_t j = 0; j < rel->getNumTuples(); j++)
+                        if (rel->getTuples()[j].getKey() > Predicates[i].filter)
+                            filters[vv].push_back(rel->getTuples()[j].getPayload());
+                    vv++;
+                    break;
+                case '<':
+                    for (uint64_t j = 0; j < rel->getNumTuples(); j++)
+                        if (rel->getTuples()[j].getKey() < Predicates[i].filter)
+                            filters[vv].push_back(rel->getTuples()[j].getPayload());
+                    vv++;
+                    break;
+                case '=':
+                    for (uint64_t j = 0; j < rel->getNumTuples(); j++)
+                        if (rel->getTuples()[j].getKey() == Predicates[i].filter)
+                            filters[vv].push_back(rel->getTuples()[j].getPayload());
+                    vv++;
+                    break;
+                default:
+                    std::cout << "Invalid operation for filtering!" << std::endl;
+                    return nullptr;
+            }
         }
 
-//    TO DO ...
+    size = v;
+    return filters;
+}
 
+int Query::exec()
+{
+//    start with filtering query
+    uint64_t f = 0;
+    Vector *filters = filtering(f);
+    if (filters == nullptr) return -1;
+
+    std::cout << "after filtering\n";
+    for (uint64_t i = 0; i < f; i++)
+    {
+        std::cout << "filters " << i << std::endl;
+        std::cout << "size " << filters[i].size() << std::endl;
+
+//        for (uint64_t j = 0; j < filters[i].size(); j++)
+//            std::cout << filters[i][j] << std::endl;
+//        std::cout << std::endl << std::endl;
+    }
 }
