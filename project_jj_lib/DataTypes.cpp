@@ -149,10 +149,18 @@ void Relation::copyTuplesVal(Relation *R, uint64_t start, uint64_t end) {
 }
 
 void Relation::filter(Vector * vector) {
-    if (vector == nullptr)
+    if (vector == nullptr) {
         return;
+        std::cout << "empty" << std::endl;
+    }
 
     uint64_t  vectorSize = vector->size();
+    if(vectorSize == 0){
+        numTuples = 0;
+        delete tuples;
+        tuples = nullptr;
+    }
+    if(vectorSize == numTuples) return;
     Tuple* tmp = new Tuple[vectorSize];
     for(int i =0; i<vectorSize;i++){
         uint64_t row = (*vector)[i];

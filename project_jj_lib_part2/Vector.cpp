@@ -19,7 +19,11 @@ Vector::Vector()
 
 Vector::~Vector() { delete[] vec; }
 
-uint64_t Vector::size() { return capacity; }
+uint64_t Vector::size()
+{
+    if(index==0) return 0;
+    return capacity;
+}
 
 void Vector::push_back(uint64_t x)
 {
