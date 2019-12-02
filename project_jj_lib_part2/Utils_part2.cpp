@@ -110,7 +110,8 @@ void execQ(char** Q, uint64_t size)
         q = new Query;
         ALLOC_CHECK(q);
 
-        q->parse(Q[i]); q->exec();
+        q->parse(Q[i]);
+        q->exec();
         delete q;
     }
 

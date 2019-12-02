@@ -35,7 +35,9 @@ public:
 
     Query();
     void parse(char *inq);
-    bool filtering(uint64_t &filters);
+    Vector* filtering(uint64_t &filters);
+
+    //    bool filtering(uint64_t &filters);
     int exec();
     static Vector* applyFilter(Relation*, char, uint64_t);
 

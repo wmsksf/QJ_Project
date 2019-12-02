@@ -139,117 +139,182 @@ void Query::parse(char *inq)
             Predicates[j].filter = atoll(tmp);
         }
         Predicates[j].operation = operation;
-
     }
 }
 
-bool Query::filtering(uint64_t &size)
+Vector* Query::filtering(uint64_t &size)
 {
 //    calc num of filters
     uint64_t v = 0;
     for (uint64_t i = 0; i < NumOfPredicates; i++)
         if (Predicates[i].filter) v++;
 
+//        filter specific relation of given operator
+    Vector *filters = new Vector[v];
+    ALLOC_CHECK(filters);
+
     for (uint64_t i = 0, vv = 0; i < NumOfPredicates; i++)
         if (Predicates[i].filter)
         {
             Relation *rel;
-
             rel = MATRICES[Predicates[i].Matrices[0]].getRelation(Predicates[i].RowIds[0]);
-            if(rel == nullptr)
-                return false;
-
-            auto vector = new Vector();
-
-            Tuple* tuples = rel->getTuples();
-            uint64_t  numOfTuples = rel->getNumTuples();
             switch(Predicates[i].operation)
             {
                 case '>':
-                    for (uint64_t j = 0; j < numOfTuples; j++)
-                        if (tuples[j].getKey() > Predicates[i].filter)
-                            vector->push_back(tuples[j].getPayload());
+                    for (uint64_t j = 0; j < rel->getNumTuples(); j++)
+                        if (rel->getTuples()[j].getKey() > Predicates[i].filter)
+                            filters[vv].push_back(rel->getTuples()[j].getPayload());
                     vv++;
                     break;
                 case '<':
                     for (uint64_t j = 0; j < rel->getNumTuples(); j++)
-                        if (tuples[j].getKey() < Predicates[i].filter)
-                            vector->push_back(tuples[j].getPayload());
+                        if (rel->getTuples()[j].getKey() < Predicates[i].filter)
+                            filters[vv].push_back(rel->getTuples()[j].getPayload());
                     vv++;
                     break;
                 case '=':
                     for (uint64_t j = 0; j < rel->getNumTuples(); j++)
-                        if (tuples[j].getKey() == Predicates[i].filter)
-                            vector->push_back(tuples[j].getPayload());
+                        if (rel->getTuples()[j].getKey() == Predicates[i].filter)
+                            filters[vv].push_back(rel->getTuples()[j].getPayload());
                     vv++;
                     break;
                 default:
                     std::cout << "Invalid operation for filtering!" << std::endl;
-                    return false;
-            }
-
-            for(int x = 0; x<NumOfMatrices;x++){
-                if(Matrices[x] == Predicates[i].Matrices[0])
-                    FilteredMatrices[x] = vector;
+                    return nullptr;
             }
         }
 
     size = v;
-    return true;
+
+    Relation *filtered_rels = new Relation[v];
+
+    return filters;
 }
 
+//
+//bool Query::filtering(uint64_t &size)
+//{
+////    calc num of filters
+//    uint64_t v = 0;
+//    for (uint64_t i = 0; i < NumOfPredicates; i++)
+//        if (Predicates[i].filter) v++;
+//
+//    for (uint64_t i = 0, vv = 0; i < NumOfPredicates; i++)
+//        if (Predicates[i].filter)
+//        {
+//            Relation *rel;
+//
+//            rel = MATRICES[Predicates[i].Matrices[0]].getRelation(Predicates[i].RowIds[0]);
+//            if(rel == nullptr)
+//                return false;
+//
+//            auto vector = new Vector();
+//
+//            Tuple* tuples = rel->getTuples();
+//            uint64_t  numOfTuples = rel->getNumTuples();
+//            switch(Predicates[i].operation)
+//            {
+//                case '>':
+//                    for (uint64_t j = 0; j < numOfTuples; j++)
+//                        if (tuples[j].getKey() > Predicates[i].filter)
+//                            vector->push_back(tuples[j].getPayload());
+//                    vv++;
+//                    break;
+//                case '<':
+//                    for (uint64_t j = 0; j < rel->getNumTuples(); j++)
+//                        if (tuples[j].getKey() < Predicates[i].filter)
+//                            vector->push_back(tuples[j].getPayload());
+//                    vv++;
+//                    break;
+//                case '=':
+//                    for (uint64_t j = 0; j < rel->getNumTuples(); j++)
+//                        if (tuples[j].getKey() == Predicates[i].filter)
+//                            vector->push_back(tuples[j].getPayload());
+//                    vv++;
+//                    break;
+//                default:
+//                    std::cout << "Invalid operation for filtering!" << std::endl;
+//                    return false;
+//            }
+//
+//            for(int x = 0; x<NumOfMatrices;x++){
+//                if(Matrices[x] == Predicates[i].Matrices[0])
+//                    FilteredMatrices[x] = vector;
+//            }
+//        }
+//
+//    size = v;
+//    return true;
+//}
 
-int Query::exec()
-{
-//    start with filtering query
+
+ int Query::exec()
+ {
     uint64_t f = 0;
-    bool filters = filtering(f);
-    if (!filters) return -1;
-
-    JoinedTuples = new LinkedList*[NumOfPredicates-f];
-
-    //Then we execute the joins
-
-    for(int i = 0, x = 0; i < NumOfPredicates; i++){
-        char operation = Predicates[i].getOperation();
-        if(operation != 'j')  //not a join operation
-            continue;
-
-        //Get the first relation of the predicate, filter it and sort it
-        Relation* R1 = MATRICES[Predicates[i].Matrices[0]].getRelation(Predicates[i].RowIds[0]);
-        for (int j = 0; j < NumOfMatrices; j++) {
-            if (Predicates[i].Matrices[0] == Matrices[j]) {
-                R1->filter(FilteredMatrices[j]);
-                break;
-            }
-        }
-        if(R1->getNumTuples() == 0){ // No item in the matrix fulfills the filter
-            return 0;
-        }
-        Radixsort(R1,0,R1->getNumTuples()-1);
-
-        //Same thing for the second relation of the predicate
-        Relation* R2 = MATRICES[Predicates[i].Matrices[1]].getRelation(Predicates[i].RowIds[1]);
-        for (int j = 0; j < NumOfMatrices; j++) {
-            if (Predicates[i].Matrices[1] == Matrices[j]) {
-                R2->filter(FilteredMatrices[j]);
-                break;
-            }
-        }
-        if(R2->getNumTuples() == 0){ // No item in the matrix fulfills the filter
-            return 0;
-        }
-        Radixsort(R2,0,R2->getNumTuples()-1);
-
-        //Save the joined result in an array
-        JoinedTuples[x++] = SortMergeJoin(R1,R2);
-
+    Vector *filters = filtering(f);
+    if (filters == nullptr)
+    {
+        std::cerr << "Filtering failed!" << std::endl;
+        exit(EXIT_FAILURE);
     }
 
-    //Now we take all separate joins and combine them into one result
+    for (uint64_t i = 0; i < NumOfPredicates; i++)
+    {
+        if (Predicates[i].filter)
+    }
+ }
 
-
-}
+//int Query::exec()
+//{
+////    start with filtering query
+//    uint64_t f = 0;
+//    bool filters = filtering(f);
+//    if (!filters) return -1;
+//
+//    JoinedTuples = new LinkedList*[NumOfPredicates-f];
+//
+//    //Then we execute the joins
+//
+//    for(int i = 0, x = 0; i < NumOfPredicates; i++){
+//        char operation = Predicates[i].getOperation();
+//        if(operation != 'j')  //not a join operation
+//            continue;
+//
+//        //Get the first relation of the predicate, filter it and sort it
+//        Relation* R1 = MATRICES[Predicates[i].Matrices[0]].getRelation(Predicates[i].RowIds[0]);
+//        for (int j = 0; j < NumOfMatrices; j++) {
+//            if (Predicates[i].Matrices[0] == Matrices[j]) {
+//                R1->filter(FilteredMatrices[j]);
+//                break;
+//            }
+//        }
+//        if(R1->getNumTuples() == 0){ // No item in the matrix fulfills the filter
+//            return 0;
+//        }
+//        Radixsort(R1,0,R1->getNumTuples()-1);
+//
+//        //Same thing for the second relation of the predicate
+//        Relation* R2 = MATRICES[Predicates[i].Matrices[1]].getRelation(Predicates[i].RowIds[1]);
+//        for (int j = 0; j < NumOfMatrices; j++) {
+//            if (Predicates[i].Matrices[1] == Matrices[j]) {
+//                R2->filter(FilteredMatrices[j]);
+//                break;
+//            }
+//        }
+//        if(R2->getNumTuples() == 0){ // No item in the matrix fulfills the filter
+//            return 0;
+//        }
+//        Radixsort(R2,0,R2->getNumTuples()-1);
+//
+//        //Save the joined result in an array
+//        JoinedTuples[x++] = SortMergeJoin(R1,R2);
+//
+//    }
+//
+//    //Now we take all separate joins and combine them into one result
+//
+//
+//}
 
 
 Vector *Query::applyFilter(Relation* R, char operation, uint64_t value) {

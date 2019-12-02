@@ -7,6 +7,7 @@
 #include <sys/mman.h>
 #include <fstream>
 #include "DataTypes.h"
+#include "../project_jj_lib_part2/MACROS.h"
 
 Tuple::Tuple() { key = payload = 0; }
 

@@ -17,6 +17,14 @@ Vector::Vector()
     index = 0;
 }
 
+Vector::Vector(Vector &vec)
+{
+    this->index = vec.index;
+    this->capacity = vec.capacity;
+
+    for (uint64_t i = 0; i < this->capacity; i++) this->vec[i] = vec[i];
+}
+
 Vector::~Vector() { delete[] vec; }
 
 uint64_t Vector::size()
@@ -41,7 +49,7 @@ void Vector::push_back(uint64_t x)
     index++;
 }
 
-uint64_t Vector::operator[](uint64_t indx)
+uint64_t& Vector::operator[](uint64_t indx)
 {
     if (indx > capacity)
     {
