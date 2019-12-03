@@ -40,8 +40,9 @@ public:
 
     void expandResultsList(LinkedList* latestJoin, uint64_t matrixA, uint64_t matrixB);
     bool filtering(uint64_t &filters);
-    int exec();
+    void exec();
 
+    void empty_sum();
     void calc_sum();
 };
 

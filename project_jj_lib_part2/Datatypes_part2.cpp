@@ -199,12 +199,16 @@ bool Query::filtering(uint64_t &size)
     return true;
 }
 
-int Query::exec()
+void Query::exec()
 {
 //    start with filtering query
     uint64_t f = 0;
     bool filters = filtering(f);
-    if (!filters) return -1;
+    if (!filters)
+    {
+        empty_sum();
+        return;
+    }
 
     //Then we execute the joins
 
@@ -221,8 +225,10 @@ int Query::exec()
                 break;
             }
         }
-        if(R1->getNumTuples() == 0){ // No item in the matrix fulfills the filter
-            return 0;
+        if(R1->getNumTuples() == 0)
+        {
+            empty_sum();
+            return;
         }
         Radixsort(R1,0,R1->getNumTuples()-1);
 
@@ -234,8 +240,10 @@ int Query::exec()
                 break;
             }
         }
-        if(R2->getNumTuples() == 0){ // No item in the matrix fulfills the filter
-            return 0;
+        if(R2->getNumTuples() == 0)
+        {
+            empty_sum();
+            return;
         }
         Radixsort(R2,0,R2->getNumTuples()-1);
 
@@ -251,7 +259,6 @@ int Query::exec()
         }
 
     }
-
 
     calc_sum();
 }
@@ -314,6 +321,13 @@ int fracto_int(double number, int dec_num)
     double dummy;
     double frac = modf(number,&dummy);
     return round(frac*pow(10,dec_num));
+}
+
+void Query::empty_sum()
+{
+    for (uint64_t i = 0; i < NumOfResults; i++)
+        std::cout << "NULL ";
+    std::cout << std::endl;
 }
 
 void Query::calc_sum()

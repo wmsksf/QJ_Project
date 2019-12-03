@@ -196,12 +196,12 @@ LinkedList* SortMergeJoin(Relation* relA, Relation* relB, uint64_t& count, bool 
 
     if(!test) {
         LinkedList *results = JoinSortedRelations(relA, relB, count);
-        std::cout << "Number of tuples after join: " << count << std::endl;
+//        std::cout << "Number of tuples after join: " << count << std::endl;
         return results;
     }
     else{
         JoinSortedRelationsTest(relA,relB,count);
-        std::cout << "Number of tuples after join: " << count << std::endl;
+//        std::cout << "Number of tuples after join: " << count << std::endl;
         return nullptr;
     }
 }
