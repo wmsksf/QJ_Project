@@ -99,11 +99,6 @@ char** Get_Input(bool flag, uint64_t *size)
 
 void execQ(char** Q, uint64_t size)
 {
-    std::cout << "total queries in batch: " << size << std::endl;
-    for (uint64_t i = 0; i < size; i++)
-        std::cout << Q[i] << std::endl;
-    std::cout << std::endl;
-
     Query *q;
     for (uint64_t i = 0; i < size; i++)
     {

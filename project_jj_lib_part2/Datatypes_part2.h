@@ -37,12 +37,12 @@ public:
 
     Query();
     void parse(char *inq);
-//    Vector* filtering(uint64_t &filters);
 
     void expandResultsList(LinkedList* latestJoin, uint64_t matrixA, uint64_t matrixB);
     bool filtering(uint64_t &filters);
     int exec();
 
+    void calc_sum();
 };
 
 #endif //PROJECT_JJ_DATATYPES_PART2_H

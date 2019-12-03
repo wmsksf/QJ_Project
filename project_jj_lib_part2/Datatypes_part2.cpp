@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <cstring>
+#include <cmath>
 #include "Datatypes_part2.h"
 #include "MACROS.h"
 #include "../project_jj_lib/Utils.h"
@@ -143,56 +144,6 @@ void Query::parse(char *inq)
     }
 }
 
-//Vector* Query::filtering(uint64_t &size)
-//{
-////    calc num of filters
-//    uint64_t v = 0;
-//    for (uint64_t i = 0; i < NumOfPredicates; i++)
-//        if (Predicates[i].filter) v++;
-//
-////        filter specific relation of given operator
-//    Vector *filters = new Vector[v];
-//    ALLOC_CHECK(filters);
-//
-//    for (uint64_t i = 0, vv = 0; i < NumOfPredicates; i++)
-//        if (Predicates[i].filter)
-//        {
-//            Relation *rel;
-//            rel = MATRICES[Predicates[i].Matrices[0]].getRelation(Predicates[i].RowIds[0]);
-//            switch(Predicates[i].operation)
-//            {
-//                case '>':
-//                    for (uint64_t j = 0; j < rel->getNumTuples(); j++)
-//                        if (rel->getTuples()[j].getKey() > Predicates[i].filter)
-//                            filters[vv].push_back(rel->getTuples()[j].getPayload());
-//                    vv++;
-//                    break;
-//                case '<':
-//                    for (uint64_t j = 0; j < rel->getNumTuples(); j++)
-//                        if (rel->getTuples()[j].getKey() < Predicates[i].filter)
-//                            filters[vv].push_back(rel->getTuples()[j].getPayload());
-//                    vv++;
-//                    break;
-//                case '=':
-//                    for (uint64_t j = 0; j < rel->getNumTuples(); j++)
-//                        if (rel->getTuples()[j].getKey() == Predicates[i].filter)
-//                            filters[vv].push_back(rel->getTuples()[j].getPayload());
-//                    vv++;
-//                    break;
-//                default:
-//                    std::cout << "Invalid operation for filtering!" << std::endl;
-//                    return nullptr;
-//            }
-//        }
-//
-//    size = v;
-//
-//    Relation *filtered_rels = new Relation[v];
-//
-//    return filters;
-//}
-
-
 bool Query::filtering(uint64_t &size)
 {
 //    calc num of filters
@@ -248,23 +199,6 @@ bool Query::filtering(uint64_t &size)
     return true;
 }
 
-
-// int Query::exec()
-// {
-//    uint64_t f = 0;
-//    Vector *filters = filtering(f);
-//    if (filters == nullptr)
-//    {
-//        std::cerr << "Filtering failed!" << std::endl;
-//        exit(EXIT_FAILURE);
-//    }
-//
-//    for (uint64_t i = 0; i < NumOfPredicates; i++)
-//    {
-//        if (Predicates[i].filter)
-//    }
-// }
-
 int Query::exec()
 {
 //    start with filtering query
@@ -319,8 +253,7 @@ int Query::exec()
     }
 
 
-
-
+    calc_sum();
 }
 
 
@@ -374,4 +307,51 @@ void Query::expandResultsList(LinkedList *latestJoin, uint64_t A, uint64_t B) {
         //delete ListOfResults;
         ListOfResults = newList;
     }
+}
+
+int fracto_int(double number, int dec_num)
+{
+    double dummy;
+    double frac = modf(number,&dummy);
+    return round(frac*pow(10,dec_num));
+}
+
+void Query::calc_sum()
+{
+    Vector sum;
+    Tuple *data;
+    uint64_t s = 0;
+    for (uint64_t i = 0; i < NumOfResults; i++)
+    {
+        double frack, intprt;
+        int x ,y;
+        frack = modf(Results[i], &intprt);
+        x = (int) intprt;
+        y = fracto_int(frack, 1);
+
+        if (!MatricesJoined->search(Matrices[x]))
+        {
+            std::cout << "No such relation in joined ones!" <<std::endl;
+            return;
+        }
+
+        int indx = MatricesJoined->getIndex(Matrices[x]);
+        if (indx != -1)
+        {
+            data = MATRICES[Matrices[x]].getRelation(y)->getTuples();
+            for (struct Node *h = ListOfResults->getHead(); h != nullptr; h = h->next)
+                s += data[h->data[indx]].getKey();
+            sum.push_back(s);
+        }
+        else
+        {
+            std::cout << "No such relation in List object" << std::endl;
+            return;
+        }
+    }
+
+    for (uint64_t i = 0; i < sum.size(); i++)
+        std::cout << sum[i] << " ";
+
+    std::cout << std::endl;
 }

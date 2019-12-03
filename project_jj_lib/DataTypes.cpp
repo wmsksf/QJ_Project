@@ -118,7 +118,7 @@ bool Relation::isSorted() {
         }
         a = b;
     }
-    std::cout << "Relation is sorted" << std::endl;
+//    std::cout << "Relation is sorted" << std::endl;
     return true;
 }
 

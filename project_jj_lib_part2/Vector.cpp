@@ -67,3 +67,20 @@ bool Vector::search(uint64_t x) {
 
     return false;
 }
+
+int Vector::getIndex(uint64_t x)
+{
+    for (uint64_t i = 0; i < index; i++)
+        if (vec[i] == x) return index;
+
+    return -1;
+}
+
+void Vector::print()
+{
+    std::cout << "Vector" << std::endl;
+    for (uint64_t i = 0; i < size(); i++)
+        std::cout << vec[i] << " ";
+
+    std::cout << std::endl;
+}
