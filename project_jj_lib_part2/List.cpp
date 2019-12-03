@@ -14,7 +14,8 @@ List::~List()
     while (tmp != nullptr)
     {
         next = tmp->next;
-        delete tmp;
+        std::cout << "diaolo" << std::endl;
+            delete tmp;
         tmp = next;
     }
 }

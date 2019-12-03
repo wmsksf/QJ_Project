@@ -3,7 +3,7 @@ project(project_jj)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(project_jj main.cpp project_jj_lib/DataTypes.cpp project_jj_lib/DataTypes.h project_jj_lib/Utils.cpp project_jj_lib/Utils.h project_jj_lib/LinkedList.cpp project_jj_lib/LinkedList.h project_jj_lib/Stack.cpp project_jj_lib/Stack.h project_jj_lib_part2/Utils_part2.cpp project_jj_lib_part2/Utils_part2.h project_jj_lib_part2/Datatypes_part2.cpp project_jj_lib_part2/Datatypes_part2.h project_jj_lib_part2/MACROS.h project_jj_lib_part2/Vector.cpp project_jj_lib_part2/Vector.h project_jj_lib_part2/Execution.cpp project_jj_lib_part2/Execution.h project_jj_lib_part2/List.cpp project_jj_lib_part2/List.h)
+add_executable(project_jj main.cpp project_jj_lib/DataTypes.cpp project_jj_lib/DataTypes.h project_jj_lib/Utils.cpp project_jj_lib/Utils.h project_jj_lib/LinkedList.cpp project_jj_lib/LinkedList.h project_jj_lib/Stack.cpp project_jj_lib/Stack.h project_jj_lib_part2/Utils_part2.cpp project_jj_lib_part2/Utils_part2.h project_jj_lib_part2/Datatypes_part2.cpp project_jj_lib_part2/Datatypes_part2.h project_jj_lib_part2/MACROS.h project_jj_lib_part2/Vector.cpp project_jj_lib_part2/Vector.h project_jj_lib_part2/List.cpp project_jj_lib_part2/List.h)
 
 #   >>>>>>>>>>>>>>>>
 #   in order to BUILD executable for testing in project

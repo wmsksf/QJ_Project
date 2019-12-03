@@ -59,3 +59,11 @@ uint64_t& Vector::operator[](uint64_t indx)
 
     return vec[indx];
 }
+
+bool Vector::search(uint64_t x) {
+
+    for(uint64_t i =0; i<index; i++)
+        if(vec[i] == x) return true;
+
+    return false;
+}

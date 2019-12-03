@@ -6,6 +6,7 @@
 #include "Vector.h"
 #include "../project_jj_lib/DataTypes.h"
 #include "../project_jj_lib/LinkedList.h"
+#include "List.h"
 
 
 #ifndef PROJECT_JJ_DATATYPES_PART2_H
@@ -31,15 +32,16 @@ public:
     double* Results;
     Predicate* Predicates;
     Vector* FilteredMatrices[4];  //max 4 matrices per query
-    LinkedList** JoinedTuples;
+    List* ListOfResults;
+    Vector* MatricesJoined;
 
     Query();
     void parse(char *inq);
-    Vector* filtering(uint64_t &filters);
+//    Vector* filtering(uint64_t &filters);
 
-    //    bool filtering(uint64_t &filters);
+    void expandResultsList(LinkedList* latestJoin, uint64_t matrixA, uint64_t matrixB);
+    bool filtering(uint64_t &filters);
     int exec();
-    static Vector* applyFilter(Relation*, char, uint64_t);
 
 };
 

@@ -80,6 +80,8 @@ class Results
 
     void setBuffersize(uint64_t buffersize);
     void initBuffer();
+    Tuple* getBuffer();
+    uint64_t  getIndex();
 
     void add(uint64_t x, uint64_t y);
     bool isFull();

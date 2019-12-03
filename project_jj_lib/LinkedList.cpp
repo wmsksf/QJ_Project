@@ -78,3 +78,7 @@ void LinkedList::print()
     for (struct node* tmp = head; tmp != nullptr; tmp = tmp->next)
         tmp->Data.print();
 }
+
+struct node* LinkedList::getHead() {
+    return head;
+}

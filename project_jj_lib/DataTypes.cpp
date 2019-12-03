@@ -284,3 +284,11 @@ void Results::print()
 
     std::cout << std::endl;
 }
+
+Tuple *Results::getBuffer() {
+    return Buffer;
+}
+
+uint64_t Results::getIndex() {
+    return index;
+}

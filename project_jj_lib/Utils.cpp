@@ -243,6 +243,7 @@ LinkedList* JoinSortedRelations(Relation *relA, Relation *relB, uint64_t& count)
             Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
             counter++;
 
+            if(j == sizeB-1) continue;
             while(tupA[i].getKey() == tupB[++j].getKey()){
                 Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
                 counter++;
@@ -252,14 +253,13 @@ LinkedList* JoinSortedRelations(Relation *relA, Relation *relB, uint64_t& count)
         }
         else if(tupA[i].getKey() > tupB[j].getKey()){
 
-
+            if(j == sizeB-1) break;
             while(tupA[i].getKey() > tupB[++j].getKey()){
                 if (j == sizeB-1) {
                     flag = true;
                     break;
                 }
             }
-
             if (j == sizeB-1) {
                 break;
             }
