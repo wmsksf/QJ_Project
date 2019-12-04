@@ -352,9 +352,19 @@ void Query::calc_sum()
         int indx = MatricesJoined->getIndex(Matrices[x]);
         if (indx != -1)
         {
-            data = MATRICES[Matrices[x]].getRelation(y)->getTuples();
+            Relation *rel = MATRICES[Matrices[x]].getRelation(y);
+            data = rel->getTuples();
             for (struct Node *h = ListOfResults->getHead(); h != nullptr; h = h->next)
+
+            {
+                if (h->data[indx] > rel->getNumTuples())
+                {
+                    std::cout << "RowId OUT OF BOUNDS: " << "max " << rel->getNumTuples()
+                    << " while indx " << h->data[indx] << std::endl;
+                    return;
+                }
                 s += data[h->data[indx]].getKey();
+            }
             sum.push_back(s);
         }
         else
