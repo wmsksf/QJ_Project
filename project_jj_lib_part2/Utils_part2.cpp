@@ -21,6 +21,7 @@ char** Get_Input(bool flag, uint64_t *size)
 
     char **Datasets = nullptr, **More_Datasets = nullptr;
     Datasets = (char**) malloc(sizeof(char*)*MAX_DATASETS);
+    ALLOC_CHECK(Datasets);
 
     uint64_t count = 0;
     char filename[PATH_MAX] = {};
@@ -49,7 +50,7 @@ char** Get_Input(bool flag, uint64_t *size)
         }
         else
         {
-//            corrupted size vs prev_size : misuse of realloc !!WILL BE FIXED LATER ON
+//          TODO:  corrupted size vs prev_size : misuse of realloc !!WILL BE FIXED LATER ON
             More_Datasets = (char**) realloc(Datasets, sizeof(char*)*count);
             if (More_Datasets != nullptr)
             {
@@ -93,6 +94,7 @@ char** Get_Input(bool flag, uint64_t *size)
     else
     {
         *size = count;
+//        TODO: Datasets to be freed before end of main
         return Datasets;
     }
 }

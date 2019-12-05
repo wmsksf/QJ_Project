@@ -4,20 +4,14 @@
 
 #include <iostream>
 #include "List.h"
+#include "MACROS.h"
 
 List::List() { head = tail = nullptr; }
 
 List::~List()
 {
-    struct Node* tmp = head;
-    struct Node* next;
-    while (tmp != nullptr)
-    {
-        next = tmp->next;
-        std::cout << "diaolo" << std::endl;
-            delete tmp;
-        tmp = next;
-    }
+    for (struct Node *h = head; h != nullptr; h = h->next)
+        remove_node(h);
 }
 
 struct Node* List::insert_node()
@@ -25,6 +19,8 @@ struct Node* List::insert_node()
     if (head == nullptr)
     {
         head = new struct Node;
+        ALLOC_CHECK(head);
+
         head->next = head->prev = nullptr;
         tail = head;
 
@@ -32,6 +28,8 @@ struct Node* List::insert_node()
     }
 
     tail->next = new struct Node;
+    ALLOC_CHECK(tail->next);
+
     tail->next->next = nullptr;
     tail->next->prev = tail;
     tail = tail->next;
@@ -39,13 +37,6 @@ struct Node* List::insert_node()
     return tail;
 }
 
-//first insertion -> expl:
-//    List l;
-//    for (uint64_t i = 0; i < 10; i++) l.insert(l.insert_node(), i);
-////      and rest ->
-//    uint64_t j = 0;
-//    for (struct Node *h = l.getHead(); h != nullptr; h = h->next, j++)
-//    h->data.push_back(j);
 void List::insert(struct Node *nd, uint64_t rowId)
 {
     if (nd == nullptr)

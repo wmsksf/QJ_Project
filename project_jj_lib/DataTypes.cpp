@@ -32,7 +32,7 @@ void Tuple::swap(Tuple *tpl)
 void Tuple::print()
 {
     std::cout << "key: " << key << " payloads: ";
-    for (int i = 0; i < payloads.size(); i++) std::cout << payloads[i] << " ";
+    payloads.print();
     std::cout << std::endl;
 }
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -50,6 +50,7 @@ void Relation::initTuples()
     }
 
     tuples = new Tuple[this->getNumTuples()];
+    ALLOC_CHECK(tuples);
 }
 
 // copy data from a given relation
@@ -69,6 +70,8 @@ void Relation::initTuplesVal(Relation* R)
     }
 
     tuples = new Tuple[this->getNumTuples()];
+    ALLOC_CHECK(tuples);
+
     for (uint64_t i = 0; i < this->getNumTuples(); i++)
     {
         tuples[i].setKey(R->tuples[i].getKey());
@@ -91,7 +94,7 @@ void Relation::setTupleVal(long unsigned int index, uint64_t key, uint64_t paylo
     this->getTuples()[index].setPayload(payload);
 }
 
-void Relation::setTupleVal(long unsigned int index, uint64_t key, Vector payload) {
+void Relation::setTupleVal(long unsigned int index, uint64_t key, Vector &payload) {
     if(index >= this->getNumTuples()){
         std::cerr << "Index out of boundaries." << std::endl
                   << "In this Relation object the index can get values from 0 to "
@@ -177,19 +180,29 @@ void Relation::filter(Vector * vector) {
     uint64_t  vectorSize = vector->size();
     if(vectorSize == 0){
         numTuples = 0;
-        delete tuples;
+        delete[] tuples;
         tuples = nullptr;
     }
     if(vectorSize == numTuples) return;
     Tuple* tmp = new Tuple[vectorSize];
+    ALLOC_CHECK(tmp);
+
+    std::cout << "in filter of relation object" << std::endl;
     for(int i =0; i<vectorSize;i++){
         uint64_t row = (*vector)[i];
         tmp[i].setKey(tuples[row].getKey());
         tmp[i].getPayloads() = tuples[row].getPayloads();
+
+        std::cout << "key " << tmp[i].getKey() << " payloads "; tmp[i].getPayloads().print();std::cout << std::endl;
+
     }
     numTuples = vectorSize;
-    delete tuples;
+    delete[] tuples;
     tuples = tmp;
+    for (uint64_t i = 0; i < numTuples;i++) tmp[i].print();
+
+    std::cout << "PRINT AT END of filter of relation object" << std::endl;
+    for (uint64_t i = 0; i < numTuples;i++) tuples[i].print();
 }
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

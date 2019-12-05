@@ -22,8 +22,10 @@ Vector::Vector(Vector &vec)
     this->index = vec.index;
     this->capacity = vec.capacity;
 
-    delete this->vec;
+    delete[] this->vec;
     this->vec = new uint64_t[this->capacity];
+    ALLOC_CHECK(this->vec);
+
     for (uint64_t i = 0; i < this->index; i++) this->vec[i] = vec[i];
 }
 
@@ -80,11 +82,9 @@ int Vector::getIndex(uint64_t x)
 
 void Vector::print()
 {
-    std::cout << "Vector" << std::endl;
     for (uint64_t i = 0; i < size(); i++)
         std::cout << vec[i] << " ";
 
-    std::cout << std::endl;
 }
 
 void Vector::clear() {
@@ -92,4 +92,5 @@ void Vector::clear() {
     index = 0;
     delete[] vec;
     vec = new uint64_t[1];
+    ALLOC_CHECK(vec);
 }
