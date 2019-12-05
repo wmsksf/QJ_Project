@@ -13,21 +13,23 @@
 
 class Tuple
 {
-    uint64_t key, payload;
-
 public:
+    uint64_t key;
+    Vector payloads;
+
     Tuple();
 
-    uint64_t getKey() const;
-    uint64_t getPayload() const;
+    void setKey(uint64_t key_);
+    uint64_t getKey();
 
-    void setKey(uint64_t key);
-    void setPayload(uint64_t payload);
+    void setPayload(uint64_t payload_);
+    Vector& getPayloads();
 
-    void swap(Tuple* tuple);
-    bool equal(Tuple x);
+    void swap(Tuple *tpl);
+
     void print();
 };
+
 //    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 class Relation
 {
@@ -41,12 +43,14 @@ public:
     Tuple *getTuples() const;
     void initTuples();
     void initTuplesVal(Relation* R);
+    void setTupleVal(long unsigned int, uint64_t, Vector);
     void setTupleVal(long unsigned int, uint64_t, uint64_t);
     void copyTuplesVal(Relation* R,uint64_t, uint64_t);
 
     uint64_t getNumTuples() const;
     void setNumTuples(uint64_t numTuples);
     void print();
+    void clean();
     bool isSorted();
     void filter(Vector*);
 };

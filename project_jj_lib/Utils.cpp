@@ -94,7 +94,7 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
         tuple = R->getTuples()[i];
         uint64_t byte = (tuple.getKey() >> current_byte) & 0xff;
 
-        RR->setTupleVal(tmp[byte]++, tuple.getKey(), tuple.getPayload());
+        RR->setTupleVal(tmp[byte]++, tuple.getKey(), tuple.getPayloads());
     }
 
 //    switch R, RR after byte checked
@@ -194,16 +194,20 @@ LinkedList* SortMergeJoin(Relation* relA, Relation* relB, uint64_t& count, bool 
     Radixsort(relA,0,sizeA-1);
     Radixsort(relB,0,sizeB-1);
 
-    if(!test) {
-        LinkedList *results = JoinSortedRelations(relA, relB, count);
-//        std::cout << "Number of tuples after join: " << count << std::endl;
-        return results;
-    }
-    else{
-        JoinSortedRelationsTest(relA,relB,count);
-//        std::cout << "Number of tuples after join: " << count << std::endl;
-        return nullptr;
-    }
+    relA->isSorted();
+    relB->isSorted();
+
+//    if(!test) {
+//        LinkedList *results = JoinSortedRelations(relA, relB, count);
+////        std::cout << "Number of tuples after join: " << count << std::endl;
+//        return results;
+//    }
+//    else{
+//        JoinSortedRelationsTest(relA,relB,count);
+////        std::cout << "Number of tuples after join: " << count << std::endl;
+//        return nullptr;
+//    }
+return nullptr;
 }
 
 void clean_up(Matrix **matrix1, Matrix **matrix2, Relation **R1, Relation **R2,
@@ -217,64 +221,64 @@ void clean_up(Matrix **matrix1, Matrix **matrix2, Relation **R1, Relation **R2,
     free(*file1); *file1 = nullptr;
     free(*file2); *file2 = nullptr;
 }
-
-LinkedList* JoinSortedRelations(Relation *relA, Relation *relB, uint64_t& count) {
-
-    if (!relA->isSorted() || !relB->isSorted())
-        return nullptr;
-
-    Tuple* tupA = relA->getTuples();
-    Tuple* tupB = relB->getTuples();
-
-    if(tupA == nullptr or tupB == nullptr)
-        return nullptr;
-
-    uint64_t sizeA = relA->getNumTuples();
-    uint64_t sizeB = relB->getNumTuples();
-    uint64_t j=0;
-    uint64_t jj=0;
-    bool flag = false;
-    uint64_t counter = 0;
-
-    LinkedList *Results = new LinkedList(BUFFERSIZE);
-    for(uint64_t i = 0; i<sizeA; i++){
-
-        if(tupA[i].getKey() == tupB[j].getKey()){
-            Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
-            counter++;
-
-            if(j == sizeB-1) continue;
-            while(tupA[i].getKey() == tupB[++j].getKey()){
-                Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
-                counter++;
-                if(j == sizeB-1) break;
-            }
-            j = jj;
-        }
-        else if(tupA[i].getKey() > tupB[j].getKey()){
-
-            if(j == sizeB-1) break;
-            while(tupA[i].getKey() > tupB[++j].getKey()){
-                if (j == sizeB-1) {
-                    flag = true;
-                    break;
-                }
-            }
-            if (j == sizeB-1) {
-                break;
-            }
-            if(flag) break;
-            jj = j--;
-            while(tupA[i].getKey() == tupB[++j].getKey()){
-                Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
-                counter++;
-            }
-            j = jj;
-        }
-    }
-    count = counter;
-    return Results;
-}
+//
+//LinkedList* JoinSortedRelations(Relation *relA, Relation *relB, uint64_t& count) {
+//
+//    if (!relA->isSorted() || !relB->isSorted())
+//        return nullptr;
+//
+//    Tuple* tupA = relA->getTuples();
+//    Tuple* tupB = relB->getTuples();
+//
+//    if(tupA == nullptr or tupB == nullptr)
+//        return nullptr;
+//
+//    uint64_t sizeA = relA->getNumTuples();
+//    uint64_t sizeB = relB->getNumTuples();
+//    uint64_t j=0;
+//    uint64_t jj=0;
+//    bool flag = false;
+//    uint64_t counter = 0;
+//
+//    LinkedList *Results = new LinkedList(BUFFERSIZE);
+//    for(uint64_t i = 0; i<sizeA; i++){
+//
+//        if(tupA[i].getKey() == tupB[j].getKey()){
+//            Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
+//            counter++;
+//
+//            if(j == sizeB-1) continue;
+//            while(tupA[i].getKey() == tupB[++j].getKey()){
+//                Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
+//                counter++;
+//                if(j == sizeB-1) break;
+//            }
+//            j = jj;
+//        }
+//        else if(tupA[i].getKey() > tupB[j].getKey()){
+//
+//            if(j == sizeB-1) break;
+//            while(tupA[i].getKey() > tupB[++j].getKey()){
+//                if (j == sizeB-1) {
+//                    flag = true;
+//                    break;
+//                }
+//            }
+//            if (j == sizeB-1) {
+//                break;
+//            }
+//            if(flag) break;
+//            jj = j--;
+//            while(tupA[i].getKey() == tupB[++j].getKey()){
+//                Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
+//                counter++;
+//            }
+//            j = jj;
+//        }
+//    }
+//    count = counter;
+//    return Results;
+//}
 
 void JoinSortedRelationsTest(Relation *relA, Relation *relB, uint64_t& count) {
 

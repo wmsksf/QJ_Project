@@ -22,25 +22,27 @@ Vector::Vector(Vector &vec)
     this->index = vec.index;
     this->capacity = vec.capacity;
 
-    for (uint64_t i = 0; i < this->capacity; i++) this->vec[i] = vec[i];
+    delete this->vec;
+    this->vec = new uint64_t[this->capacity];
+    for (uint64_t i = 0; i < this->index; i++) this->vec[i] = vec[i];
 }
 
 Vector::~Vector() { delete[] vec; }
 
 uint64_t Vector::size()
 {
-    if(index==0) return 0;
-    return capacity;
+    return index;
 }
 
 void Vector::push_back(uint64_t x)
 {
     if (index == capacity)
     {
-        uint64_t *tmp = new uint64_t[++capacity];
+        capacity *= 2;
+        uint64_t *tmp = new uint64_t[capacity];
         ALLOC_CHECK(tmp);
 
-        for (uint64_t i = 0; i < capacity; i++) tmp[i] = vec[i];
+        for (uint64_t i = 0; i < index; i++) tmp[i] = vec[i];
         delete[] vec;
         vec = tmp;
     }
@@ -83,4 +85,11 @@ void Vector::print()
         std::cout << vec[i] << " ";
 
     std::cout << std::endl;
+}
+
+void Vector::clear() {
+    capacity = 1;
+    index = 0;
+    delete[] vec;
+    vec = new uint64_t[1];
 }

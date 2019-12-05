@@ -21,6 +21,7 @@ public:
     void push_back(uint64_t x);
     bool search(uint64_t x);
     int getIndex(uint64_t x);
+    void clear();
 
     uint64_t& operator[] (uint64_t x);
 
