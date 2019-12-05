@@ -89,6 +89,7 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
     for (uint64_t i = 0; i < 256; i++) tmp[i] = Psum[i];
 
     Tuple tuple;
+    RR->clean();
     for (uint64_t i = start; i <= end; i++)
     {
         tuple = R->getTuples()[i];

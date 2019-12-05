@@ -42,6 +42,7 @@ public:
 
     Tuple *getTuples() const;
     void initTuples();
+
     void initTuplesVal(Relation* R);
     void setTupleVal(long unsigned int, uint64_t, Vector&);
     void setTupleVal(long unsigned int, uint64_t, uint64_t);

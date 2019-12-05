@@ -19,14 +19,30 @@ Vector& Tuple::getPayloads() { return payloads; }
 
 void Tuple::swap(Tuple *tpl)
 {
+    std::cout << "before swap:" << this->key << " payloads: "; this->payloads.print();
+    std::cout << "next " << tpl->getKey() << " payloads:"; tpl->payloads.print();
+    std::cout << std::endl;
+
     uint64_t tmp = key;
     setKey(tpl->getKey());
     tpl->setKey(tmp);
 
     Vector tmpayl;
-    tmpayl = payloads;
-    payloads = tpl->getPayloads();
-    tpl->getPayloads() = tmpayl;
+    for (uint64_t i = 0; i < payloads.size(); i++)
+        tmpayl.push_back(payloads[i]);
+
+    payloads.clear();
+    for (uint64_t i = 0; i < tpl->payloads.size(); i++)
+        payloads.push_back(tpl->payloads[i]);
+
+    tpl->payloads.clear();
+    for (uint64_t i = 0; i < tmpayl.size(); i++)
+        tpl->payloads.push_back(tmpayl[i]);
+
+    std::cout << "after swap:" << this->key << " payloads: "; this->payloads.print();
+    std::cout << "next " << tpl->getKey() << " payloads:"; tpl->payloads.print();
+    std::cout << std::endl;
+
 }
 
 void Tuple::print()
@@ -54,6 +70,8 @@ void Relation::initTuples()
 }
 
 // copy data from a given relation
+
+
 void Relation::initTuplesVal(Relation* R)
 {
     if (!this->getNumTuples())
@@ -75,7 +93,9 @@ void Relation::initTuplesVal(Relation* R)
     for (uint64_t i = 0; i < this->getNumTuples(); i++)
     {
         tuples[i].setKey(R->tuples[i].getKey());
-        tuples[i].getPayloads() = R->tuples[i].getPayloads();
+
+        for(uint64_t j = 0; j < tuples[i].payloads.size(); j++)
+            tuples[i].setPayload(R->tuples[i].payloads[j]);
     }
 }
 
@@ -83,6 +103,7 @@ Tuple* Relation::getTuples() const { return tuples; }
 uint64_t Relation::getNumTuples() const { return numTuples; }
 void Relation::setNumTuples(uint64_t numTuples_) { numTuples = numTuples_; }
 
+// use in method of Matrix object: getRelation()
 void Relation::setTupleVal(long unsigned int index, uint64_t key, uint64_t payload) {
     if(index >= this->getNumTuples()){
         std::cerr << "Index out of boundaries." << std::endl
@@ -102,7 +123,10 @@ void Relation::setTupleVal(long unsigned int index, uint64_t key, Vector &payloa
         exit(EXIT_FAILURE);
     }
     this->getTuples()[index].setKey(key);
-    this->getTuples()[index].payloads = payload;
+
+    uint64_t p = payload.size();
+    for (uint64_t j = 0; j < p; j++)
+        this->getTuples()[index].setPayload(payload[j]);
 }
 
 void Relation::clean()
@@ -167,15 +191,15 @@ void Relation::copyTuplesVal(Relation *R, uint64_t start, uint64_t end) {
     for (uint64_t i = start; i <= end; i++)
     {
         tuples[i].setKey(R->tuples[i].getKey());
-        tuples[i].payloads = R->tuples[i].getPayloads();
+        uint64_t p = R->tuples[i].payloads.size();
+        for (uint64_t j = 0; j < p; j++)
+            tuples[i].setPayload(R->getTuples()->payloads[j]);
     }
 }
 
 void Relation::filter(Vector * vector) {
-    if (vector == nullptr) {
+    if (vector == nullptr)
         return;
-        std::cout << "empty" << std::endl;
-    }
 
     uint64_t  vectorSize = vector->size();
     if(vectorSize == 0){
@@ -184,25 +208,22 @@ void Relation::filter(Vector * vector) {
         tuples = nullptr;
     }
     if(vectorSize == numTuples) return;
+
     Tuple* tmp = new Tuple[vectorSize];
     ALLOC_CHECK(tmp);
 
-    std::cout << "in filter of relation object" << std::endl;
-    for(int i =0; i<vectorSize;i++){
+    for(int i =0; i<vectorSize;i++)
+    {
         uint64_t row = (*vector)[i];
         tmp[i].setKey(tuples[row].getKey());
-        tmp[i].getPayloads() = tuples[row].getPayloads();
 
-        std::cout << "key " << tmp[i].getKey() << " payloads "; tmp[i].getPayloads().print();std::cout << std::endl;
-
+        for (uint64_t j =0; j < tuples[row].payloads.size(); j++)
+            tmp[i].setPayload(tuples[row].payloads[j]);
     }
+
     numTuples = vectorSize;
     delete[] tuples;
     tuples = tmp;
-    for (uint64_t i = 0; i < numTuples;i++) tmp[i].print();
-
-    std::cout << "PRINT AT END of filter of relation object" << std::endl;
-    for (uint64_t i = 0; i < numTuples;i++) tuples[i].print();
 }
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

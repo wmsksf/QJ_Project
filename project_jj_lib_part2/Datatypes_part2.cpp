@@ -213,13 +213,12 @@ void Query::exec() {
 
         //Get the first relation of the predicate, filter it and sort it
         Relation *R1 = MATRICES[Predicates[i].Matrices[0]].getRelation(Predicates[i].RowIds[0]);
-//        for (int j = 0; j < NumOfMatrices; j++) {
-//            if (Predicates[i].Matrices[0] == Matrices[j]) {
-//                R1->filter(FilteredMatrices[j]);
-//                break;
-//            }
-//        }
-
+        for (int j = 0; j < NumOfMatrices; j++) {
+            if (Predicates[i].Matrices[0] == Matrices[j]) {
+                R1->filter(FilteredMatrices[j]);
+                break;
+            }
+        }
         if (R1->getNumTuples() == 0) {
             empty_sum();
             return;
@@ -227,15 +226,17 @@ void Query::exec() {
         R1->print();
 
         Radixsort(R1, 0, R1->getNumTuples() - 1);
+        R1->print();
 
+exit(1);
         //Same thing for the second relation of the predicate
         Relation *R2 = MATRICES[Predicates[i].Matrices[1]].getRelation(Predicates[i].RowIds[1]);
-//        for (int j = 0; j < NumOfMatrices; j++) {
-//            if (Predicates[i].Matrices[1] == Matrices[j]) {
-//                R2->filter(FilteredMatrices[j]);
-//                break;
-//            }
-//        }
+        for (int j = 0; j < NumOfMatrices; j++) {
+            if (Predicates[i].Matrices[1] == Matrices[j]) {
+                R2->filter(FilteredMatrices[j]);
+                break;
+            }
+        }
 
         if (R2->getNumTuples() == 0) {
             empty_sum();
@@ -244,7 +245,6 @@ void Query::exec() {
         std::cout << "next rel\n";
         R2->print();
         Radixsort(R2, 0, R2->getNumTuples() - 1);
-
 
         if (MatricesJoined != nullptr and MatricesJoined->search(Predicates[i].Matrices[0])) {
             //Save the joined result in an array

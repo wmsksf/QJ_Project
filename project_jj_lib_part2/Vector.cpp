@@ -17,18 +17,6 @@ Vector::Vector()
     index = 0;
 }
 
-Vector::Vector(Vector &vec)
-{
-    this->index = vec.index;
-    this->capacity = vec.capacity;
-
-    delete[] this->vec;
-    this->vec = new uint64_t[this->capacity];
-    ALLOC_CHECK(this->vec);
-
-    for (uint64_t i = 0; i < this->index; i++) this->vec[i] = vec[i];
-}
-
 Vector::~Vector() { delete[] vec; }
 
 uint64_t Vector::size()

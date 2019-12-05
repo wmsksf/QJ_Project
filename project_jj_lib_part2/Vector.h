@@ -14,7 +14,6 @@ class Vector
 
 public:
     Vector();
-    Vector(Vector& vec);
     ~Vector();
 
     uint64_t size();
