@@ -64,7 +64,7 @@ bool Vector::search(uint64_t x) {
 int Vector::getIndex(uint64_t x)
 {
     for (uint64_t i = 0; i < index; i++)
-        if (vec[i] == x) return index;
+        if (vec[i] == x) return i;
 
     return -1;
 }

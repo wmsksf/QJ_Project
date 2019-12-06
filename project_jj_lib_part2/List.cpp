@@ -98,7 +98,7 @@ void List::print()
     uint64_t n = 0;
     for (struct Node *h = head; h != nullptr; h = h->next, n++)
     {
-        std::cout << n << " Node:" << std::endl;
+        std::cout << n << " Node: ";
         for (uint64_t j = 0; j < h->data.size(); j++)
             std::cout << h->data[j] << " ";
         std::cout << std::endl;

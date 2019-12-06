@@ -254,9 +254,21 @@ void Matrix::printMatrix() {
 uint64_t *Matrix::getData() { return data; }
 
 Relation *Matrix::getRelation(List* list,int index, long int numOfRows_, int columnNumber) {
-    if(list == nullptr or list->getHead() == nullptr) return nullptr;
-    if(numOfRows_ == 0) return nullptr;
-    if(index >= list->getHead()->data.size()) return nullptr;
+    if(list == nullptr or list->getHead() == nullptr)
+    {
+        std::cout << "No list object" << std::endl;
+        return nullptr;
+    }
+    if(numOfRows_ == 0)
+    {
+        std::cout << "No rows after join\n";
+        return nullptr;
+    }
+    if(index >= list->getHead()->data.size())
+    {
+        std::cout << "Index of vec out of bounds in struct Node\n";
+        return nullptr;
+    }
 
     if(columnNumber >=numOfColumns) {
         std::cout << "Out of matrix boundaries. The matrix has only "<< numOfColumns <<

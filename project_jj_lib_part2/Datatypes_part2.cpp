@@ -193,6 +193,7 @@ void Query::exec() {
     uint64_t f = 0;
     bool filters = filtering(f);
     if (!filters) {
+        std::cout << "Exec: no filters\n";
         empty_sum();
         return;
     }
@@ -217,6 +218,7 @@ void Query::exec() {
                 }
             }
             if (!R1->numTuples) {
+                std::cout << "Exec: empty filtered r1\n";
                 empty_sum();
                 return;
             }
@@ -237,6 +239,7 @@ void Query::exec() {
                 }
             }
             if (!R2->numTuples) {
+                std::cout << "Exec: empty filtered r2\n";
                 empty_sum();
                 return;
             }
@@ -245,6 +248,7 @@ void Query::exec() {
             R2 = MATRICES[Predicates[i].Matrices[1]].getRelation(ListOfResults,index,rowsInResults,Predicates[i].RowIds[1]);
 
         if(R1 == nullptr or R2 == nullptr){
+            std::cout << "Exec: no rel1||re2\n";
             empty_sum();
             return;
         }
@@ -264,6 +268,7 @@ void Query::exec() {
             ListOfResults = join(R2, R1);
         }
         if(ListOfResults == nullptr){
+            std::cout << "Exec: empty results\n";
             empty_sum();
             return;
         }
@@ -275,27 +280,34 @@ void Query::exec() {
 
 List* Query::join(Relation *relA, Relation *relB) {
 
-    std::cout << "A before" << std::endl;
-    relA->print();
+//    std::cout << "A before" << std::endl;
+//    relA->print();
     Radixsort(relA,0,relA->numTuples-1);
-    std::cout << "A after" << std::endl;
-    relA->print();
+//    std::cout << "A after" << std::endl;
+//    relA->print();
 
-    std::cout << "B before" << std::endl;
-    relB->print();
+//    std::cout << "B before" << std::endl;
+//    relB->print();
     Radixsort(relB,0,relB->numTuples-1);
-    std::cout << "B after" << std::endl;
-    relB->print();
+//    std::cout << "B after" << std::endl;
+//    relB->print();
 
 //    ---> Radixsort of relX works fine
     if (!relA->isSorted() || !relB->isSorted())
+    {
+        std::cout << "Join: no sorted rels\n";
         return nullptr;
+    }
 
     Tuple* tupA = relA->getTuples();
     Tuple* tupB = relB->getTuples();
 
     if(tupA == nullptr or tupB == nullptr)
+
+    {
+        std::cout << "Join: empty tuples\n";
         return nullptr;
+    }
 
     uint64_t sizeA = relA->numTuples;
     uint64_t sizeB = relB->numTuples;
@@ -353,7 +365,11 @@ List* Query::join(Relation *relA, Relation *relB) {
             j = jj;
         }
     }
-    if(counter==0) return nullptr;
+    if(counter==0)
+    {
+        std::cout <<"Join: no joins\n";
+        return nullptr;
+    }
     rowsInResults = counter;
     return results;
 }
@@ -434,7 +450,7 @@ void Query::calc_sum() {
         y = fracto_int(frack, 1);
 
         if (!MatricesJoined->search(Matrices[x])) {
-            std::cout << "No such relation in joined ones!" << std::endl;
+            std::cout << "Calculation: No such relation in joined ones!" << std::endl;
             return;
         }
 
@@ -444,7 +460,7 @@ void Query::calc_sum() {
             data = rel->getTuples();
             for (struct Node *h = ListOfResults->getHead(); h != nullptr; h = h->next) {
                 if (h->data[indx] > rel->numTuples) {
-                    std::cout << "RowId OUT OF BOUNDS: " << "max " << rel->numTuples
+                    std::cout << "Calculation: RowId OUT OF BOUNDS: " << "max " << rel->numTuples
                               << " while indx " << h->data[indx] << std::endl;
                     return;
                 }
@@ -452,7 +468,7 @@ void Query::calc_sum() {
             }
             sum.push_back(s);
         } else {
-            std::cout << "No such relation in List object" << std::endl;
+            std::cout << "Calculation: No such relation in List object" << std::endl;
             return;
         }
     }
