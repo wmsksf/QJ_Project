@@ -315,7 +315,7 @@ List* Query::join(Relation *relA, Relation *relB) {
 
         if(tupA[i].getKey() == tupB[j].getKey()){
             N = results->insert_node();
-            std::cout << tupA[i].payloads.size() << std::endl;
+            //std::cout << tupA[i].payloads.size() << std::endl;
             for(int x =0; x < (int) tupA[i].payloads.size(); x++)
                 results->insert(N,tupA[i].payloads[x]);
             results->insert(N,tupB[j].payloads[0]);
@@ -324,7 +324,7 @@ List* Query::join(Relation *relA, Relation *relB) {
             if(j == sizeB-1) continue;
             while(tupA[i].getKey() == tupB[++j].getKey()){
                 N = results->insert_node();
-                std::cout << tupA[i].payloads.size() << std::endl;
+                //std::cout << tupA[i].payloads.size() << std::endl;
                 for(int x =0; x < (int) tupA[i].payloads.size(); x++)
                     results->insert(N,tupA[i].payloads[x]);
                 results->insert(N,tupB[j].payloads[0]);
@@ -349,7 +349,7 @@ List* Query::join(Relation *relA, Relation *relB) {
             jj = j--;
             while(tupA[i].getKey() == tupB[++j].getKey()){
                 N = results->insert_node();
-                std::cout << tupA[i].payloads.size() << std::endl;
+                //std::cout << tupA[i].payloads.size() << std::endl;
                 for(int x =0; x < (int) tupA[i].payloads.size(); x++)
                     results->insert(N,tupA[i].payloads[x]);
                 results->insert(N,tupB[j].payloads[0]);
