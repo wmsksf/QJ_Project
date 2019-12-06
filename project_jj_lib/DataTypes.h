@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include "../project_jj_lib_part2/Vector.h"
+#include "../project_jj_lib_part2/List.h"
 
 #define L1_CACHESIZE 64*1024
 #define BUFFERSIZE (1024*1024)/sizeof(Tuple)
@@ -69,6 +70,7 @@ public:
     bool setMatrix(char* fileName);       // Initializes the matrix data, given an input file
     void printMatrix();
     Relation* getRelation(long unsigned int);
+    Relation* getRelation(List* list,int index, long int numOfRows, int columnNumber);
     uint64_t * getData();
     long unsigned int getNumOfRows();
     long unsigned int getNumOfColumns();

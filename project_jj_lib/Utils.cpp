@@ -88,14 +88,12 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
     uint64_t tmp[256] = {0};
     for (uint64_t i = 0; i < 256; i++) tmp[i] = Psum[i];
 
-    Tuple tuple;
     RR->clean();
     for (uint64_t i = start; i <= end; i++)
     {
-        tuple = R->getTuples()[i];
-        uint64_t byte = (tuple.getKey() >> current_byte) & 0xff;
+        uint64_t byte = (R->getTuples()[i].getKey() >> current_byte) & 0xff;
 
-        RR->setTupleVal(tmp[byte]++, tuple.getKey(), tuple.getPayloads());
+        RR->setTupleVal(tmp[byte]++, R->getTuples()[i].getKey(), R->getTuples()[i].getPayloads());
     }
 
 //    switch R, RR after byte checked
@@ -129,7 +127,9 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
             OptQuicksort(RR->getTuples(), Psum[255], end);
         }
     }
-        R->copyTuplesVal(RR, start, end);
+    //R->clean();
+    R->copyTuplesVal(RR, start, end);
+    RR->clean();
 
     if(nth_byte==7) {
         delete RR;

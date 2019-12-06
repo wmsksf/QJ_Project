@@ -19,9 +19,6 @@ Vector& Tuple::getPayloads() { return payloads; }
 
 void Tuple::swap(Tuple *tpl)
 {
-    std::cout << "before swap:" << this->key << " payloads: "; this->payloads.print();
-    std::cout << "next " << tpl->getKey() << " payloads:"; tpl->payloads.print();
-    std::cout << std::endl;
 
     uint64_t tmp = key;
     setKey(tpl->getKey());
@@ -38,10 +35,6 @@ void Tuple::swap(Tuple *tpl)
     tpl->payloads.clear();
     for (uint64_t i = 0; i < tmpayl.size(); i++)
         tpl->payloads.push_back(tmpayl[i]);
-
-    std::cout << "after swap:" << this->key << " payloads: "; this->payloads.print();
-    std::cout << "next " << tpl->getKey() << " payloads:"; tpl->payloads.print();
-    std::cout << std::endl;
 
 }
 
@@ -164,7 +157,7 @@ bool Relation::isSorted() {
         }
         a = b;
     }
-    std::cout << "Relation is sorted" << std::endl;
+    //std::cout << "Relation is sorted" << std::endl;
     return true;
 }
 
@@ -301,6 +294,29 @@ uint64_t *Matrix::getData() {
     return data;
 }
 
+Relation *Matrix::getRelation(List* list,int index, long int numOfRows_, int columnNumber) {
+    if(list == nullptr or list->getHead() == nullptr) return nullptr;
+    if(numOfRows_ == 0) return nullptr;
+    if(index >= list->getHead()->data.size()) return nullptr;
+
+    if(columnNumber >=numOfColumns) {
+        std::cout << "Out of matrix boundaries. The matrix has only "<< numOfColumns <<
+                  " columns.  You tries to access column " << columnNumber << std::endl;
+        return nullptr;
+    }
+
+    long unsigned int offset = columnNumber*numOfRows;
+    auto* R = new Relation();
+    R->setNumTuples(numOfRows_);
+    R->initTuples();
+    long int i = 0;
+    for(struct Node* N = list->getHead(); N != nullptr; N = N->next){
+        R->setTupleVal(i,data[offset+N->data[index]],N->data);
+        i++;
+    }
+    return R;
+
+}
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 Results::Results() { Buffer = nullptr; Buffersize = 0; }
 Results::~Results() { delete[] Buffer; }

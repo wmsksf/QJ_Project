@@ -211,53 +211,156 @@ void Query::exec() {
         if (operation != 'j')  //not a join operation
             continue;
 
+        Relation* R1, *R2;
         //Get the first relation of the predicate, filter it and sort it
-        Relation *R1 = MATRICES[Predicates[i].Matrices[0]].getRelation(Predicates[i].RowIds[0]);
-        for (int j = 0; j < NumOfMatrices; j++) {
-            if (Predicates[i].Matrices[0] == Matrices[j]) {
-                R1->filter(FilteredMatrices[j]);
-                break;
+        int index = -1;
+        if(MatricesJoined != nullptr)
+            index = MatricesJoined->getIndex(Predicates[i].Matrices[0]);
+        if(index == -1) { //matrix not in Results structure
+            R1 = MATRICES[Predicates[i].Matrices[0]].getRelation(Predicates[i].RowIds[0]);
+            for (int j = 0; j < NumOfMatrices; j++) {
+                if (Predicates[i].Matrices[0] == Matrices[j]) {
+                    R1->filter(FilteredMatrices[j]);
+                    break;
+                }
+            }
+            if (R1->getNumTuples() == 0) {
+                empty_sum();
+                return;
             }
         }
-        if (R1->getNumTuples() == 0) {
-            empty_sum();
-            return;
+        else{
+            R1 = MATRICES[Predicates[i].Matrices[0]].
+                    getRelation(ListOfResults,index,rowsInResults,Predicates[i].RowIds[0]);
         }
-        R1->print();
 
-        Radixsort(R1, 0, R1->getNumTuples() - 1);
-        R1->print();
-
-exit(1);
         //Same thing for the second relation of the predicate
-        Relation *R2 = MATRICES[Predicates[i].Matrices[1]].getRelation(Predicates[i].RowIds[1]);
-        for (int j = 0; j < NumOfMatrices; j++) {
-            if (Predicates[i].Matrices[1] == Matrices[j]) {
-                R2->filter(FilteredMatrices[j]);
-                break;
+        index = -1;
+        if(MatricesJoined != nullptr)
+            index = MatricesJoined->getIndex(Predicates[i].Matrices[1]);
+        if(index == -1) { //matrix not in Results structure
+            R2 = MATRICES[Predicates[i].Matrices[1]].getRelation(Predicates[i].RowIds[1]);
+            for (int j = 0; j < NumOfMatrices; j++) {
+                if (Predicates[i].Matrices[1] == Matrices[j]) {
+                    R2->filter(FilteredMatrices[j]);
+                    break;
+                }
+            }
+            if (R2->getNumTuples() == 0) {
+                empty_sum();
+                return;
             }
         }
+        else{
+            R2 = MATRICES[Predicates[i].Matrices[1]].
+                    getRelation(ListOfResults,index,rowsInResults,Predicates[i].RowIds[1]);
+        }
 
-        if (R2->getNumTuples() == 0) {
+        if(R1 == nullptr or R2 == nullptr){
             empty_sum();
             return;
         }
-        std::cout << "next rel\n";
-        R2->print();
-        Radixsort(R2, 0, R2->getNumTuples() - 1);
 
-        if (MatricesJoined != nullptr and MatricesJoined->search(Predicates[i].Matrices[0])) {
-            //Save the joined result in an array
-            LinkedList *tmp = SortMergeJoin(R1, R2);
-          //  expandResultsList(tmp, Predicates[i].Matrices[0], Predicates[i].Matrices[1]);
-        } else {
-            LinkedList *tmp = SortMergeJoin(R2, R1);
-            //expandResultsList(tmp, Predicates[i].Matrices[1], Predicates[i].Matrices[0]);
+        //R1->print();
+        if(MatricesJoined==nullptr){
+            MatricesJoined = new Vector();
+            MatricesJoined->push_back(Predicates[i].Matrices[0]);
+            MatricesJoined->push_back(Predicates[i].Matrices[1]);
+            ListOfResults = join(R1, R2);
         }
-
+        else if ( MatricesJoined->search(Predicates[i].Matrices[0])) {
+            MatricesJoined->search(Predicates[i].Matrices[1]);
+            //Save the joined result in an array
+            ListOfResults = join(R1, R2);
+        } else {
+            MatricesJoined->search(Predicates[i].Matrices[0]);
+            ListOfResults = join(R2, R1);
+        }
+        if(ListOfResults == nullptr){
+            empty_sum();
+            return;
+        }
+        //ListOfResults->print();
     }
-
     calc_sum();
+}
+
+
+List* Query::join(Relation *relA, Relation *relB) {
+
+    relA->print();
+    Radixsort(relA,0,relA->getNumTuples()-1);
+    relA->print();
+    Radixsort(relB,0,relB->getNumTuples()-1);
+
+    if (!relA->isSorted() || !relB->isSorted())
+        return nullptr;
+
+    Tuple* tupA = relA->getTuples();
+    Tuple* tupB = relB->getTuples();
+
+    if(tupA == nullptr or tupB == nullptr)
+        return nullptr;
+
+    uint64_t sizeA = relA->getNumTuples();
+    uint64_t sizeB = relB->getNumTuples();
+    uint64_t j=0;
+    uint64_t jj=0;
+    bool flag = false;
+    uint64_t counter = 0;
+    struct Node* N;
+
+    List* results = new List();
+    for(uint64_t i = 0; i<sizeA; i++){
+
+        if(tupA[i].getKey() == tupB[j].getKey()){
+            N = results->insert_node();
+            std::cout << tupA[i].payloads.size() << std::endl;
+            for(int x =0; x < (int) tupA[i].payloads.size(); x++)
+                results->insert(N,tupA[i].payloads[x]);
+            results->insert(N,tupB[j].payloads[0]);
+            counter++;
+
+            if(j == sizeB-1) continue;
+            while(tupA[i].getKey() == tupB[++j].getKey()){
+                N = results->insert_node();
+                std::cout << tupA[i].payloads.size() << std::endl;
+                for(int x =0; x < (int) tupA[i].payloads.size(); x++)
+                    results->insert(N,tupA[i].payloads[x]);
+                results->insert(N,tupB[j].payloads[0]);
+                counter++;
+                if(j == sizeB-1) break;
+            }
+            j = jj;
+        }
+        else if(tupA[i].getKey() > tupB[j].getKey()){
+
+            if(j == sizeB-1) break;
+            while(tupA[i].getKey() > tupB[++j].getKey()){
+                if (j == sizeB-1) {
+                    flag = true;
+                    break;
+                }
+            }
+            if (j == sizeB-1) {
+                break;
+            }
+            if(flag) break;
+            jj = j--;
+            while(tupA[i].getKey() == tupB[++j].getKey()){
+                N = results->insert_node();
+                std::cout << tupA[i].payloads.size() << std::endl;
+                for(int x =0; x < (int) tupA[i].payloads.size(); x++)
+                    results->insert(N,tupA[i].payloads[x]);
+                results->insert(N,tupB[j].payloads[0]);
+                counter++;
+            }
+            j = jj;
+        }
+    }
+    if(counter==0) return nullptr;
+    rowsInResults = counter;
+    return results;
 }
 
 

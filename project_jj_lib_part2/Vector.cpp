@@ -17,7 +17,8 @@ Vector::Vector()
     index = 0;
 }
 
-Vector::~Vector() { delete[] vec; }
+Vector::~Vector() {
+    delete[] vec; }
 
 uint64_t Vector::size()
 {

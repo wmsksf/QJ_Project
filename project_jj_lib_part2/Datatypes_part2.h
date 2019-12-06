@@ -30,6 +30,7 @@ public:
     int NumOfResults;
     int* Matrices;
     double* Results;
+    long int rowsInResults;
     Predicate* Predicates;
     Vector* FilteredMatrices[4];  //max 4 matrices per query
     List* ListOfResults;
@@ -38,7 +39,8 @@ public:
     Query();
     void parse(char *inq);
 
-    void expandResultsList(LinkedList* latestJoin, uint64_t matrixA, uint64_t matrixB);
+    List* join(Relation*, Relation*);
+    //void expandResultsList(LinkedList* latestJoin, uint64_t matrixA, uint64_t matrixB);
     bool filtering(uint64_t &filters);
     void exec();
 
