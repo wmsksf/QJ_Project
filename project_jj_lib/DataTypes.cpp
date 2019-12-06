@@ -181,6 +181,7 @@ void Relation::copyTuplesVal(Relation *R, uint64_t start, uint64_t end) {
         exit(EXIT_FAILURE);
     }
 
+    clean();
     for (uint64_t i = start; i <= end; i++)
     {
         tuples[i].setKey(R->tuples[i].getKey());
