@@ -2,6 +2,15 @@
 // Created by wmsksf on 27/11/19.
 //
 
+#define DEBUG
+#ifdef DEBUG
+#define log(msg)({fprintf(stderr, msg); })
+#endif
+
+#ifndef DEBUG
+#define log(...)
+#endif
+
 #ifndef PROJECT_JJ_MACROS_H
 #define PROJECT_JJ_MACROS_H
 

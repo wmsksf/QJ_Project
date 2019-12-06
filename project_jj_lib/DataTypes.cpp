@@ -105,7 +105,7 @@ void Relation::clean()
 }
 void Relation::print() {
     if (!numTuples) {
-        std::cout << "Empty Relation object." << std::endl;
+        log("Empty Relation object\n");
         return;
     }
     uint64_t j = numTuples;
@@ -116,15 +116,15 @@ void Relation::print() {
 
 bool Relation::isSorted() {
     uint64_t  size = numTuples;
-    if(size ==0){
-        std::cout << "Relation is empty" << std::endl;
+    if(!size){
+        log("Relation is empty\n");
         return false;
     }
     uint64_t a = tuples[0].key;
     for (uint64_t i =1; i<size; i++){
         uint64_t b = tuples[i].key;
         if(a > b){
-            std::cout << "Relation is not sorted" << std::endl;
+            log("Relation is not sorted\n");
             return false;
         }
         a = b;
@@ -142,12 +142,12 @@ void Relation::copyTuplesVal(Relation *R, uint64_t start, uint64_t end) {
     }
     else if (R->numTuples != numTuples)
     {
-        std::cout << "Relation objects of different size." << std::endl;
+        std::cerr << "Relation objects of different size." << std::endl;
         exit(EXIT_FAILURE);
     }
     else if(numTuples <= end or numTuples <= start)
     {
-        std::cout << "start or end value is out of index" << std::endl;
+        std::cerr << "Start or end value is out of bounds" << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -205,7 +205,7 @@ bool Matrix::setMatrix(char* fileName)
     if (data == MAP_FAILED)
     {
         perror("mmap");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     for (int j = 0; j < numOfColumns*numOfRows; j++)
@@ -215,9 +215,9 @@ bool Matrix::setMatrix(char* fileName)
 }
 
 Relation *Matrix::getRelation(long unsigned int columnNumber) {
-    if(columnNumber >=numOfColumns) {
-        std::cout << "Out of matrix boundaries. The matrix has only "<< numOfColumns <<
-                  " columns.  You tries to access column " << columnNumber << std::endl;
+    if(columnNumber >=numOfColumns)
+    {
+        log("Out of Matrix object data array bounds\n");
         return nullptr;
     }
 
@@ -256,23 +256,23 @@ uint64_t *Matrix::getData() { return data; }
 Relation *Matrix::getRelation(List* list,int index, long int numOfRows_, int columnNumber) {
     if(list == nullptr or list->getHead() == nullptr)
     {
-        std::cout << "No list object" << std::endl;
+        log("No List object\n");
         return nullptr;
     }
     if(numOfRows_ == 0)
     {
-        std::cout << "No rows after join\n";
+        log("No rows\n");
         return nullptr;
     }
     if(index >= list->getHead()->data.size())
     {
-        std::cout << "Index of vec out of bounds in struct Node\n";
+        log("Index of Vector class vec array out of bounds in struct Node\n");
         return nullptr;
     }
 
-    if(columnNumber >=numOfColumns) {
-        std::cout << "Out of matrix boundaries. The matrix has only "<< numOfColumns <<
-                  " columns.  You tries to access column " << columnNumber << std::endl;
+    if(columnNumber >=numOfColumns)
+    {
+        log("Out of Matrix object data array bounds\n");
         return nullptr;
     }
 
