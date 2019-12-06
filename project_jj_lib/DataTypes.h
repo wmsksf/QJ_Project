@@ -47,7 +47,7 @@ public:
     void copyTuplesVal(Relation* R,uint64_t, uint64_t);
 
     void print();
-    void clean();
+    void clean(uint64_t start, uint64_t end);
     bool isSorted();
 
     void filter(Vector*);

@@ -95,9 +95,9 @@ void Relation::setTupleVal(long unsigned int index, uint64_t key, Vector &payloa
         tuples[index].setPayload(payload[j]);
 }
 
-void Relation::clean()
+void Relation::clean(uint64_t start, uint64_t end)
 {
-    for (uint64_t i = 0; i < numTuples; i++)
+    for (uint64_t i = start; i < end+1; i++)
     {
         tuples[i].key = 0;
         tuples[i].getPayloads().clear();

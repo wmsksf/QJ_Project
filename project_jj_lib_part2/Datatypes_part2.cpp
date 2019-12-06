@@ -182,6 +182,7 @@ bool Query::filtering(uint64_t &size) {
             for (int x = 0; x < NumOfMatrices; x++)
                 if (Matrices[x] == Predicates[i].Matrices[0])
                     FilteredMatrices[x] = vector;
+               // std::cout << "vector size: " << vector->size() << std::endl;
         }
 
     size = v;
@@ -218,7 +219,7 @@ void Query::exec() {
                 }
             }
             if (!R1->numTuples) {
-                log("Exec: Empty filtered rel1\n");
+                //log("Exec: Empty filtered rel1\n");
                 empty_sum();
                 return;
             }
@@ -239,7 +240,7 @@ void Query::exec() {
                 }
             }
             if (!R2->numTuples) {
-                log("Exec: Empty filtered rel2\n");
+                //log("Exec: Empty filtered rel2\n");
                 empty_sum();
                 return;
             }
@@ -253,6 +254,7 @@ void Query::exec() {
             return;
         }
 
+
         if(MatricesJoined==nullptr){
             MatricesJoined = new Vector();
             MatricesJoined->push_back(Predicates[i].Matrices[0]);
@@ -260,39 +262,33 @@ void Query::exec() {
             ListOfResults = join(R1, R2);
         }
         else if ( MatricesJoined->search(Predicates[i].Matrices[0])) {
-            MatricesJoined->search(Predicates[i].Matrices[1]);
+            delete ListOfResults;
+            MatricesJoined->push_back(Predicates[i].Matrices[1]);
             //Save the joined result in an array
             ListOfResults = join(R1, R2);
         } else {
-            MatricesJoined->search(Predicates[i].Matrices[0]);
+            delete ListOfResults;
+            MatricesJoined->push_back(Predicates[i].Matrices[0]);
             ListOfResults = join(R2, R1);
         }
         if(ListOfResults == nullptr){
-            log("Exec: Empty results\n");
+            //log("Exec: Empty results\n");
             empty_sum();
             return;
         }
-//        ListOfResults->print();
+        //MatricesJoined->print();
+       // std:: cout << rowsInResults << std:: endl;
     }
+
     calc_sum();
 }
 
 
 List* Query::join(Relation *relA, Relation *relB) {
 
-//    std::cout << "A before" << std::endl;
-//    relA->print();
     Radixsort(relA,0,relA->numTuples-1);
-//    std::cout << "A after" << std::endl;
-//    relA->print();
-
-//    std::cout << "B before" << std::endl;
-//    relB->print();
     Radixsort(relB,0,relB->numTuples-1);
-//    std::cout << "B after" << std::endl;
-//    relB->print();
 
-//    ---> Radixsort of relX works fine
     if (!relA->isSorted() || !relB->isSorted())
     {
         log("Join: No sorted rels\n");
@@ -322,16 +318,15 @@ List* Query::join(Relation *relA, Relation *relB) {
 
         if(tupA[i].key == tupB[j].key){
             N = results->insert_node();
-            //std::cout << tupA[i].payloads.size() << std::endl;
             for(int x =0; x < (int) tupA[i].payloads.size(); x++)
                 results->insert(N,tupA[i].payloads[x]);
             results->insert(N,tupB[j].payloads[0]);
             counter++;
 
             if(j == sizeB-1) continue;
+            jj = j;
             while(tupA[i].key == tupB[++j].key){
                 N = results->insert_node();
-                //std::cout << tupA[i].payloads.size() << std::endl;
                 for(int x =0; x < (int) tupA[i].payloads.size(); x++)
                     results->insert(N,tupA[i].payloads[x]);
                 results->insert(N,tupB[j].payloads[0]);
@@ -349,18 +344,17 @@ List* Query::join(Relation *relA, Relation *relB) {
                     break;
                 }
             }
-            if (j == sizeB-1) {
-                break;
-            }
             if(flag) break;
             jj = j--;
             while(tupA[i].key == tupB[++j].key){
                 N = results->insert_node();
-                //std::cout << tupA[i].payloads.size() << std::endl;
                 for(int x =0; x < (int) tupA[i].payloads.size(); x++)
                     results->insert(N,tupA[i].payloads[x]);
                 results->insert(N,tupB[j].payloads[0]);
                 counter++;
+                if (j == sizeB-1) {
+                    break;
+                }
             }
             j = jj;
         }
@@ -373,58 +367,6 @@ List* Query::join(Relation *relA, Relation *relB) {
     rowsInResults = counter;
     return results;
 }
-
-
-//void Query::expandResultsList(LinkedList *latestJoin, uint64_t A, uint64_t B) {
-//
-//    if (latestJoin == nullptr) return;
-//
-//    if (ListOfResults == nullptr) {  //List of Results is empty
-//        MatricesJoined = new Vector();
-//        MatricesJoined->push_back(A);   //Write the names of the first 2 joined matrices
-//        MatricesJoined->push_back(B);
-//        ListOfResults = new List();
-//
-//        //Add all joined tuples to our list of results
-//        for (struct node *tmp = latestJoin->getHead(); tmp != nullptr; tmp = tmp->next) {
-//            Tuple *t = tmp->Data.getBuffer();
-//            uint64_t size = tmp->Data.getIndex();
-//            for (uint64_t i = 0; i < size; i++) {
-//                struct Node *node = ListOfResults->insert_node();
-//                ListOfResults->insert(node, t[i].getKey());
-//                ListOfResults->insert(node, t[i].getPayload());
-//            }
-//        }
-//    } else {   //At least 2 matrices are in list of results
-//        MatricesJoined->push_back(B);
-//        int x = -1;
-//        for (int i = 0; i < MatricesJoined->size(); i++) {
-//            if ((*MatricesJoined)[i] == A) x = i;   //get the x position of matrix A in the list of arrays
-//        }
-//        if (x == -1) {
-//            std::cout << "Matrix A not in MatricesJoined" << std::endl;
-//            exit(1);
-//        }
-//        List *newList = new List();
-//
-//        //create a new list with
-//        for (struct node *tmp = latestJoin->getHead(); tmp != nullptr; tmp = tmp->next) {
-//            Tuple *t = tmp->Data.getBuffer();
-//            uint64_t size = tmp->Data.getIndex();
-//            for (uint64_t i = 0; i < size; i++) {
-//                for (struct Node *node = ListOfResults->getHead(); node != nullptr; node = node->next) {
-//                    if (t[i].getKey() == (node->data[x])) {
-//                        struct Node *newNode = newList->insert_node();
-//                        newNode->data = node->data;
-//                        newNode->data.push_back(t[i].getPayload());
-//                    }
-//                }
-//            }
-//        }
-//        //delete ListOfResults;
-//        ListOfResults = newList;
-//    }
-//}
 
 int fracto_int(double number, int dec_num) {
     double dummy;
@@ -441,8 +383,8 @@ void Query::empty_sum() {
 void Query::calc_sum() {
     Vector sum;
     Tuple *data;
-    uint64_t s = 0;
     for (uint64_t i = 0; i < NumOfResults; i++) {
+        uint64_t s = 0;
         double frack, intprt;
         int x, y;
         frack = modf(Results[i], &intprt);
@@ -471,6 +413,7 @@ void Query::calc_sum() {
             return;
         }
     }
+    delete ListOfResults;
 
     for (uint64_t i = 0; i < sum.size(); i++)
         std::cout << sum[i] << " ";
