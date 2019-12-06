@@ -228,7 +228,7 @@ void Query::exec() {
         Radixsort(R1, 0, R1->getNumTuples() - 1);
         R1->print();
 
-exit(1);
+
         //Same thing for the second relation of the predicate
         Relation *R2 = MATRICES[Predicates[i].Matrices[1]].getRelation(Predicates[i].RowIds[1]);
         for (int j = 0; j < NumOfMatrices; j++) {
@@ -246,6 +246,7 @@ exit(1);
         R2->print();
         Radixsort(R2, 0, R2->getNumTuples() - 1);
 
+        exit(1);
         if (MatricesJoined != nullptr and MatricesJoined->search(Predicates[i].Matrices[0])) {
             //Save the joined result in an array
             LinkedList *tmp = SortMergeJoin(R1, R2);

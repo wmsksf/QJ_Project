@@ -19,9 +19,9 @@ Vector& Tuple::getPayloads() { return payloads; }
 
 void Tuple::swap(Tuple *tpl)
 {
-    std::cout << "before swap:" << this->key << " payloads: "; this->payloads.print();
-    std::cout << "next " << tpl->getKey() << " payloads:"; tpl->payloads.print();
-    std::cout << std::endl;
+//    std::cout << "before swap:" << this->key << " payloads: "; this->payloads.print();
+//    std::cout << "next " << tpl->getKey() << " payloads:"; tpl->payloads.print();
+//    std::cout << std::endl;
 
     uint64_t tmp = key;
     setKey(tpl->getKey());
@@ -39,10 +39,9 @@ void Tuple::swap(Tuple *tpl)
     for (uint64_t i = 0; i < tmpayl.size(); i++)
         tpl->payloads.push_back(tmpayl[i]);
 
-    std::cout << "after swap:" << this->key << " payloads: "; this->payloads.print();
-    std::cout << "next " << tpl->getKey() << " payloads:"; tpl->payloads.print();
-    std::cout << std::endl;
-
+//    std::cout << "after swap:" << this->key << " payloads: "; this->payloads.print();
+//    std::cout << "next " << tpl->getKey() << " payloads:"; tpl->payloads.print();
+//    std::cout << std::endl;
 }
 
 void Tuple::print()
@@ -188,6 +187,7 @@ void Relation::copyTuplesVal(Relation *R, uint64_t start, uint64_t end) {
         exit(EXIT_FAILURE);
     }
 
+    clean();
     for (uint64_t i = start; i <= end; i++)
     {
         tuples[i].setKey(R->tuples[i].getKey());
