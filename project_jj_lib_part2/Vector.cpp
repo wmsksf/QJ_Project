@@ -31,7 +31,6 @@ void Vector::push_back(uint64_t x)
     {
         capacity *= 2;
         uint64_t *tmp = new uint64_t[capacity];
-        ALLOC_CHECK(tmp);
 
         for (uint64_t i = 0; i < index; i++) tmp[i] = vec[i];
         delete[] vec;
@@ -40,9 +39,10 @@ void Vector::push_back(uint64_t x)
 
     vec[index] = x;
     index++;
+//    std::cout<<"in vec "; print(); std::cout << std::endl;
 }
 
-uint64_t& Vector::operator[](uint64_t indx)
+uint64_t Vector::operator[](uint64_t indx)
 {
     if (indx > capacity)
     {
@@ -73,13 +73,12 @@ void Vector::print()
 {
     for (uint64_t i = 0; i < size(); i++)
         std::cout << vec[i] << " ";
-
 }
 
 void Vector::clear() {
     capacity = 1;
     index = 0;
     delete[] vec;
+
     vec = new uint64_t[1];
-    ALLOC_CHECK(vec);
 }

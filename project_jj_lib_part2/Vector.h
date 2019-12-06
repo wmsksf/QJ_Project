@@ -22,7 +22,7 @@ public:
     int getIndex(uint64_t x);
     void clear();
 
-    uint64_t& operator[] (uint64_t x);
+    uint64_t operator[] (uint64_t x);
 
     void print();
 };

@@ -11,18 +11,21 @@
 
 Tuple::Tuple() { key = 0; }
 
-void Tuple::setKey(uint64_t key_) { key = key_; }
-uint64_t Tuple::getKey() { return key; }
+//void Tuple::setKey(uint64_t key_) { key = key_; }
+//uint64_t Tuple::getKey() { return key; }
 
 void Tuple::setPayload(uint64_t payload_) { payloads.push_back(payload_); }
 Vector& Tuple::getPayloads() { return payloads; }
 
 void Tuple::swap(Tuple *tpl)
 {
+//    std::cout << "before swap:" << this->key << " payloads: "; this->payloads.print();
+//    std::cout << "next " << tpl->getKey() << " payloads:"; tpl->payloads.print();
+//    std::cout << std::endl;
 
     uint64_t tmp = key;
-    setKey(tpl->getKey());
-    tpl->setKey(tmp);
+    this->key = tpl->key;
+    tpl->key = tmp;
 
     Vector tmpayl;
     for (uint64_t i = 0; i < payloads.size(); i++)
@@ -36,6 +39,9 @@ void Tuple::swap(Tuple *tpl)
     for (uint64_t i = 0; i < tmpayl.size(); i++)
         tpl->payloads.push_back(tmpayl[i]);
 
+//    std::cout << "after swap:" << this->key << " payloads: "; this->payloads.print();
+//    std::cout << "next " << tpl->getKey() << " payloads:"; tpl->payloads.print();
+//    std::cout << std::endl;
 }
 
 void Tuple::print()
@@ -50,7 +56,7 @@ Relation::~Relation() { delete[] tuples; }
 
 void Relation::initTuples()
 {
-    if (!this->getNumTuples())
+    if (!numTuples)
     {
         std::cerr << "Empty Relation object." << std::endl
                   << "Tip: call setNumTuples() of object first!" << std::endl;
@@ -58,140 +64,103 @@ void Relation::initTuples()
         exit(EXIT_FAILURE);
     }
 
-    tuples = new Tuple[this->getNumTuples()];
-    ALLOC_CHECK(tuples);
-}
-
-// copy data from a given relation
-
-
-void Relation::initTuplesVal(Relation* R)
-{
-    if (!this->getNumTuples())
-    {
-        std::cerr << "Empty Relation object." << std::endl
-                  << "Tip: call setNumTuples() of object first!" << std::endl;
-
-        exit(EXIT_FAILURE);
-    }
-    else if (R->getNumTuples() != this->getNumTuples())
-    {
-        std::cout << "Relation objects of different size." << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    tuples = new Tuple[this->getNumTuples()];
-    ALLOC_CHECK(tuples);
-
-    for (uint64_t i = 0; i < this->getNumTuples(); i++)
-    {
-        tuples[i].setKey(R->tuples[i].getKey());
-
-        for(uint64_t j = 0; j < tuples[i].payloads.size(); j++)
-            tuples[i].setPayload(R->tuples[i].payloads[j]);
-    }
+    tuples = new Tuple[numTuples];
 }
 
 Tuple* Relation::getTuples() const { return tuples; }
-uint64_t Relation::getNumTuples() const { return numTuples; }
-void Relation::setNumTuples(uint64_t numTuples_) { numTuples = numTuples_; }
 
-// use in method of Matrix object: getRelation()
+//    use in method Matrix::getRelation
 void Relation::setTupleVal(long unsigned int index, uint64_t key, uint64_t payload) {
-    if(index >= this->getNumTuples()){
+    if(index >= numTuples){
         std::cerr << "Index out of boundaries." << std::endl
                   << "In this Relation object the index can get values from 0 to "
-                  << this->getNumTuples()-1 << std::endl;
+                  << numTuples-1 << std::endl;
         exit(EXIT_FAILURE);
     }
-    this->getTuples()[index].setKey(key);
-    this->getTuples()[index].setPayload(payload);
+    tuples[index].key = key;
+    tuples[index].setPayload(payload);
 }
 
 void Relation::setTupleVal(long unsigned int index, uint64_t key, Vector &payload) {
-    if(index >= this->getNumTuples()){
+    if(index >= numTuples){
         std::cerr << "Index out of boundaries." << std::endl
                   << "In this Relation object the index can get values from 0 to "
-                  << this->getNumTuples()-1 << std::endl;
+                  << numTuples-1 << std::endl;
         exit(EXIT_FAILURE);
     }
-    this->getTuples()[index].setKey(key);
 
+    tuples[index].key = key;
     uint64_t p = payload.size();
     for (uint64_t j = 0; j < p; j++)
-        this->getTuples()[index].setPayload(payload[j]);
+        tuples[index].setPayload(payload[j]);
 }
 
 void Relation::clean()
 {
     for (uint64_t i = 0; i < numTuples; i++)
     {
-        getTuples()[i].setKey(0);
-        getTuples()[i].getPayloads().clear();
+        tuples[i].key = 0;
+        tuples[i].getPayloads().clear();
     }
 }
 void Relation::print() {
-    if (!this->getNumTuples()) {
+    if (!numTuples) {
         std::cout << "Empty Relation object." << std::endl;
         return;
     }
-    uint64_t j = this->getNumTuples();
-    Tuple *t = this->getTuples();
+    uint64_t j = numTuples;
+    Tuple *t = tuples;
     for (uint64_t i = 0; i < j; i++)
         t[i].print();
 }
 
 bool Relation::isSorted() {
-    Tuple* tuples_ = this->getTuples();
-    uint64_t  size = this->getNumTuples();
+    uint64_t  size = numTuples;
     if(size ==0){
         std::cout << "Relation is empty" << std::endl;
         return false;
     }
-    uint64_t a = tuples_[0].getKey();
+    uint64_t a = tuples[0].key;
     for (uint64_t i =1; i<size; i++){
-        uint64_t b = tuples_[i].getKey();
+        uint64_t b = tuples[i].key;
         if(a > b){
             std::cout << "Relation is not sorted" << std::endl;
             return false;
         }
         a = b;
     }
-    //std::cout << "Relation is sorted" << std::endl;
+//    std::cout << "Relation is sorted" << std::endl;
     return true;
 }
 
 void Relation::copyTuplesVal(Relation *R, uint64_t start, uint64_t end) {
-    uint64_t size = this->getNumTuples();
-    if (!size)
+    if (!numTuples)
     {
         std::cerr << "Empty Relation object." << std::endl
                   << "Tip: call setNumTuples() of object first!" << std::endl;
-
         exit(EXIT_FAILURE);
     }
-    else if (R->getNumTuples() != size)
+    else if (R->numTuples != numTuples)
     {
         std::cout << "Relation objects of different size." << std::endl;
         exit(EXIT_FAILURE);
     }
-    else if(size <= end or size <= start)
+    else if(numTuples <= end or numTuples <= start)
     {
         std::cout << "start or end value is out of index" << std::endl;
         exit(EXIT_FAILURE);
     }
 
-    clean();
     for (uint64_t i = start; i <= end; i++)
     {
-        tuples[i].setKey(R->tuples[i].getKey());
+        tuples[i].key = R->tuples[i].key;
         uint64_t p = R->tuples[i].payloads.size();
         for (uint64_t j = 0; j < p; j++)
-            tuples[i].setPayload(R->getTuples()->payloads[j]);
+            tuples[i].setPayload(R->getTuples()[i].payloads[j]);
     }
 }
 
-void Relation::filter(Vector * vector) {
+void Relation::filter(Vector  *vector) {
     if (vector == nullptr)
         return;
 
@@ -204,12 +173,11 @@ void Relation::filter(Vector * vector) {
     if(vectorSize == numTuples) return;
 
     Tuple* tmp = new Tuple[vectorSize];
-    ALLOC_CHECK(tmp);
 
     for(int i =0; i<vectorSize;i++)
     {
         uint64_t row = (*vector)[i];
-        tmp[i].setKey(tuples[row].getKey());
+        tmp[i].key = tuples[row].key;
 
         for (uint64_t j =0; j < tuples[row].payloads.size(); j++)
             tmp[i].setPayload(tuples[row].payloads[j]);
@@ -246,6 +214,23 @@ bool Matrix::setMatrix(char* fileName)
     return true;
 }
 
+Relation *Matrix::getRelation(long unsigned int columnNumber) {
+    if(columnNumber >=numOfColumns) {
+        std::cout << "Out of matrix boundaries. The matrix has only "<< numOfColumns <<
+                  " columns.  You tries to access column " << columnNumber << std::endl;
+        return nullptr;
+    }
+
+    long unsigned int offset = columnNumber*numOfRows;
+    auto* R = new Relation();
+    R->numTuples = numOfRows;
+    R->initTuples();
+    for(uint64_t i = 0; i<numOfRows; i++){
+        R->setTupleVal(i,data[offset+i],i);
+    }
+    return R;
+}
+
 void Matrix::printMatrix() {
     uint64_t row = 0;
     uint64_t column = 0;
@@ -266,34 +251,7 @@ void Matrix::printMatrix() {
     }
 }
 
-Relation *Matrix::getRelation(long unsigned int columnNumber) {
-    if(columnNumber >=numOfColumns) {
-        std::cout << "Out of matrix boundaries. The matrix has only "<< numOfColumns <<
-                  " columns.  You tries to access column " << columnNumber << std::endl;
-        return nullptr;
-    }
-
-    long unsigned int offset = columnNumber*numOfRows;
-    auto* R = new Relation();
-    R->setNumTuples(this->numOfRows);
-    R->initTuples();
-    for(uint64_t i = 0; i<numOfRows; i++){
-        R->setTupleVal(i,data[offset+i],i);
-    }
-    return R;
-}
-
-long unsigned int Matrix::getNumOfRows() {
-    return numOfRows;
-}
-
-long unsigned int Matrix::getNumOfColumns() {
-    return numOfColumns;
-}
-
-uint64_t *Matrix::getData() {
-    return data;
-}
+uint64_t *Matrix::getData() { return data; }
 
 Relation *Matrix::getRelation(List* list,int index, long int numOfRows_, int columnNumber) {
     if(list == nullptr or list->getHead() == nullptr) return nullptr;
@@ -308,7 +266,7 @@ Relation *Matrix::getRelation(List* list,int index, long int numOfRows_, int col
 
     long unsigned int offset = columnNumber*numOfRows;
     auto* R = new Relation();
-    R->setNumTuples(numOfRows_);
+    R->numTuples = numOfRows_;
     R->initTuples();
     long int i = 0;
     for(struct Node* N = list->getHead(); N != nullptr; N = N->next){
@@ -329,7 +287,7 @@ void Results::initBuffer()
     if (!Buffersize)
     {
         std::cout << "Empty Results object." << std::endl <<
-        "Tip: call setBuffersize() of object first!" << std::endl;
+                  "Tip: call setBuffersize() of object first!" << std::endl;
 
         exit(EXIT_FAILURE);
     }
@@ -339,7 +297,7 @@ void Results::initBuffer()
 
 void Results::add(uint64_t x, uint64_t y)
 {
-    Buffer[index].setKey(x);
+    Buffer[index].key = x;
     Buffer[index].setPayload(y);
 
     index++;
@@ -350,7 +308,7 @@ bool Results::isEmpty() { return (index == 0); }
 void Results::print()
 {
     for (uint64_t i = 0; i < index; i++) {
-        std::cout << Buffer[i].getKey() << "\t";
+        std::cout << Buffer[i].key << "\t";
         Buffer[i].getPayloads().print();
     }
 

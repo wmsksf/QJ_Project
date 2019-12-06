@@ -50,7 +50,6 @@ void Query::parse(char *inq) {
     }
 //    alloc Matrices and set
     Matrices = new int[NumOfMatrices];
-    ALLOC_CHECK(Matrices);
 
     char *tmp = strtok(matrices, " ");
     Matrices[0] = atoi(tmp);
@@ -71,7 +70,6 @@ void Query::parse(char *inq) {
     }
 //    alloc Results and set
     Results = new double[NumOfResults];
-    ALLOC_CHECK(Results);
 
     tmp = strtok(results, " ");
     Results[0] = atof(tmp);
@@ -94,7 +92,6 @@ void Query::parse(char *inq) {
     }
 
     Predicates = new Predicate[NumOfPredicates];
-    ALLOC_CHECK(Predicates);
     char *strArray[NumOfPredicates];
 
     strArray[0] = strtok(predicates, "&"); // reading the 1st predicate
@@ -149,7 +146,7 @@ bool Query::filtering(uint64_t &size) {
     for (uint64_t i = 0; i < NumOfPredicates; i++)
         if (Predicates[i].filter) v++;
 
-    for (uint64_t i = 0, vv = 0; i < NumOfPredicates; i++)
+    for (uint64_t i = 0; i < NumOfPredicates; i++)
         if (Predicates[i].filter) {
             Relation *rel;
 
@@ -160,35 +157,31 @@ bool Query::filtering(uint64_t &size) {
             auto vector = new Vector();
 
             Tuple *tuples = rel->getTuples();
-            uint64_t numOfTuples = rel->getNumTuples();
+            uint64_t numOfTuples = rel->numTuples;
             switch (Predicates[i].operation) {
                 case '>':
                     for (uint64_t j = 0; j < numOfTuples; j++)
-                        if (tuples[j].getKey() > Predicates[i].filter)
+                        if (tuples[j].key > Predicates[i].filter)
                             vector->push_back(tuples[j].getPayloads()[0]);
-                    vv++;
                     break;
                 case '<':
-                    for (uint64_t j = 0; j < rel->getNumTuples(); j++)
-                        if (tuples[j].getKey() < Predicates[i].filter)
+                    for (uint64_t j = 0; j < rel->numTuples; j++)
+                        if (tuples[j].key < Predicates[i].filter)
                             vector->push_back(tuples[j].getPayloads()[0]);
-                    vv++;
                     break;
                 case '=':
-                    for (uint64_t j = 0; j < rel->getNumTuples(); j++)
-                        if (tuples[j].getKey() == Predicates[i].filter)
+                    for (uint64_t j = 0; j < rel->numTuples; j++)
+                        if (tuples[j].key == Predicates[i].filter)
                             vector->push_back(tuples[j].getPayloads()[0]);
-                    vv++;
                     break;
                 default:
                     std::cout << "Invalid operation for filtering!" << std::endl;
                     return false;
             }
 
-            for (int x = 0; x < NumOfMatrices; x++) {
+            for (int x = 0; x < NumOfMatrices; x++)
                 if (Matrices[x] == Predicates[i].Matrices[0])
                     FilteredMatrices[x] = vector;
-            }
         }
 
     size = v;
@@ -205,13 +198,12 @@ void Query::exec() {
     }
 
     //Then we execute the joins
-
     for (int i = 0; i < NumOfPredicates; i++) {
         char operation = Predicates[i].getOperation();
         if (operation != 'j')  //not a join operation
             continue;
 
-        Relation* R1, *R2;
+        Relation *R1, *R2;
         //Get the first relation of the predicate, filter it and sort it
         int index = -1;
         if(MatricesJoined != nullptr)
@@ -224,15 +216,13 @@ void Query::exec() {
                     break;
                 }
             }
-            if (R1->getNumTuples() == 0) {
+            if (!R1->numTuples) {
                 empty_sum();
                 return;
             }
         }
-        else{
-            R1 = MATRICES[Predicates[i].Matrices[0]].
-                    getRelation(ListOfResults,index,rowsInResults,Predicates[i].RowIds[0]);
-        }
+        else
+            R1 = MATRICES[Predicates[i].Matrices[0]].getRelation(ListOfResults,index,rowsInResults,Predicates[i].RowIds[0]);
 
         //Same thing for the second relation of the predicate
         index = -1;
@@ -246,22 +236,19 @@ void Query::exec() {
                     break;
                 }
             }
-            if (R2->getNumTuples() == 0) {
+            if (!R2->numTuples) {
                 empty_sum();
                 return;
             }
         }
-        else{
-            R2 = MATRICES[Predicates[i].Matrices[1]].
-                    getRelation(ListOfResults,index,rowsInResults,Predicates[i].RowIds[1]);
-        }
+        else
+            R2 = MATRICES[Predicates[i].Matrices[1]].getRelation(ListOfResults,index,rowsInResults,Predicates[i].RowIds[1]);
 
         if(R1 == nullptr or R2 == nullptr){
             empty_sum();
             return;
         }
 
-        //R1->print();
         if(MatricesJoined==nullptr){
             MatricesJoined = new Vector();
             MatricesJoined->push_back(Predicates[i].Matrices[0]);
@@ -280,7 +267,7 @@ void Query::exec() {
             empty_sum();
             return;
         }
-        //ListOfResults->print();
+//        ListOfResults->print();
     }
     calc_sum();
 }
@@ -288,11 +275,19 @@ void Query::exec() {
 
 List* Query::join(Relation *relA, Relation *relB) {
 
+    std::cout << "A before" << std::endl;
     relA->print();
-    Radixsort(relA,0,relA->getNumTuples()-1);
+    Radixsort(relA,0,relA->numTuples-1);
+    std::cout << "A after" << std::endl;
     relA->print();
-    Radixsort(relB,0,relB->getNumTuples()-1);
 
+    std::cout << "B before" << std::endl;
+    relB->print();
+    Radixsort(relB,0,relB->numTuples-1);
+    std::cout << "B after" << std::endl;
+    relB->print();
+
+//    ---> Radixsort of relX works fine
     if (!relA->isSorted() || !relB->isSorted())
         return nullptr;
 
@@ -302,8 +297,8 @@ List* Query::join(Relation *relA, Relation *relB) {
     if(tupA == nullptr or tupB == nullptr)
         return nullptr;
 
-    uint64_t sizeA = relA->getNumTuples();
-    uint64_t sizeB = relB->getNumTuples();
+    uint64_t sizeA = relA->numTuples;
+    uint64_t sizeB = relB->numTuples;
     uint64_t j=0;
     uint64_t jj=0;
     bool flag = false;
@@ -313,7 +308,7 @@ List* Query::join(Relation *relA, Relation *relB) {
     List* results = new List();
     for(uint64_t i = 0; i<sizeA; i++){
 
-        if(tupA[i].getKey() == tupB[j].getKey()){
+        if(tupA[i].key == tupB[j].key){
             N = results->insert_node();
             //std::cout << tupA[i].payloads.size() << std::endl;
             for(int x =0; x < (int) tupA[i].payloads.size(); x++)
@@ -322,7 +317,7 @@ List* Query::join(Relation *relA, Relation *relB) {
             counter++;
 
             if(j == sizeB-1) continue;
-            while(tupA[i].getKey() == tupB[++j].getKey()){
+            while(tupA[i].key == tupB[++j].key){
                 N = results->insert_node();
                 //std::cout << tupA[i].payloads.size() << std::endl;
                 for(int x =0; x < (int) tupA[i].payloads.size(); x++)
@@ -333,10 +328,10 @@ List* Query::join(Relation *relA, Relation *relB) {
             }
             j = jj;
         }
-        else if(tupA[i].getKey() > tupB[j].getKey()){
+        else if(tupA[i].key > tupB[j].key){
 
             if(j == sizeB-1) break;
-            while(tupA[i].getKey() > tupB[++j].getKey()){
+            while(tupA[i].key > tupB[++j].key){
                 if (j == sizeB-1) {
                     flag = true;
                     break;
@@ -347,7 +342,7 @@ List* Query::join(Relation *relA, Relation *relB) {
             }
             if(flag) break;
             jj = j--;
-            while(tupA[i].getKey() == tupB[++j].getKey()){
+            while(tupA[i].key == tupB[++j].key){
                 N = results->insert_node();
                 //std::cout << tupA[i].payloads.size() << std::endl;
                 for(int x =0; x < (int) tupA[i].payloads.size(); x++)
@@ -448,12 +443,12 @@ void Query::calc_sum() {
             Relation *rel = MATRICES[Matrices[x]].getRelation(y);
             data = rel->getTuples();
             for (struct Node *h = ListOfResults->getHead(); h != nullptr; h = h->next) {
-                if (h->data[indx] > rel->getNumTuples()) {
-                    std::cout << "RowId OUT OF BOUNDS: " << "max " << rel->getNumTuples()
+                if (h->data[indx] > rel->numTuples) {
+                    std::cout << "RowId OUT OF BOUNDS: " << "max " << rel->numTuples
                               << " while indx " << h->data[indx] << std::endl;
                     return;
                 }
-                s += data[h->data[indx]].getKey();
+                s += data[h->data[indx]].key;
             }
             sum.push_back(s);
         } else {

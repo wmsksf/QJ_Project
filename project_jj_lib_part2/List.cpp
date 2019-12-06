@@ -19,7 +19,6 @@ struct Node* List::insert_node()
     if (head == nullptr)
     {
         head = new struct Node;
-        ALLOC_CHECK(head);
 
         head->next = head->prev = nullptr;
         tail = head;
@@ -28,7 +27,6 @@ struct Node* List::insert_node()
     }
 
     tail->next = new struct Node;
-    ALLOC_CHECK(tail->next);
 
     tail->next->next = nullptr;
     tail->next->prev = tail;
@@ -100,7 +98,7 @@ void List::print()
     uint64_t n = 0;
     for (struct Node *h = head; h != nullptr; h = h->next, n++)
     {
-        std::cout << n << " Node" << std::endl;
+        std::cout << n << " Node:" << std::endl;
         for (uint64_t j = 0; j < h->data.size(); j++)
             std::cout << h->data[j] << " ";
         std::cout << std::endl;

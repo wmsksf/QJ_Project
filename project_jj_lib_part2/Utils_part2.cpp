@@ -105,10 +105,10 @@ void execQ(char** Q, uint64_t size)
     for (uint64_t i = 0; i < size; i++)
     {
         q = new Query;
-        ALLOC_CHECK(q);
 
         q->parse(Q[i]);
         q->exec();
+
         delete q;
     }
 

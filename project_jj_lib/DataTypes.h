@@ -20,9 +20,6 @@ public:
 
     Tuple();
 
-    void setKey(uint64_t key_);
-    uint64_t getKey();
-
     void setPayload(uint64_t payload_);
     Vector& getPayloads();
 
@@ -30,30 +27,29 @@ public:
 
     void print();
 };
-
 //    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 class Relation
 {
     Tuple* tuples;
-    uint64_t numTuples;
 
 public:
+    uint64_t numTuples;
+
     Relation();
     ~Relation();
 
     Tuple *getTuples() const;
     void initTuples();
 
-    void initTuplesVal(Relation* R);
     void setTupleVal(long unsigned int, uint64_t, Vector&);
+//    use in method Matrix::getRelation
     void setTupleVal(long unsigned int, uint64_t, uint64_t);
     void copyTuplesVal(Relation* R,uint64_t, uint64_t);
 
-    uint64_t getNumTuples() const;
-    void setNumTuples(uint64_t numTuples);
     void print();
     void clean();
     bool isSorted();
+
     void filter(Vector*);
 };
 //    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -67,13 +63,14 @@ public:
 //    Matrix(long unsigned int, long unsigned int);
     Matrix();
     ~Matrix();
-    bool setMatrix(char* fileName);       // Initializes the matrix data, given an input file
-    void printMatrix();
+//    Initializes the matrix data, given an input file
+    bool setMatrix(char* fileName);
+
     Relation* getRelation(long unsigned int);
     Relation* getRelation(List* list,int index, long int numOfRows, int columnNumber);
+
+    void printMatrix();
     uint64_t * getData();
-    long unsigned int getNumOfRows();
-    long unsigned int getNumOfColumns();
 };
 //    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 class Results
@@ -81,14 +78,14 @@ class Results
     Tuple *Buffer;
     uint64_t index = 0, Buffersize;
 
-    public:
+public:
     Results();
     ~Results();
 
     void setBuffersize(uint64_t buffersize);
     void initBuffer();
     Tuple* getBuffer();
-    uint64_t  getIndex();
+    uint64_t getIndex();
 
     void add(uint64_t x, uint64_t y);
     bool isFull();

@@ -14,11 +14,11 @@
 
 static uint64_t partition(Tuple* A, uint64_t p, uint64_t r)
 {
-    uint64_t pivot = A[r].getKey();
+    uint64_t pivot = A[r].key;
     int64_t i = p - 1;
 
     for (uint64_t j = p; j < r; j++)
-        if (A[j].getKey() <= pivot)
+        if (A[j].key <= pivot)
         {
             i++;
             A[i].swap(&A[j]);
@@ -72,13 +72,13 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
     if (RR == nullptr)
     {
         RR = new Relation;
-        RR->setNumTuples(R->getNumTuples());
+        RR->numTuples = R->numTuples;
         RR->initTuples();
     }
 
     uint64_t Hist[256] = {0};
     for (uint64_t i = start; i <= end; i++)
-        Hist[(R->getTuples()[i].getKey() >> current_byte) & 0xff]++; // for byte 0 same as A[i] & 0xff
+        Hist[(R->getTuples()[i].key >> current_byte) & 0xff]++; // for byte 0 same as A[i] & 0xff
 
     uint64_t Psum[256] = {start};
     for (int i = 1; i < 256; i++)
@@ -91,9 +91,8 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
     RR->clean();
     for (uint64_t i = start; i <= end; i++)
     {
-        uint64_t byte = (R->getTuples()[i].getKey() >> current_byte) & 0xff;
-
-        RR->setTupleVal(tmp[byte]++, R->getTuples()[i].getKey(), R->getTuples()[i].getPayloads());
+        uint64_t byte = (R->getTuples()[i].key >> current_byte) & 0xff;
+        RR->setTupleVal(tmp[byte]++, R->getTuples()[i].key, R->getTuples()[i].payloads);
     }
 
 //    switch R, RR after byte checked
@@ -127,9 +126,8 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
             OptQuicksort(RR->getTuples(), Psum[255], end);
         }
     }
-    //R->clean();
+    R->clean();
     R->copyTuplesVal(RR, start, end);
-    RR->clean();
 
     if(nth_byte==7) {
         delete RR;
@@ -176,7 +174,7 @@ Tuple getMatrixSize(char *fileName) {
     fclose(fp);
 
     Tuple tmp;
-    tmp.setKey(columns);
+    tmp.key = columns;
     tmp.setPayload(lines);
 
     return tmp;
@@ -189,8 +187,8 @@ LinkedList* SortMergeJoin(Relation* relA, Relation* relB, uint64_t& count, bool 
         return nullptr;
     }
 
-    uint64_t sizeA = relA->getNumTuples();
-    uint64_t sizeB = relB->getNumTuples();
+    uint64_t sizeA = relA->numTuples;
+    uint64_t sizeB = relB->numTuples;
 
     Radixsort(relA,0,sizeA-1);
     Radixsort(relB,0,sizeB-1);
@@ -293,8 +291,8 @@ void JoinSortedRelationsTest(Relation *relA, Relation *relB, uint64_t& count) {
     if(tupA == nullptr or tupB == nullptr)
         return;
 
-    uint64_t sizeA = relA->getNumTuples();
-    uint64_t sizeB = relB->getNumTuples();
+    uint64_t sizeA = relA->numTuples;
+    uint64_t sizeB = relB->numTuples;
     uint64_t j=0;
     uint64_t jj=0;
     bool flag = false;
@@ -302,19 +300,19 @@ void JoinSortedRelationsTest(Relation *relA, Relation *relB, uint64_t& count) {
 
     for(uint64_t i = 0; i<sizeA; i++){
 
-        if(tupA[i].getKey() == tupB[j].getKey()){
+        if(tupA[i].key == tupB[j].key){
             counter++;
 
-            while(tupA[i].getKey() == tupB[++j].getKey()){
+            while(tupA[i].key == tupB[++j].key){
                 counter++;
                 if(j == sizeB-1) break;
             }
             j = jj;
         }
-        else if(tupA[i].getKey() > tupB[j].getKey()){
+        else if(tupA[i].key > tupB[j].key){
 
 
-            while(tupA[i].getKey() > tupB[++j].getKey()){
+            while(tupA[i].key > tupB[++j].key){
                 if (j == sizeB-1) {
                     flag = true;
                     break;
@@ -326,7 +324,7 @@ void JoinSortedRelationsTest(Relation *relA, Relation *relB, uint64_t& count) {
             }
             if(flag) break;
             jj = j--;
-            while(tupA[i].getKey() == tupB[++j].getKey()){
+            while(tupA[i].key == tupB[++j].key){
                 counter++;
             }
             j = jj;
