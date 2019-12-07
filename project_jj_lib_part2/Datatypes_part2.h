@@ -41,6 +41,7 @@ public:
     void parse(char *inq);
 
     List* join(Relation*, Relation*);
+    List* EQjoin(Relation *relA, Relation *relB);
     //void expandResultsList(LinkedList* latestJoin, uint64_t matrixA, uint64_t matrixB);
     bool filtering(uint64_t &filters);
     void exec();
