@@ -32,6 +32,16 @@ Query::Query() {
     MatricesJoined = nullptr;
 }
 
+Query::~Query()
+{
+    delete[] Matrices;
+    delete[] Results;
+    delete[] Predicates;
+
+    delete MatricesJoined;
+    delete ListOfResults;
+}
+
 inline void parse_err() {
     std::cerr << "Invalid inq to parser" << std::endl;
     exit(EXIT_FAILURE);
@@ -140,7 +150,7 @@ void Query::parse(char *inq) {
     }
 }
 
-bool Query::filtering(uint64_t &size) {
+bool Query::filtering(uint64_t &size){
 //    calc num of filters
     uint64_t v = 0;
     for (uint64_t i = 0; i < NumOfPredicates; i++)
@@ -182,106 +192,218 @@ bool Query::filtering(uint64_t &size) {
             for (int x = 0; x < NumOfMatrices; x++)
                 if (Matrices[x] == Predicates[i].Matrices[0])
                     FilteredMatrices[x] = vector;
-               // std::cout << "vector size: " << vector->size() << std::endl;
+            // std::cout << "vector size: " << vector->size() << std::endl;
         }
 
     size = v;
     return true;
 }
 
-void Query::exec() {
-//    start with filtering query
+Relation* Query::FltrRel(uint64_t mat, uint64_t rel)
+{
+    Relation *R = MATRICES[mat].getRelation(rel);
+    for (int j = 0; j < NumOfMatrices; j++)
+        if (mat == Matrices[j])
+        {
+            R->filter(FilteredMatrices[j]);
+            break;
+        }
+    return R;
+}
+
+void Query::exec()
+{
     uint64_t f = 0;
     bool filters = filtering(f);
-    if (!filters) {
+    if (!filters)
+    {
         log("Exec: No filters\n");
         empty_sum();
         return;
     }
 
-    //Then we execute the joins
-    for (int i = 0; i < NumOfPredicates; i++) {
+    for (int i = 0; i < NumOfPredicates; i++)
+    {
         char operation = Predicates[i].getOperation();
-        if (operation != 'j')  //not a join operation
-            continue;
+        if (operation != 'j') continue;
 
-        Relation *R1, *R2;
-        //Get the first relation of the predicate, filter it and sort it
-        int index = -1;
-        if(MatricesJoined != nullptr)
-            index = MatricesJoined->getIndex(Predicates[i].Matrices[0]);
-        if(index == -1) { //matrix not in Results structure
-            R1 = MATRICES[Predicates[i].Matrices[0]].getRelation(Predicates[i].RowIds[0]);
-            for (int j = 0; j < NumOfMatrices; j++) {
-                if (Predicates[i].Matrices[0] == Matrices[j]) {
-                    R1->filter(FilteredMatrices[j]);
-                    break;
-                }
-            }
-            if (!R1->numTuples) {
-                //log("Exec: Empty filtered rel1\n");
-                empty_sum();
-                return;
-            }
-        }
-        else
-            R1 = MATRICES[Predicates[i].Matrices[0]].getRelation(ListOfResults,index,rowsInResults,Predicates[i].RowIds[0]);
-
-        //Same thing for the second relation of the predicate
-        index = -1;
-        if(MatricesJoined != nullptr)
-            index = MatricesJoined->getIndex(Predicates[i].Matrices[1]);
-        if(index == -1) { //matrix not in Results structure
-            R2 = MATRICES[Predicates[i].Matrices[1]].getRelation(Predicates[i].RowIds[1]);
-            for (int j = 0; j < NumOfMatrices; j++) {
-                if (Predicates[i].Matrices[1] == Matrices[j]) {
-                    R2->filter(FilteredMatrices[j]);
-                    break;
-                }
-            }
-            if (!R2->numTuples) {
-                //log("Exec: Empty filtered rel2\n");
-                empty_sum();
-                return;
-            }
-        }
-        else
-            R2 = MATRICES[Predicates[i].Matrices[1]].getRelation(ListOfResults,index,rowsInResults,Predicates[i].RowIds[1]);
-
-        if(R1 == nullptr or R2 == nullptr){
-            log("Exec: No rel1||re2\n");
-            empty_sum();
-            return;
-        }
-
-
-        if(MatricesJoined==nullptr){
+        Relation *R1 = nullptr, *R2 = nullptr;
+        if (MatricesJoined == nullptr)
+        {
             MatricesJoined = new Vector();
             MatricesJoined->push_back(Predicates[i].Matrices[0]);
             MatricesJoined->push_back(Predicates[i].Matrices[1]);
+
+            R1 = FltrRel(Predicates[i].Matrices[0], Predicates[i].RowIds[0]);
+            R2 = FltrRel(Predicates[i].Matrices[1], Predicates[i].RowIds[1]);
+            if (!R1->numTuples || !R2->numTuples)
+            {
+                log("Exec: Empty filtered relations\n");
+                empty_sum();
+
+                delete R1; delete R2;
+                return;
+            }
             ListOfResults = join(R1, R2);
         }
-        else if ( MatricesJoined->search(Predicates[i].Matrices[0])) {
-            delete ListOfResults;
-            MatricesJoined->push_back(Predicates[i].Matrices[1]);
-            //Save the joined result in an array
-            ListOfResults = join(R1, R2);
-        } else {
-            delete ListOfResults;
-            MatricesJoined->push_back(Predicates[i].Matrices[0]);
-            ListOfResults = join(R2, R1);
+        else if (MatricesJoined->search(Predicates[i].Matrices[0]))
+        {
+            R1 = MATRICES[Predicates[i].Matrices[0]].getRelation(ListOfResults,MatricesJoined->getIndex(Predicates[i].Matrices[0]),rowsInResults,Predicates[i].RowIds[0]);
+            if (R1 == nullptr)
+            {
+                log("No rel1\n");
+                empty_sum();
+                return;
+            }
+
+            if (!MatricesJoined->search(Predicates[i].Matrices[1]))
+            {
+                delete ListOfResults;
+                MatricesJoined->push_back(Predicates[i].Matrices[1]);
+
+                R2 = FltrRel(Predicates[i].Matrices[1], Predicates[i].RowIds[1]);
+                if (!R2->numTuples)
+                {
+                    log("Exec: Empty filtered relation\n");
+
+                    delete R1; delete R2;
+                    return;
+                }
+                ListOfResults = join(R1, R2);
+            }
+            else
+            {
+                std::cout << "SELF JOIN || EQUALITY BETWEEN RELS BOTH IN INTERMEDIATE STRUCTURE\n";
+                return;
+            }
         }
-        if(ListOfResults == nullptr){
-            //log("Exec: Empty results\n");
-            empty_sum();
+        else
+        {
+            std::cout << "Shouldn't reach here!" << std::endl;
             return;
         }
-        //MatricesJoined->print();
-       // std:: cout << rowsInResults << std:: endl;
+
+        if (ListOfResults == nullptr)
+        {
+            log("Exec: No results\n");
+            empty_sum();
+
+            delete R1; delete R2;
+            return;
+        }
+
+        delete R1; delete R2;
     }
 
     calc_sum();
 }
+
+//
+//void Query::exec() {
+////    start with filtering query
+//    uint64_t f = 0;
+//    bool filters = filtering(f);
+//    if (!filters) {
+//        log("Exec: No filters\n");
+//        empty_sum();
+//        return;
+//    }
+//
+//    //Then we execute the joins
+//    for (int i = 0; i < NumOfPredicates; i++) {
+//        char operation = Predicates[i].getOperation();
+//        if (operation != 'j')  //not a join operation
+//            continue;
+//
+//        Relation *R1, *R2;
+//        //Get the first relation of the predicate, filter it and sort it
+//        int index = -1;
+//        if(MatricesJoined != nullptr)
+//            index = MatricesJoined->getIndex(Predicates[i].Matrices[0]);
+//        if(index == -1) { //matrix not in Results structure
+//            R1 = MATRICES[Predicates[i].Matrices[0]].getRelation(Predicates[i].RowIds[0]);
+//            for (int j = 0; j < NumOfMatrices; j++) {
+//                if (Predicates[i].Matrices[0] == Matrices[j]) {
+//                    R1->filter(FilteredMatrices[j]);
+//                    break;
+//                }
+//            }
+//            if (!R1->numTuples) {
+//                log("Exec: Empty filtered rel1\n");
+//                empty_sum();
+//                return;
+//            }
+//        }
+//        else
+//            R1 = MATRICES[Predicates[i].Matrices[0]].getRelation(ListOfResults,index,rowsInResults,Predicates[i].RowIds[0]);
+//
+//        //Same thing for the second relation of the predicate
+//        index = -1;
+//        if(MatricesJoined != nullptr)
+//            index = MatricesJoined->getIndex(Predicates[i].Matrices[1]);
+//        if(index == -1) { //matrix not in Results structure
+//            R2 = MATRICES[Predicates[i].Matrices[1]].getRelation(Predicates[i].RowIds[1]);
+//            for (int j = 0; j < NumOfMatrices; j++) {
+//                if (Predicates[i].Matrices[1] == Matrices[j]) {
+//                    R2->filter(FilteredMatrices[j]);
+//                    break;
+//                }
+//            }
+//            if (!R2->numTuples) {
+//                log("Exec: Empty filtered rel2\n");
+//                empty_sum();
+//                return;
+//            }
+//        }
+//        else
+//            R2 = MATRICES[Predicates[i].Matrices[1]].getRelation(ListOfResults,index,rowsInResults,Predicates[i].RowIds[1]);
+//
+//        if(R1 == nullptr or R2 == nullptr){
+//            log("Exec: No rel1||re2\n");
+//            empty_sum();
+//            return;
+//        }
+//
+//
+//        if (MatricesJoined == nullptr)
+//        {
+//            MatricesJoined = new Vector();
+//            MatricesJoined->push_back(Predicates[i].Matrices[0]);
+//            MatricesJoined->push_back(Predicates[i].Matrices[1]);
+//            ListOfResults = join(R1, R2);
+//        }
+//        else if (MatricesJoined->search(Predicates[i].Matrices[0]))
+//        {
+//            if (!MatricesJoined->search(Predicates[i].Matrices[1]))
+//            {
+//                delete ListOfResults;
+//                MatricesJoined->push_back(Predicates[i].Matrices[1]);
+//                ListOfResults = join(R1, R2);
+//            }
+//            else
+//            {
+//                std::cout << "hello\n";
+//                return;
+//            }
+//
+//        }
+//        else
+//        {
+//            std::cout << "Shouldn't reach here!" << std::endl;
+//            return;
+//        }
+//
+//        if(ListOfResults == nullptr){
+//            //log("Exec: Empty results\n");
+//            empty_sum();
+//            return;
+//        }
+//        //MatricesJoined->print();
+//        // std:: cout << rowsInResults << std:: endl;
+//    }
+//
+//    calc_sum();
+//}
 
 
 List* Query::join(Relation *relA, Relation *relB) {
@@ -291,7 +413,7 @@ List* Query::join(Relation *relA, Relation *relB) {
 
     if (!relA->isSorted() || !relB->isSorted())
     {
-        log("Join: No sorted rels\n");
+        log("Join: No sorted relations\n");
         return nullptr;
     }
 
@@ -383,7 +505,8 @@ void Query::empty_sum() {
 void Query::calc_sum() {
     Vector sum;
     Tuple *data;
-    for (uint64_t i = 0; i < NumOfResults; i++) {
+    for (uint64_t i = 0; i < NumOfResults; i++)
+    {
         uint64_t s = 0;
         double frack, intprt;
         int x, y;
@@ -391,29 +514,34 @@ void Query::calc_sum() {
         x = (int) intprt;
         y = fracto_int(frack, 1);
 
-        if (!MatricesJoined->search(Matrices[x])) {
+        if (!MatricesJoined->search(Matrices[x]))
+        {
             log("Calculation: No such relation in joined ones!\n");
             return;
         }
 
         int indx = MatricesJoined->getIndex(Matrices[x]);
-        if (indx != -1) {
+        if (indx != -1)
+        {
             Relation *rel = MATRICES[Matrices[x]].getRelation(y);
             data = rel->getTuples();
-            for (struct Node *h = ListOfResults->getHead(); h != nullptr; h = h->next) {
-                if (h->data[indx] > rel->numTuples) {
+            for (struct Node *h = ListOfResults->getHead(); h != nullptr; h = h->next)
+            {
+                if (h->data[indx] > rel->numTuples)
+                {
                     log("Calculation: RowId OUT OF BOUNDS\n");
                     return;
                 }
                 s += data[h->data[indx]].key;
             }
             sum.push_back(s);
-        } else {
+        }
+        else
+        {
             log("Calculation: No such relation in List object\n");
             return;
         }
     }
-    delete ListOfResults;
 
     for (uint64_t i = 0; i < sum.size(); i++)
         std::cout << sum[i] << " ";
