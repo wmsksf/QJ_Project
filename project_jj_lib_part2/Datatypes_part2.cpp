@@ -132,6 +132,11 @@ void Query::parse(char *inq) {
             Predicates[j].Matrices[1] = Matrices[atoi(tmp)];
             tmp = strtok(nullptr, "\0");
             Predicates[j].RowIds[1] = atoi(tmp);
+            for(int i =0; i < j; i++){
+                if((Predicates[i].Matrices[0] == Predicates[j].Matrices[0] and Predicates[i].Matrices[1] == Predicates[j].Matrices[1])
+                    or (Predicates[i].Matrices[0] == Predicates[j].Matrices[1] and Predicates[i].Matrices[1] == Predicates[j].Matrices[0]))
+                    operation = 'x';
+            }
         } else {
             tmp = strtok(nullptr, "\0");
             Predicates[j].filter = atoll(tmp);
@@ -143,14 +148,23 @@ void Query::parse(char *inq) {
 bool Query::filtering(uint64_t &size) {
 //    calc num of filters
     uint64_t v = 0;
-    for (uint64_t i = 0; i < NumOfPredicates; i++)
+    for (uint64_t i = 0; i < NumOfPredicates; i++) {
         if (Predicates[i].filter) v++;
+        if(Predicates[i].operation == 'x') v++;
+    }
 
     for (uint64_t i = 0; i < NumOfPredicates; i++)
-        if (Predicates[i].filter) {
+        if (Predicates[i].filter or Predicates[i].operation == 'x') {
             Relation *rel;
 
+
             rel = MATRICES[Predicates[i].Matrices[0]].getRelation(Predicates[i].RowIds[0]);
+            for (int j = 0; j < NumOfMatrices; j++) {
+                if (Predicates[i].Matrices[0] == Matrices[j]) {
+                    rel->filter(FilteredMatrices[j]);
+                    break;
+                }
+            }
             if (rel == nullptr)
                 return false;
 
@@ -174,6 +188,26 @@ bool Query::filtering(uint64_t &size) {
                         if (tuples[j].key == Predicates[i].filter)
                             vector->push_back(tuples[j].getPayloads()[0]);
                     break;
+                case 'x': {
+                    delete vector;
+                    Relation *rel2 = MATRICES[Predicates[i].Matrices[1]].getRelation(Predicates[i].RowIds[1]);
+                    for (int j = 0; j < NumOfMatrices; j++) {
+                        if (Predicates[i].Matrices[1] == Matrices[j]) {
+                            rel->filter(FilteredMatrices[j]);
+                            break;
+                        }
+                    }
+                    if (rel2 == nullptr)
+                        return false;
+                    Vector** vec = filterRelations(rel,rel2);
+                    if(vec == nullptr or vec[0] == nullptr or vec[1] == nullptr) return false;
+                    vector = vec[0];
+
+                    for (int x = 0; x < NumOfMatrices; x++)
+                        if (Matrices[x] == Predicates[i].Matrices[1])
+                            FilteredMatrices[x] = vec[1];
+                    break;
+                }
                 default:
                     std::cout << "Invalid operation for filtering!" << std::endl;
                     return false;
@@ -184,6 +218,7 @@ bool Query::filtering(uint64_t &size) {
                     FilteredMatrices[x] = vector;
                // std::cout << "vector size: " << vector->size() << std::endl;
         }
+
 
     size = v;
     return true;
@@ -414,9 +449,67 @@ void Query::calc_sum() {
         }
     }
     delete ListOfResults;
+    delete[] Predicates;
 
     for (uint64_t i = 0; i < sum.size(); i++)
         std::cout << sum[i] << " ";
 
     std::cout << std::endl;
+}
+
+Vector **Query::filterRelations(Relation * A, Relation * B) {
+    if(A == nullptr or B == nullptr) return nullptr;
+
+    uint64_t sizeA = A->numTuples;
+    uint64_t sizeB = B->numTuples;
+
+    Radixsort(A,0,sizeA-1);
+    Radixsort(B,0,sizeB-1);
+
+    if(!A->isSorted() or !B->isSorted()) return nullptr;
+
+    Tuple* tupA = A->getTuples();
+    Tuple* tupB = B->getTuples();
+
+    Vector** vectors = new Vector*[2];
+    vectors[0] = new Vector();
+    vectors[1] = new Vector();
+
+    uint64_t j =0;
+    bool flag = false;
+    for(int64_t i =0; i < sizeA; i++){
+        if(tupA[i].key == tupB[j].key){
+            vectors[0]->push_back(i);
+            vectors[1]->push_back(j);
+            if(j == sizeB-1) continue;
+            while(tupA[i].key == tupB[++j].key){
+                vectors[1]->push_back(j);
+                if(j == sizeB-1) {
+                    j++;
+                    break;
+                }
+            }
+            j--;
+            if(i == sizeA-1) break;
+            while(tupA[++i].key == tupB[j].key){
+                vectors[0]->push_back(i);
+                if(i == sizeA-1) {
+                    break;
+                }
+            }
+        }
+        else if(tupA[i].key > tupB[j].key) {
+            if(j == sizeB-1) break;
+            while(tupA[i].key > tupB[++j].key){
+                if(j == sizeB-1){
+                    flag = true;
+                    break;
+                }
+            }
+            if(flag) break;
+            i--;
+        }
+    }
+
+    return vectors;
 }

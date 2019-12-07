@@ -40,7 +40,7 @@ public:
     void parse(char *inq);
 
     List* join(Relation*, Relation*);
-    //void expandResultsList(LinkedList* latestJoin, uint64_t matrixA, uint64_t matrixB);
+    Vector** filterRelations(Relation*,Relation*);
     bool filtering(uint64_t &filters);
     void exec();
 
