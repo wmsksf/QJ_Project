@@ -40,7 +40,7 @@ public:
     ~Query();
     void parse(char *inq);
 
-    List* join(Relation*, Relation*);
+
     Vector** filterRelations(Relation*,Relation*);
     bool filtering(uint64_t &filters);
     bool prev_predicate(uint64_t cur1, uint64_t cur2);

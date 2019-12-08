@@ -36,10 +36,10 @@ Query::~Query()
 {
     delete[] Matrices;
     delete[] Results;
-    delete[] Predicates;
+   // delete[] Predicates;
 
     delete MatricesJoined;
-    delete ListOfResults;
+   // delete ListOfResults;
 }
 
 inline void parse_err() {
