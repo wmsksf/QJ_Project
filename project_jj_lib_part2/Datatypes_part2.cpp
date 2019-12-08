@@ -142,11 +142,11 @@ void Query::parse(char *inq) {
             Predicates[j].Matrices[1] = Matrices[atoi(tmp)];
             tmp = strtok(nullptr, "\0");
             Predicates[j].RowIds[1] = atoi(tmp);
-            for(int i =0; i < j; i++){
-                if((Predicates[i].Matrices[0] == Predicates[j].Matrices[0] and Predicates[i].Matrices[1] == Predicates[j].Matrices[1])
-                    or (Predicates[i].Matrices[0] == Predicates[j].Matrices[1] and Predicates[i].Matrices[1] == Predicates[j].Matrices[0]))
-                    operation = 'x';
-            }
+//            for(int i =0; i < j; i++){
+//                if((Predicates[i].Matrices[0] == Predicates[j].Matrices[0] and Predicates[i].Matrices[1] == Predicates[j].Matrices[1])
+//                    or (Predicates[i].Matrices[0] == Predicates[j].Matrices[1] and Predicates[i].Matrices[1] == Predicates[j].Matrices[0]))
+//                    operation = 'x';
+//            }
         } else {
             tmp = strtok(nullptr, "\0");
             Predicates[j].filter = atoll(tmp);
@@ -198,26 +198,26 @@ bool Query::filtering(uint64_t &size){
                         if (tuples[j].key == Predicates[i].filter)
                             vector->push_back(tuples[j].getPayloads()[0]);
                     break;
-                case 'x': {
-                    delete vector;
-                    Relation *rel2 = MATRICES[Predicates[i].Matrices[1]].getRelation(Predicates[i].RowIds[1]);
-                    for (int j = 0; j < NumOfMatrices; j++) {
-                        if (Predicates[i].Matrices[1] == Matrices[j]) {
-                            rel->filter(FilteredMatrices[j]);
-                            break;
-                        }
-                    }
-                    if (rel2 == nullptr)
-                        return false;
-                    Vector** vec = filterRelations(rel,rel2);
-                    if(vec == nullptr or vec[0] == nullptr or vec[1] == nullptr) return false;
-                    vector = vec[0];
-
-                    for (int x = 0; x < NumOfMatrices; x++)
-                        if (Matrices[x] == Predicates[i].Matrices[1])
-                            FilteredMatrices[x] = vec[1];
-                    break;
-                }
+//                case 'x': {
+//                    delete vector;
+//                    Relation *rel2 = MATRICES[Predicates[i].Matrices[1]].getRelation(Predicates[i].RowIds[1]);
+//                    for (int j = 0; j < NumOfMatrices; j++) {
+//                        if (Predicates[i].Matrices[1] == Matrices[j]) {
+//                            rel->filter(FilteredMatrices[j]);
+//                            break;
+//                        }
+//                    }
+//                    if (rel2 == nullptr)
+//                        return false;
+//                    Vector** vec = filterRelations(rel,rel2);
+//                    if(vec == nullptr or vec[0] == nullptr or vec[1] == nullptr) return false;
+//                    vector = vec[0];
+//
+//                    for (int x = 0; x < NumOfMatrices; x++)
+//                        if (Matrices[x] == Predicates[i].Matrices[1])
+//                            FilteredMatrices[x] = vec[1];
+//                    break;
+//                }
                 default:
                     std::cout << "Invalid operation for filtering!" << std::endl;
                     return false;
@@ -341,6 +341,21 @@ void Query::exec()
 
     calc_sum();
 }
+
+//void Query::equality_filter(int pos1, int pos2){
+//
+//    struct Node* j = nullptr;
+//    struct Node* n = ListOfResults->getHead();
+//    while(n != nullptr){
+//        if(n->data[pos1] != n->data[pos2]){
+//            j = n;
+//            n = n->next;
+//            ListOfResults->remove_node(j);
+//        }
+//        else n = n->next;
+//    }
+//
+//}
 
 List* Query::equality_filter(Relation *relA, Relation *relB)
 {

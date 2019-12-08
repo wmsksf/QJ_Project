@@ -47,6 +47,7 @@ public:
 
     void exec();
     List* equality_filter(Relation *relA, Relation *relB);
+//    void equality_filter(int pos1, int pos2);
     List* join(Relation*, Relation*);
     List* EQjoin(Relation *relA, Relation *relB);
 
