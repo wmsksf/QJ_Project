@@ -280,17 +280,29 @@ void Query::exec()
         {
             MatricesJoined = new Vector();
             MatricesJoined->push_back(Predicates[i].Matrices[0]);
-            MatricesJoined->push_back(Predicates[i].Matrices[1]);
-
             R1 = FltrRel(Predicates[i].Matrices[0], Predicates[i].RowIds[0]);
             R2 = FltrRel(Predicates[i].Matrices[1], Predicates[i].RowIds[1]);
-            if (!R1->numTuples || !R2->numTuples)
-            {
+            if (!R1->numTuples || !R2->numTuples) {
                 empty_sum();
-                delete R1; delete R2;
+                delete R1;
+                delete R2;
                 return;
             }
-            ListOfResults = join(R1, R2);
+
+            if(Predicates[i].Matrices[0] != Predicates[i].Matrices[1]) {
+                MatricesJoined->push_back(Predicates[i].Matrices[1]);
+
+                ListOfResults = join(R1, R2);
+            }
+            else
+            {
+                ListOfResults = new List();
+                for(int x =0; x < R1->numTuples; x++){
+                    struct Node* n = ListOfResults->insert_node();
+                    ListOfResults->insert(n,i);
+                }
+                equality_filter(0, 0, R1, R2);
+            }
         }
         else if (MatricesJoined->search(Predicates[i].Matrices[0]))
         {
