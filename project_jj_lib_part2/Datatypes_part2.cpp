@@ -326,6 +326,23 @@ void Query::exec()
                 }
             }
         }
+        else if (MatricesJoined->search(Predicates[i].Matrices[1]))
+        {
+            R1 = MATRICES[Predicates[i].Matrices[1]].getRelation(ListOfResults,MatricesJoined->getIndex(Predicates[i].Matrices[1]),rowsInResults,Predicates[i].RowIds[1]);
+            if (R1 == nullptr) return;
+
+            delete ListOfResults;
+            MatricesJoined->push_back(Predicates[i].Matrices[0]);
+
+            R2 = FltrRel(Predicates[i].Matrices[0], Predicates[i].RowIds[0]);
+            if (!R2->numTuples)
+            {
+                empty_sum();
+                delete R1; delete R2;
+                return;
+            }
+            ListOfResults = join(R1, R2);
+        }
         else
         {
             std::cout << "Shouldn't reach here!" << std::endl;
@@ -351,10 +368,11 @@ void Query::equality_filter(int pos1, int pos2, Relation *r1, Relation *r2)
 
     struct Node* j = nullptr;
     struct Node* n = ListOfResults->getHead();
+    int i =0;
     while(n != nullptr)
     {
-        if (tup1[tup1->getPayloads().getIndex(n->data[pos1])].key
-            != tup2[tup2->getPayloads().getIndex(n->data[pos2])].key)
+        if (tup1[i].key
+            != tup2[i].key)
         {
             j = n;
             n = n->next;
@@ -362,6 +380,7 @@ void Query::equality_filter(int pos1, int pos2, Relation *r1, Relation *r2)
             rowsInResults--;
         }
         else n = n->next;
+        i++;
     }
 }
 
