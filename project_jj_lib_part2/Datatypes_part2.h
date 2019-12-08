@@ -46,7 +46,8 @@ public:
     bool prev_predicate(uint64_t cur1, uint64_t cur2);
 
     void exec();
-    List* equality_filter(Relation *relA, Relation *relB);
+    void equality_filter(int pos1, int pos2, Relation *r1, Relation *r2);
+
 //    void equality_filter(int pos1, int pos2);
     List* join(Relation*, Relation*);
     List* EQjoin(Relation *relA, Relation *relB);

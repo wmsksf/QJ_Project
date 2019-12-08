@@ -36,10 +36,10 @@ Query::~Query()
 {
     delete[] Matrices;
     delete[] Results;
-   // delete[] Predicates;
+    // delete[] Predicates;
 
     delete MatricesJoined;
-   // delete ListOfResults;
+    // delete ListOfResults;
 }
 
 inline void parse_err() {
@@ -156,7 +156,7 @@ void Query::parse(char *inq) {
 }
 
 bool Query::filtering(uint64_t &size){
-//    calc num of filters
+    //    calc num of filters
     uint64_t v = 0;
     for (uint64_t i = 0; i < NumOfPredicates; i++) {
         if (Predicates[i].filter) v++;
@@ -316,12 +316,14 @@ void Query::exec()
                 R2 = MATRICES[Predicates[i].Matrices[1]].getRelationKeys(ListOfResults,MatricesJoined->getIndex(Predicates[i].Matrices[1]),rowsInResults,Predicates[i].RowIds[1]);
                 if (R2 == nullptr) return;
 
-                delete ListOfResults;
 //               equality filter or self join
-                if (prev_predicate(Predicates[i].Matrices[0], Predicates[i].Matrices[1]))
-                    ListOfResults = equality_filter(R1, R2);
+                if (prev_predicate(Predicates[i].Matrices[0], Predicates[i].Matrices[1]) || Predicates[i].Matrices[0] == Predicates[i].Matrices[1])
+                    equality_filter(MatricesJoined->getIndex(Predicates[i].Matrices[0]), MatricesJoined->getIndex(Predicates[i].Matrices[1]), R1, R2);
                 else
+                {
+                    delete ListOfResults;
                     ListOfResults = EQjoin(R1, R2);
+                }
             }
         }
         else
@@ -342,55 +344,25 @@ void Query::exec()
     calc_sum();
 }
 
-//void Query::equality_filter(int pos1, int pos2){
-//
-//    struct Node* j = nullptr;
-//    struct Node* n = ListOfResults->getHead();
-//    while(n != nullptr){
-//        if(n->data[pos1] != n->data[pos2]){
-//            j = n;
-//            n = n->next;
-//            ListOfResults->remove_node(j);
-//        }
-//        else n = n->next;
-//    }
-//
-//}
-
-List* Query::equality_filter(Relation *relA, Relation *relB)
+void Query::equality_filter(int pos1, int pos2, Relation *r1, Relation *r2)
 {
-    Radixsort(relA,0,relA->numTuples-1);
-    Radixsort(relB,0,relB->numTuples-1);
-    if (!relA->isSorted() || !relB->isSorted()) return nullptr;
+    Tuple *tup1 = r1->getTuples();
+    Tuple *tup2 = r2->getTuples();
 
-    Tuple* tupA = relA->getTuples();
-    Tuple* tupB = relB->getTuples();
-    if(tupA == nullptr or tupB == nullptr) return nullptr;
-
-    uint64_t sizeA = relA->numTuples;
-    uint64_t sizeB = relB->numTuples;
-    uint64_t count = 0;
-
-    struct Node *N;
-    List* results = new List();
-
-    for (uint64_t i = 0; i < sizeA; i++)
-        for (uint64_t j = 0; j < sizeB; j++)
-            if (tupA[i].key < tupB[j].key) i++;
-            else if (tupA[i].key > tupB[j].key) j++;
-            else if (tupA[i].key == tupB[j].key)
-            {
-                N = results->insert_node();
-                for(uint64_t f = 0; f < tupA[i].payloads.size(); f++)
-                    results->insert(N,tupA[i].payloads[f]);
-
-                i++;j++;
-                count++;
-            }
-
-    if (!count) return nullptr;
-    rowsInResults = count;
-    return results;
+    struct Node* j = nullptr;
+    struct Node* n = ListOfResults->getHead();
+    while(n != nullptr)
+    {
+        if (tup1[tup1->getPayloads().getIndex(n->data[pos1])].key
+            != tup2[tup2->getPayloads().getIndex(n->data[pos2])].key)
+        {
+            j = n;
+            n = n->next;
+            ListOfResults->remove_node(j);
+            rowsInResults--;
+        }
+        else n = n->next;
+    }
 }
 
 List* Query::join(Relation *relA, Relation *relB) {

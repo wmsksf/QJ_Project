@@ -318,7 +318,10 @@ Relation* Matrix::getRelationKeys(List* list,int index, long int numOfRows_, int
     R->initTuples();
     long int i = 0;
     for(struct Node* N = list->getHead(); N != nullptr; N = N->next, i++)
+    {
         R->getTuples()[i].key = data[offset+N->data[index]];
+        R->getTuples()[i].setPayload(N->data[index]);
+    }
 
     return R;
 }
