@@ -59,7 +59,7 @@ void Relation::initTuples()
     if (!numTuples)
     {
         std::cerr << "Empty Relation object." << std::endl
-                  << "Tip: call setNumTuples() of object first!" << std::endl;
+                  << "Tip: set numTuples of object first!" << std::endl;
 
         exit(EXIT_FAILURE);
     }
@@ -286,7 +286,41 @@ Relation *Matrix::getRelation(List* list,int index, long int numOfRows_, int col
         i++;
     }
     return R;
+}
 
+Relation* Matrix::getRelationKeys(List* list,int index, long int numOfRows_, int columnNumber)
+{
+    if(list == nullptr or list->getHead() == nullptr)
+    {
+        log("No List object\n");
+        return nullptr;
+    }
+    if(numOfRows_ == 0)
+    {
+        log("No rows\n");
+        return nullptr;
+    }
+    if(index >= list->getHead()->data.size())
+    {
+        log("Index of Vector class vec array out of bounds in struct Node\n");
+        return nullptr;
+    }
+
+    if(columnNumber >=numOfColumns)
+    {
+        log("Out of Matrix object data array bounds\n");
+        return nullptr;
+    }
+
+    long unsigned int offset = columnNumber*numOfRows;
+    auto* R = new Relation();
+    R->numTuples = numOfRows_;
+    R->initTuples();
+    long int i = 0;
+    for(struct Node* N = list->getHead(); N != nullptr; N = N->next, i++)
+        R->getTuples()[i].key = data[offset+N->data[index]];
+
+    return R;
 }
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 Results::Results() { Buffer = nullptr; Buffersize = 0; }

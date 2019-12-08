@@ -68,8 +68,9 @@ public:
 
     Relation* getRelation(long unsigned int);
     Relation* getRelation(List* list,int index, long int numOfRows, int columnNumber);
+    Relation* getRelationKeys(List* list,int index, long int numOfRows_, int columnNumber);
 
-    void printMatrix();
+        void printMatrix();
     uint64_t * getData();
 };
 //    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

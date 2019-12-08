@@ -43,7 +43,12 @@ public:
     List* join(Relation*, Relation*);
     Vector** filterRelations(Relation*,Relation*);
     bool filtering(uint64_t &filters);
+    bool prev_predicate(uint64_t cur1, uint64_t cur2);
+
     void exec();
+    List* equality_filter(Relation *relA, Relation *relB);
+    List* join(Relation*, Relation*);
+    List* EQjoin(Relation *relA, Relation *relB);
 
     void empty_sum();
     void calc_sum();
