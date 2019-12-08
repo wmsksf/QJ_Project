@@ -208,7 +208,22 @@ Relation* Query::FltrRel(uint64_t mat, uint64_t rel)
             R->filter(FilteredMatrices[j]);
             break;
         }
+
     return R;
+}
+
+bool Query::prev_predicate(uint64_t cur1, uint64_t cur2)
+{
+    for (uint64_t i = 0;  i < NumOfPredicates; i++)
+    {
+        if (Predicates[i].operation != 'j') continue;
+
+        if (i && ( (Predicates[i-1].Matrices[0] == cur1 && Predicates[i-1].Matrices[1] == cur2)
+                   || (Predicates[i-1].Matrices[0] == cur2 && Predicates[i-1].Matrices[1] == cur1)))
+            return true;
+    }
+
+    return false;
 }
 
 void Query::exec()
@@ -217,7 +232,6 @@ void Query::exec()
     bool filters = filtering(f);
     if (!filters)
     {
-        log("Exec: No filters\n");
         empty_sum();
         return;
     }
@@ -238,9 +252,7 @@ void Query::exec()
             R2 = FltrRel(Predicates[i].Matrices[1], Predicates[i].RowIds[1]);
             if (!R1->numTuples || !R2->numTuples)
             {
-                log("Exec: Empty filtered relations\n");
                 empty_sum();
-
                 delete R1; delete R2;
                 return;
             }
@@ -249,11 +261,7 @@ void Query::exec()
         else if (MatricesJoined->search(Predicates[i].Matrices[0]))
         {
             R1 = MATRICES[Predicates[i].Matrices[0]].getRelation(ListOfResults,MatricesJoined->getIndex(Predicates[i].Matrices[0]),rowsInResults,Predicates[i].RowIds[0]);
-            if (R1 == nullptr)
-            {
-                log("No rel1\n");
-                return;
-            }
+            if (R1 == nullptr) return;
 
             if (!MatricesJoined->search(Predicates[i].Matrices[1]))
             {
@@ -263,9 +271,7 @@ void Query::exec()
                 R2 = FltrRel(Predicates[i].Matrices[1], Predicates[i].RowIds[1]);
                 if (!R2->numTuples)
                 {
-                    log("Exec: Empty filtered relation\n");
                     empty_sum();
-
                     delete R1; delete R2;
                     return;
                 }
@@ -273,16 +279,15 @@ void Query::exec()
             }
             else
             {
-//                either is self join, meaning relations from same matrix to be joined, or relations both in ListOfResults, same behavior
                 R2 = MATRICES[Predicates[i].Matrices[1]].getRelationKeys(ListOfResults,MatricesJoined->getIndex(Predicates[i].Matrices[1]),rowsInResults,Predicates[i].RowIds[1]);
-                if (R2 == nullptr)
-                {
-                    log("Empty relation\n");
-                    return;
-                }
+                if (R2 == nullptr) return;
 
                 delete ListOfResults;
-                ListOfResults = EQjoin(R1, R2);
+//               equality filter or self join
+                if (prev_predicate(Predicates[i].Matrices[0], Predicates[i].Matrices[1]))
+                    ListOfResults = equality_filter(R1, R2);
+                else
+                    ListOfResults = EQjoin(R1, R2);
             }
         }
         else
@@ -293,17 +298,50 @@ void Query::exec()
 
         if (ListOfResults == nullptr)
         {
-            log("Exec: No results\n");
             empty_sum();
-
             delete R1; delete R2;
             return;
         }
-
         delete R1; delete R2;
     }
 
     calc_sum();
+}
+
+List* Query::equality_filter(Relation *relA, Relation *relB)
+{
+    Radixsort(relA,0,relA->numTuples-1);
+    Radixsort(relB,0,relB->numTuples-1);
+    if (!relA->isSorted() || !relB->isSorted()) return nullptr;
+
+    Tuple* tupA = relA->getTuples();
+    Tuple* tupB = relB->getTuples();
+    if(tupA == nullptr or tupB == nullptr) return nullptr;
+
+    uint64_t sizeA = relA->numTuples;
+    uint64_t sizeB = relB->numTuples;
+    uint64_t count = 0;
+
+    struct Node *N;
+    List* results = new List();
+
+    for (uint64_t i = 0; i < sizeA; i++)
+        for (uint64_t j = 0; j < sizeB; j++)
+            if (tupA[i].key < tupB[j].key) i++;
+            else if (tupA[i].key > tupB[j].key) j++;
+            else if (tupA[i].key == tupB[j].key)
+            {
+                N = results->insert_node();
+                for(uint64_t f = 0; f < tupA[i].payloads.size(); f++)
+                    results->insert(N,tupA[i].payloads[f]);
+
+                i++;j++;
+                count++;
+            }
+
+    if (!count) return nullptr;
+    rowsInResults = count;
+    return results;
 }
 
 List* Query::join(Relation *relA, Relation *relB) {
@@ -311,21 +349,12 @@ List* Query::join(Relation *relA, Relation *relB) {
     Radixsort(relA,0,relA->numTuples-1);
     Radixsort(relB,0,relB->numTuples-1);
 
-    if (!relA->isSorted() || !relB->isSorted())
-    {
-        log("Join: No sorted relations\n");
-        return nullptr;
-    }
+    if (!relA->isSorted() || !relB->isSorted()) return nullptr;
 
     Tuple* tupA = relA->getTuples();
     Tuple* tupB = relB->getTuples();
 
-    if(tupA == nullptr or tupB == nullptr)
-
-    {
-        log("Join: Empty tuples\n");
-        return nullptr;
-    }
+    if(tupA == nullptr or tupB == nullptr) return nullptr;
 
     uint64_t sizeA = relA->numTuples;
     uint64_t sizeB = relB->numTuples;
@@ -381,11 +410,7 @@ List* Query::join(Relation *relA, Relation *relB) {
             j = jj;
         }
     }
-    if(counter==0)
-    {
-        log("Join: No joins\n");
-        return nullptr;
-    }
+    if(counter==0) return nullptr;
     rowsInResults = counter;
     return results;
 }
@@ -394,22 +419,11 @@ List* Query::EQjoin(Relation *relA, Relation *relB)
 {
     Radixsort(relA,0,relA->numTuples-1);
     Radixsort(relB,0,relB->numTuples-1);
-
-    if (!relA->isSorted() || !relB->isSorted())
-    {
-        log("Join: No sorted relations\n");
-        return nullptr;
-    }
+    if (!relA->isSorted() || !relB->isSorted()) return nullptr;
 
     Tuple* tupA = relA->getTuples();
     Tuple* tupB = relB->getTuples();
-
-    if(tupA == nullptr or tupB == nullptr)
-
-    {
-        log("Join: Empty tuples\n");
-        return nullptr;
-    }
+    if(tupA == nullptr or tupB == nullptr) return nullptr;
 
     uint64_t sizeA = relA->numTuples;
     uint64_t sizeB = relB->numTuples;
@@ -417,9 +431,10 @@ List* Query::EQjoin(Relation *relA, Relation *relB)
     uint64_t jj=0;
     bool flag = false;
     uint64_t counter = 0;
-    struct Node* N;
 
+    struct Node* N;
     List* results = new List();
+
     for(uint64_t i = 0; i<sizeA; i++){
 
         if(tupA[i].key == tupB[j].key){
@@ -462,11 +477,7 @@ List* Query::EQjoin(Relation *relA, Relation *relB)
             j = jj;
         }
     }
-    if(counter==0)
-    {
-        log("Join: No joins\n");
-        return nullptr;
-    }
+    if(counter==0) return nullptr;
     rowsInResults = counter;
     return results;
 }
@@ -483,7 +494,8 @@ void Query::empty_sum() {
     std::cout << std::endl;
 }
 
-void Query::calc_sum() {
+void Query::calc_sum()
+{
     Vector sum;
     Tuple *data;
     for (uint64_t i = 0; i < NumOfResults; i++)
@@ -495,11 +507,7 @@ void Query::calc_sum() {
         x = (int) intprt;
         y = fracto_int(frack, 1);
 
-        if (!MatricesJoined->search(Matrices[x]))
-        {
-            log("Calculation: No such relation in joined ones!\n");
-            return;
-        }
+        if (!MatricesJoined->search(Matrices[x])) return;
 
         int indx = MatricesJoined->getIndex(Matrices[x]);
         if (indx != -1)
@@ -508,20 +516,12 @@ void Query::calc_sum() {
             data = rel->getTuples();
             for (struct Node *h = ListOfResults->getHead(); h != nullptr; h = h->next)
             {
-                if (h->data[indx] > rel->numTuples)
-                {
-                    log("Calculation: RowId OUT OF BOUNDS\n");
-                    return;
-                }
+                if (h->data[indx] > rel->numTuples) return;
                 s += data[h->data[indx]].key;
             }
             sum.push_back(s);
         }
-        else
-        {
-            log("Calculation: No such relation in List object\n");
-            return;
-        }
+        else return;
     }
 
     for (uint64_t i = 0; i < sum.size(); i++)
