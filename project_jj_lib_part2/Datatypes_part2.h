@@ -17,6 +17,7 @@ public:
     char operation;     //operation can be 'j', '>', '<', '=', ... 'j': join
     int Matrices[2];
     int RowIds[2];
+    int MatricesIndex[2];
     uint64_t filter;
 
     Predicate();

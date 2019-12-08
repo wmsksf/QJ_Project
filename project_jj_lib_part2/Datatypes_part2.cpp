@@ -14,6 +14,7 @@ Predicate::Predicate() {
 
     Matrices[0] = Matrices[1] = -1;
     RowIds[0] = RowIds[1] = -1;
+    MatricesIndex[0] = MatricesIndex[1] = -1;
 
     filter = 0;
 }
@@ -30,6 +31,7 @@ Query::Query() {
     FilteredMatrices[0] = FilteredMatrices[1] = FilteredMatrices[2] = FilteredMatrices[3] = nullptr;
     ListOfResults = nullptr;
     MatricesJoined = nullptr;
+    rowsInResults = 0;
 }
 
 Query::~Query()
@@ -135,11 +137,13 @@ void Query::parse(char *inq) {
         tmp = strtok(tmp, ".");
 //        in predicates as given when there is <rel>.<relcolmn>, <rel> is index of rel in Matrices[], in class Query, given .pdf file of second part of project
         Predicates[j].Matrices[0] = Matrices[atoi(tmp)];
+        Predicates[j].MatricesIndex[0] = atoi(tmp);
         tmp = strtok(nullptr, del);
         Predicates[j].RowIds[0] = atoi(tmp);
         if (operation == 'j') {
             tmp = strtok(nullptr, ".");
             Predicates[j].Matrices[1] = Matrices[atoi(tmp)];
+            Predicates[j].MatricesIndex[1] = atoi(tmp);
             tmp = strtok(nullptr, "\0");
             Predicates[j].RowIds[1] = atoi(tmp);
 //            for(int i =0; i < j; i++){
@@ -223,9 +227,7 @@ bool Query::filtering(uint64_t &size){
                     return false;
             }
 
-            for (int x = 0; x < NumOfMatrices; x++)
-                if (Matrices[x] == Predicates[i].Matrices[0])
-                    FilteredMatrices[x] = vector;
+            FilteredMatrices[Predicates[i].MatricesIndex[0]] = vector;
             // std::cout << "vector size: " << vector->size() << std::endl;
         }
 
@@ -297,9 +299,13 @@ void Query::exec()
             else
             {
                 ListOfResults = new List();
+                std:: cout << R1->numTuples << std::endl;
+                R1->print();
+                R2->print();
                 for(int x =0; x < R1->numTuples; x++){
                     struct Node* n = ListOfResults->insert_node();
-                    ListOfResults->insert(n,i);
+                    ListOfResults->insert(n,R1->getTuples()[i].payloads[0]);
+                    rowsInResults++;
                 }
                 equality_filter(0, 0, R1, R2);
             }
