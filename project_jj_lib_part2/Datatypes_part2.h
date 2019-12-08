@@ -56,7 +56,7 @@ public:
     void empty_sum();
     void calc_sum();
 
-    Relation* FltrRel(uint64_t mat, uint64_t rel);
+    Relation* FltrRel(uint64_t mat,uint64_t  index,uint64_t rel);
 };
 
 #endif //PROJECT_JJ_DATATYPES_PART2_H

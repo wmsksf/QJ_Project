@@ -235,15 +235,11 @@ bool Query::filtering(uint64_t &size){
     return true;
 }
 
-Relation* Query::FltrRel(uint64_t mat, uint64_t rel)
+Relation* Query::FltrRel(uint64_t mat, uint64_t index,uint64_t rel)
 {
     Relation *R = MATRICES[mat].getRelation(rel);
-    for (int j = 0; j < NumOfMatrices; j++)
-        if (mat == Matrices[j])
-        {
-            R->filter(FilteredMatrices[j]);
-            break;
-        }
+    if(FilteredMatrices[index] != nullptr)
+        R->filter(FilteredMatrices[index]);
 
     return R;
 }
@@ -282,8 +278,8 @@ void Query::exec()
         {
             MatricesJoined = new Vector();
             MatricesJoined->push_back(Predicates[i].Matrices[0]);
-            R1 = FltrRel(Predicates[i].Matrices[0], Predicates[i].RowIds[0]);
-            R2 = FltrRel(Predicates[i].Matrices[1], Predicates[i].RowIds[1]);
+            R1 = FltrRel(Predicates[i].Matrices[0],Predicates[i].MatricesIndex[0], Predicates[i].RowIds[0]);
+            R2 = FltrRel(Predicates[i].Matrices[1],Predicates[i].MatricesIndex[1], Predicates[i].RowIds[1]);
             if (!R1->numTuples || !R2->numTuples) {
                 empty_sum();
                 delete R1;
@@ -300,8 +296,7 @@ void Query::exec()
             {
                 ListOfResults = new List();
                 std:: cout << R1->numTuples << std::endl;
-                R1->print();
-                R2->print();
+                std:: cout << R2->numTuples << std::endl;
                 for(int x =0; x < R1->numTuples; x++){
                     struct Node* n = ListOfResults->insert_node();
                     ListOfResults->insert(n,R1->getTuples()[i].payloads[0]);
@@ -320,7 +315,7 @@ void Query::exec()
                 delete ListOfResults;
                 MatricesJoined->push_back(Predicates[i].Matrices[1]);
 
-                R2 = FltrRel(Predicates[i].Matrices[1], Predicates[i].RowIds[1]);
+                R2 = FltrRel(Predicates[i].Matrices[1],Predicates[i].MatricesIndex[1], Predicates[i].RowIds[1]);
                 if (!R2->numTuples)
                 {
                     empty_sum();
@@ -352,7 +347,7 @@ void Query::exec()
             delete ListOfResults;
             MatricesJoined->push_back(Predicates[i].Matrices[0]);
 
-            R2 = FltrRel(Predicates[i].Matrices[0], Predicates[i].RowIds[0]);
+            R2 = FltrRel(Predicates[i].Matrices[0],Predicates[i].MatricesIndex[0], Predicates[i].RowIds[0]);
             if (!R2->numTuples)
             {
                 empty_sum();
