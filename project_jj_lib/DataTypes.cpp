@@ -155,7 +155,7 @@ void Relation::filter(Vector  *vector) {
 
     Tuple* tmp = new Tuple[vectorSize];
 
-    for(int i =0; i<vectorSize;i++)
+    for(uint64_t i = 0; i<vectorSize;i++)
     {
         uint64_t row = (*vector)[i];
         tmp[i].key = tuples[row].key;
@@ -189,7 +189,7 @@ bool Matrix::setMatrix(char* fileName)
         exit(EXIT_FAILURE);
     }
 
-    for (int j = 0; j < numOfColumns*numOfRows; j++)
+    for (uint64_t j = 0; j < numOfColumns*numOfRows; j++)
         infile.read((char*)(data+j), sizeof(uint64_t));
 
     return true;
@@ -233,8 +233,8 @@ uint64_t *Matrix::getData() { return data; }
 Relation *Matrix::getRelation(List* list,int index, long int numOfRows_, int columnNumber) {
     if(list == nullptr or list->getHead() == nullptr) return nullptr;
     if(numOfRows_ == 0) return nullptr;
-    if(index >= list->getHead()->data.size()) return nullptr;
-    if(columnNumber >=numOfColumns) return nullptr;
+    if((uint64_t) index >= list->getHead()->data.size()) return nullptr;
+    if((uint64_t) columnNumber >=numOfColumns) return nullptr;
 
     long unsigned int offset = columnNumber*numOfRows;
     auto* R = new Relation();
@@ -252,8 +252,8 @@ Relation* Matrix::getRelationKeys(List* list,int index, long int numOfRows_, int
 {
     if(list == nullptr or list->getHead() == nullptr) return nullptr;
     if(numOfRows_ == 0) return nullptr;
-    if(index >= list->getHead()->data.size()) return nullptr;
-    if(columnNumber >=numOfColumns) return nullptr;
+    if((uint64_t) index >= list->getHead()->data.size()) return nullptr;
+    if((uint64_t) columnNumber >=numOfColumns) return nullptr;
 
     long unsigned int offset = columnNumber*numOfRows;
     auto* R = new Relation();

@@ -6,6 +6,7 @@ mkdir -p build/obj
 make
 
 mv *.o build/obj
-mv SortMergeJoin Catch_tests_run build/
+mv ExecQueries build/
+cp input.sh build/
 
 #./input.sh <filename.init> <filename.work> | ./<executable> <<(append) output.sh

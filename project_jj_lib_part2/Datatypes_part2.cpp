@@ -55,7 +55,7 @@ void Query::parse(char *inq) {
     char *results = strtok(nullptr, "");
 
 //  calc num of matrices
-    for (int i = 1; i < strlen(matrices) + 1; i++) {
+    for (uint64_t i = 1; i < strlen(matrices) + 1; i++) {
         if ((matrices[i - 1] < '0' or matrices[i - 1] > '9') and matrices[i - 1] != ' ') parse_err();
         if (matrices[i - 1] >= '0' and matrices[i - 1] <= '9' and (matrices[i] == '\0' or matrices[i] == ' '))
             NumOfMatrices++;
@@ -73,7 +73,7 @@ void Query::parse(char *inq) {
     }
 
 //    calc num of results
-    for (int i = 1; i < strlen(results) + 1; i++) {
+    for (uint64_t i = 1; i < strlen(results) + 1; i++) {
         if ((results[i - 1] < '0' or results[i - 1] > '9') and results[i - 1] != ' ' and
             results[i - 1] != '.')
             parse_err();
@@ -92,7 +92,7 @@ void Query::parse(char *inq) {
     }
 
 //    calc num of predicates
-    for (int i = 1; i < strlen(predicates) + 1; i++) {
+    for (uint64_t i = 1; i < strlen(predicates) + 1; i++) {
         // Looking for illegal characters in the predicates
         if ((predicates[i - 1] < '0' or predicates[i - 1] > '9') and predicates[i - 1] != '>' and
             predicates[i - 1] != '<'
@@ -116,7 +116,7 @@ void Query::parse(char *inq) {
 
         tmp = strtok(strArray[j], "&");
 
-        for (int i = 0; i < strlen(tmp); i++) {
+        for (uint64_t i = 0; i < strlen(tmp); i++) {
             //Looking for the operation symbol '>' or '<' or '='
             if (tmp[i - 1] == '>' or tmp[i - 1] == '=' or tmp[i - 1] == '<') {
                 //More than 1 operation symbol is not allowed within the same predicate
@@ -135,7 +135,6 @@ void Query::parse(char *inq) {
             del[0] = '=';
 
         tmp = strtok(tmp, ".");
-//        in predicates as given when there is <rel>.<relcolmn>, <rel> is index of rel in Matrices[], in class Query, given .pdf file of second part of project
         Predicates[j].Matrices[0] = Matrices[atoi(tmp)];
         Predicates[j].MatricesIndex[0] = atoi(tmp);
         tmp = strtok(nullptr, del);
@@ -157,12 +156,12 @@ void Query::parse(char *inq) {
 bool Query::filtering(uint64_t &size){
     //    calc num of filters
     uint64_t v = 0;
-    for (uint64_t i = 0; i < NumOfPredicates; i++) {
+    for (int i = 0; i < NumOfPredicates; i++) {
         if (Predicates[i].filter) v++;
         if(Predicates[i].operation == 'x') v++;
     }
 
-    for (uint64_t i = 0; i < NumOfPredicates; i++)
+    for (int i = 0; i < NumOfPredicates; i++)
         if (Predicates[i].filter or Predicates[i].operation == 'x') {
             Relation *rel;
 
@@ -203,7 +202,6 @@ bool Query::filtering(uint64_t &size){
             }
 
             FilteredMatrices[Predicates[i].MatricesIndex[0]] = vector;
-            // std::cout << "vector size: " << vector->size() << std::endl;
         }
 
     size = v;
@@ -219,9 +217,9 @@ Relation* Query::FltrRel(uint64_t mat, uint64_t index,uint64_t rel)
     return R;
 }
 
-bool Query::prev_predicate(uint64_t cur1, uint64_t cur2)
+bool Query::prev_predicate(int cur1, int cur2)
 {
-    for (uint64_t i = 0;  i < NumOfPredicates; i++)
+    for (int i = 0;  i < NumOfPredicates; i++)
     {
         if (Predicates[i].operation != 'j') continue;
 
@@ -299,7 +297,6 @@ void Query::exec()
                     return;
                 }
 
-//               equality filter or self join
                 if (prev_predicate(Predicates[i].Matrices[0], Predicates[i].Matrices[1]))
                     equality_filter(R1, R2);
                 else
@@ -375,20 +372,12 @@ List* Query::join(Relation *relA, Relation *relB) {
     Radixsort(relA,0,relA->numTuples-1);
     Radixsort(relB,0,relB->numTuples-1);
 
-    if (!relA->isSorted() || !relB->isSorted())
-    {
-        log("no sorted\n");
-        return nullptr;
-    }
+    if (!relA->isSorted() || !relB->isSorted()) return nullptr;
 
     Tuple* tupA = relA->getTuples();
     Tuple* tupB = relB->getTuples();
 
-    if(tupA == nullptr or tupB == nullptr)
-    {
-        log("empty\n");
-        return nullptr;
-    }
+    if(tupA == nullptr or tupB == nullptr) return nullptr;
 
     uint64_t sizeA = relA->numTuples;
     uint64_t sizeB = relB->numTuples;
@@ -444,11 +433,8 @@ List* Query::join(Relation *relA, Relation *relB) {
             j = jj;
         }
     }
-    if(counter==0)
-    {
-        log("zero counter\n");
-        return nullptr;
-    }
+
+    if(!counter) return nullptr;
     rowsInResults = counter;
     return results;
 }
@@ -460,7 +446,7 @@ int fracto_int(double number, int dec_num) {
 }
 
 void Query::empty_sum() {
-    for (uint64_t i = 0; i < NumOfResults; i++)
+    for (int i = 0; i < NumOfResults; i++)
         std::cout << "NULL ";
     std::cout << std::endl;
 }
@@ -469,7 +455,7 @@ void Query::calc_sum()
 {
     Vector sum;
     Tuple *data;
-    for (uint64_t i = 0; i < NumOfResults; i++)
+    for (int i = 0; i < NumOfResults; i++)
     {
         uint64_t s = 0;
         double frack, intprt;

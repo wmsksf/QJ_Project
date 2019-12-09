@@ -60,7 +60,7 @@ char** Get_Input(bool flag, uint64_t *size)
             }
             else
             {
-                for (int i = 0; i < count; i++) free(Datasets[i]);
+                for (uint64_t i = 0; i < count; i++) free(Datasets[i]);
                 free(Datasets);
 
                 ALLOC_CHECK(More_Datasets);
@@ -80,13 +80,13 @@ char** Get_Input(bool flag, uint64_t *size)
         MATRICES= (Matrix*) malloc(sizeof(Matrix)*count);
         ALLOC_CHECK(MATRICES);
 
-        for (int i = 0; i < count; i++)
+        for (uint64_t i = 0; i < count; i++)
             MATRICES[i].setMatrix(Datasets[i]);
 
         MATRICES_SIZE = count;
 
 //         no need for filenames anymore
-        for (int i = 0; i < count; i++) free(Datasets[i]);
+        for (uint64_t i = 0; i < count; i++) free(Datasets[i]);
         free(Datasets);
 
         return nullptr;
@@ -94,7 +94,6 @@ char** Get_Input(bool flag, uint64_t *size)
     else
     {
         *size = count;
-//        TODO: Datasets to be freed before end of main
         return Datasets;
     }
 }
@@ -112,7 +111,7 @@ void execQ(char** Q, uint64_t size)
         delete q;
     }
 
-    for (int i = 0; i < size; i++) free(Q[i]);
+    for (uint64_t i = 0; i < size; i++) free(Q[i]);
     free(Q);
 }
 

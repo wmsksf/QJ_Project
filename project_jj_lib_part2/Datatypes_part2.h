@@ -40,7 +40,7 @@ public:
     void parse(char *inq);
 
     bool filtering(uint64_t &filters);
-    bool prev_predicate(uint64_t cur1, uint64_t cur2);
+    bool prev_predicate(int cur1, int cur2);
 
     Relation* FltrRel(uint64_t mat,uint64_t  index,uint64_t rel);
     void exec();

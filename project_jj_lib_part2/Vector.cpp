@@ -39,7 +39,6 @@ void Vector::push_back(uint64_t x)
 
     vec[index] = x;
     index++;
-//    std::cout<<"in vec "; print(); std::cout << std::endl;
 }
 
 uint64_t Vector::operator[](uint64_t indx)
