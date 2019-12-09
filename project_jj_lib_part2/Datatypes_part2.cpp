@@ -38,10 +38,10 @@ Query::~Query()
 {
     delete[] Matrices;
     delete[] Results;
-//    delete[] Predicates;
+    delete[] Predicates;
 
     delete MatricesJoined;
-    // delete ListOfResults;
+    delete ListOfResults;
 }
 
 inline void parse_err() {
@@ -252,7 +252,9 @@ void Query::exec()
         if (MatricesJoined == nullptr)
         {
             MatricesJoined = new Vector();
-            MatricesJoined->push_back(Predicates[i].Matrices[0]);
+            MatricesJoined->push_back(Predicates[i].MatricesIndex[0]);
+            MatricesJoined->push_back(Predicates[i].MatricesIndex[1]);
+
             R1 = FltrRel(Predicates[i].Matrices[0],Predicates[i].MatricesIndex[0], Predicates[i].RowIds[0]);
             R2 = FltrRel(Predicates[i].Matrices[1],Predicates[i].MatricesIndex[1], Predicates[i].RowIds[1]);
             if (!R1->numTuples || !R2->numTuples) {
@@ -262,38 +264,21 @@ void Query::exec()
                 return;
             }
 
-            if(Predicates[i].Matrices[0] != Predicates[i].Matrices[1]) {
-                MatricesJoined->push_back(Predicates[i].Matrices[1]);
-
-                ListOfResults = join(R1, R2);
-            }
-            else
-            {
-                ListOfResults = new List();
-                std:: cout << R1->numTuples << std::endl;
-                std:: cout << R2->numTuples << std::endl;
-
-                for(int x =0; x < R1->numTuples; x++){
-                    struct Node* n = ListOfResults->insert_node();
-                    ListOfResults->insert(n,R1->getTuples()[x].payloads[0]);
-                    rowsInResults++;
-                }
-                equality_filter(R1, R2);
-            }
+            ListOfResults = join(R1, R2);
         }
-        else if (MatricesJoined->search(Predicates[i].Matrices[0]))
+        else if (MatricesJoined->search(Predicates[i].MatricesIndex[0]))
         {
-            R1 = MATRICES[Predicates[i].Matrices[0]].getRelation(ListOfResults,MatricesJoined->getIndex(Predicates[i].Matrices[0]),rowsInResults,Predicates[i].RowIds[0]);
+            R1 = MATRICES[Predicates[i].Matrices[0]].getRelation(ListOfResults,MatricesJoined->getIndex(Predicates[i].MatricesIndex[0]),rowsInResults,Predicates[i].RowIds[0]);
             if (R1 == nullptr)
             {
                 empty_sum();
                 return;
             }
 
-            if (!MatricesJoined->search(Predicates[i].Matrices[1]))
+            if (!MatricesJoined->search(Predicates[i].MatricesIndex[1]))
             {
                 delete ListOfResults;
-                MatricesJoined->push_back(Predicates[i].Matrices[1]);
+                MatricesJoined->push_back(Predicates[i].MatricesIndex[1]);
 
                 R2 = FltrRel(Predicates[i].Matrices[1],Predicates[i].MatricesIndex[1], Predicates[i].RowIds[1]);
                 if (!R2->numTuples)
@@ -306,7 +291,7 @@ void Query::exec()
             }
             else
             {
-                R2 = MATRICES[Predicates[i].Matrices[1]].getRelationKeys(ListOfResults,MatricesJoined->getIndex(Predicates[i].Matrices[1]),rowsInResults,Predicates[i].RowIds[1]);
+                R2 = MATRICES[Predicates[i].Matrices[1]].getRelationKeys(ListOfResults,MatricesJoined->getIndex(Predicates[i].MatricesIndex[1]),rowsInResults,Predicates[i].RowIds[1]);
                 if (R2 == nullptr)
                 {
                     empty_sum();
@@ -315,7 +300,7 @@ void Query::exec()
                 }
 
 //               equality filter or self join
-                if (prev_predicate(Predicates[i].Matrices[0], Predicates[i].Matrices[1]) || Predicates[i].Matrices[0] == Predicates[i].Matrices[1])
+                if (prev_predicate(Predicates[i].Matrices[0], Predicates[i].Matrices[1]))
                     equality_filter(R1, R2);
                 else
                 {
@@ -324,9 +309,9 @@ void Query::exec()
                 }
             }
         }
-        else if (MatricesJoined->search(Predicates[i].Matrices[1]))
+        else if (MatricesJoined->search(Predicates[i].MatricesIndex[1]))
         {
-            R1 = MATRICES[Predicates[i].Matrices[1]].getRelation(ListOfResults,MatricesJoined->getIndex(Predicates[i].Matrices[1]),rowsInResults,Predicates[i].RowIds[1]);
+            R1 = MATRICES[Predicates[i].Matrices[1]].getRelation(ListOfResults,MatricesJoined->getIndex(Predicates[i].MatricesIndex[1]),rowsInResults,Predicates[i].RowIds[1]);
             if (R1 == nullptr)
             {
                 empty_sum();
@@ -334,8 +319,7 @@ void Query::exec()
             }
 
             delete ListOfResults;
-            MatricesJoined->push_back(Predicates[i].Matrices[0]);
-
+            MatricesJoined->push_back(Predicates[i].MatricesIndex[0]);
             R2 = FltrRel(Predicates[i].Matrices[0],Predicates[i].MatricesIndex[0], Predicates[i].RowIds[0]);
             if (!R2->numTuples)
             {
@@ -391,12 +375,20 @@ List* Query::join(Relation *relA, Relation *relB) {
     Radixsort(relA,0,relA->numTuples-1);
     Radixsort(relB,0,relB->numTuples-1);
 
-    if (!relA->isSorted() || !relB->isSorted()) return nullptr;
+    if (!relA->isSorted() || !relB->isSorted())
+    {
+        log("no sorted\n");
+        return nullptr;
+    }
 
     Tuple* tupA = relA->getTuples();
     Tuple* tupB = relB->getTuples();
 
-    if(tupA == nullptr or tupB == nullptr) return nullptr;
+    if(tupA == nullptr or tupB == nullptr)
+    {
+        log("empty\n");
+        return nullptr;
+    }
 
     uint64_t sizeA = relA->numTuples;
     uint64_t sizeB = relB->numTuples;
@@ -452,7 +444,11 @@ List* Query::join(Relation *relA, Relation *relB) {
             j = jj;
         }
     }
-    if(counter==0) return nullptr;
+    if(counter==0)
+    {
+        log("zero counter\n");
+        return nullptr;
+    }
     rowsInResults = counter;
     return results;
 }
@@ -482,9 +478,9 @@ void Query::calc_sum()
         x = (int) intprt;
         y = fracto_int(frack, 1);
 
-        if (!MatricesJoined->search(Matrices[x])) return;
+        if (!MatricesJoined->search(x)) return;
 
-        int indx = MatricesJoined->getIndex(Matrices[x]);
+        int indx = MatricesJoined->getIndex(x);
         if (indx != -1)
         {
             Relation *rel = MATRICES[Matrices[x]].getRelation(y);
@@ -498,8 +494,6 @@ void Query::calc_sum()
         }
         else return;
     }
-    delete ListOfResults;
-    delete[] Predicates;
 
     for (uint64_t i = 0; i < sum.size(); i++)
         std::cout << sum[i] << " ";
