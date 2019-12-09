@@ -38,7 +38,7 @@ Query::~Query()
 {
     delete[] Matrices;
     delete[] Results;
-    // delete[] Predicates;
+//    delete[] Predicates;
 
     delete MatricesJoined;
     // delete ListOfResults;
@@ -146,11 +146,6 @@ void Query::parse(char *inq) {
             Predicates[j].MatricesIndex[1] = atoi(tmp);
             tmp = strtok(nullptr, "\0");
             Predicates[j].RowIds[1] = atoi(tmp);
-//            for(int i =0; i < j; i++){
-//                if((Predicates[i].Matrices[0] == Predicates[j].Matrices[0] and Predicates[i].Matrices[1] == Predicates[j].Matrices[1])
-//                    or (Predicates[i].Matrices[0] == Predicates[j].Matrices[1] and Predicates[i].Matrices[1] == Predicates[j].Matrices[0]))
-//                    operation = 'x';
-//            }
         } else {
             tmp = strtok(nullptr, "\0");
             Predicates[j].filter = atoll(tmp);
@@ -202,26 +197,6 @@ bool Query::filtering(uint64_t &size){
                         if (tuples[j].key == Predicates[i].filter)
                             vector->push_back(tuples[j].getPayloads()[0]);
                     break;
-//                case 'x': {
-//                    delete vector;
-//                    Relation *rel2 = MATRICES[Predicates[i].Matrices[1]].getRelation(Predicates[i].RowIds[1]);
-//                    for (int j = 0; j < NumOfMatrices; j++) {
-//                        if (Predicates[i].Matrices[1] == Matrices[j]) {
-//                            rel->filter(FilteredMatrices[j]);
-//                            break;
-//                        }
-//                    }
-//                    if (rel2 == nullptr)
-//                        return false;
-//                    Vector** vec = filterRelations(rel,rel2);
-//                    if(vec == nullptr or vec[0] == nullptr or vec[1] == nullptr) return false;
-//                    vector = vec[0];
-//
-//                    for (int x = 0; x < NumOfMatrices; x++)
-//                        if (Matrices[x] == Predicates[i].Matrices[1])
-//                            FilteredMatrices[x] = vec[1];
-//                    break;
-//                }
                 default:
                     std::cout << "Invalid operation for filtering!" << std::endl;
                     return false;
@@ -297,18 +272,23 @@ void Query::exec()
                 ListOfResults = new List();
                 std:: cout << R1->numTuples << std::endl;
                 std:: cout << R2->numTuples << std::endl;
+
                 for(int x =0; x < R1->numTuples; x++){
                     struct Node* n = ListOfResults->insert_node();
-                    ListOfResults->insert(n,R1->getTuples()[i].payloads[0]);
+                    ListOfResults->insert(n,R1->getTuples()[x].payloads[0]);
                     rowsInResults++;
                 }
-                equality_filter(0, 0, R1, R2);
+                equality_filter(R1, R2);
             }
         }
         else if (MatricesJoined->search(Predicates[i].Matrices[0]))
         {
             R1 = MATRICES[Predicates[i].Matrices[0]].getRelation(ListOfResults,MatricesJoined->getIndex(Predicates[i].Matrices[0]),rowsInResults,Predicates[i].RowIds[0]);
-            if (R1 == nullptr) return;
+            if (R1 == nullptr)
+            {
+                empty_sum();
+                return;
+            }
 
             if (!MatricesJoined->search(Predicates[i].Matrices[1]))
             {
@@ -327,22 +307,31 @@ void Query::exec()
             else
             {
                 R2 = MATRICES[Predicates[i].Matrices[1]].getRelationKeys(ListOfResults,MatricesJoined->getIndex(Predicates[i].Matrices[1]),rowsInResults,Predicates[i].RowIds[1]);
-                if (R2 == nullptr) return;
+                if (R2 == nullptr)
+                {
+                    empty_sum();
+                    delete  R1; delete R2;
+                    return;
+                }
 
 //               equality filter or self join
                 if (prev_predicate(Predicates[i].Matrices[0], Predicates[i].Matrices[1]) || Predicates[i].Matrices[0] == Predicates[i].Matrices[1])
-                    equality_filter(MatricesJoined->getIndex(Predicates[i].Matrices[0]), MatricesJoined->getIndex(Predicates[i].Matrices[1]), R1, R2);
+                    equality_filter(R1, R2);
                 else
                 {
-                    delete ListOfResults;
-                    ListOfResults = EQjoin(R1, R2);
+                    std::cout << "Should not reach this else!" << std::endl;
+                    return;
                 }
             }
         }
         else if (MatricesJoined->search(Predicates[i].Matrices[1]))
         {
             R1 = MATRICES[Predicates[i].Matrices[1]].getRelation(ListOfResults,MatricesJoined->getIndex(Predicates[i].Matrices[1]),rowsInResults,Predicates[i].RowIds[1]);
-            if (R1 == nullptr) return;
+            if (R1 == nullptr)
+            {
+                empty_sum();
+                return;
+            }
 
             delete ListOfResults;
             MatricesJoined->push_back(Predicates[i].Matrices[0]);
@@ -374,7 +363,7 @@ void Query::exec()
     calc_sum();
 }
 
-void Query::equality_filter(int pos1, int pos2, Relation *r1, Relation *r2)
+void Query::equality_filter(Relation *r1, Relation *r2)
 {
     Tuple *tup1 = r1->getTuples();
     Tuple *tup2 = r2->getTuples();
@@ -468,73 +457,6 @@ List* Query::join(Relation *relA, Relation *relB) {
     return results;
 }
 
-List* Query::EQjoin(Relation *relA, Relation *relB)
-{
-    Radixsort(relA,0,relA->numTuples-1);
-    Radixsort(relB,0,relB->numTuples-1);
-    if (!relA->isSorted() || !relB->isSorted()) return nullptr;
-
-    Tuple* tupA = relA->getTuples();
-    Tuple* tupB = relB->getTuples();
-    if(tupA == nullptr or tupB == nullptr) return nullptr;
-
-    uint64_t sizeA = relA->numTuples;
-    uint64_t sizeB = relB->numTuples;
-    uint64_t j=0;
-    uint64_t jj=0;
-    bool flag = false;
-    uint64_t counter = 0;
-
-    struct Node* N;
-    List* results = new List();
-
-    for(uint64_t i = 0; i<sizeA; i++){
-
-        if(tupA[i].key == tupB[j].key){
-            N = results->insert_node();
-            for(int x =0; x < (int) tupA[i].payloads.size(); x++)
-                results->insert(N,tupA[i].payloads[x]);
-            counter++;
-
-            if(j == sizeB-1) continue;
-            jj = j;
-            while(tupA[i].key == tupB[++j].key){
-                N = results->insert_node();
-                for(int x =0; x < (int) tupA[i].payloads.size(); x++)
-                    results->insert(N,tupA[i].payloads[x]);
-                counter++;
-                if(j == sizeB-1) break;
-            }
-            j = jj;
-        }
-        else if(tupA[i].key > tupB[j].key){
-
-            if(j == sizeB-1) break;
-            while(tupA[i].key > tupB[++j].key){
-                if (j == sizeB-1) {
-                    flag = true;
-                    break;
-                }
-            }
-            if(flag) break;
-            jj = j--;
-            while(tupA[i].key == tupB[++j].key){
-                N = results->insert_node();
-                for(int x =0; x < (int) tupA[i].payloads.size(); x++)
-                    results->insert(N,tupA[i].payloads[x]);
-                counter++;
-                if (j == sizeB-1) {
-                    break;
-                }
-            }
-            j = jj;
-        }
-    }
-    if(counter==0) return nullptr;
-    rowsInResults = counter;
-    return results;
-}
-
 int fracto_int(double number, int dec_num) {
     double dummy;
     double frac = modf(number, &dummy);
@@ -583,62 +505,4 @@ void Query::calc_sum()
         std::cout << sum[i] << " ";
 
     std::cout << std::endl;
-}
-
-
-Vector **Query::filterRelations(Relation * A, Relation * B) {
-    if(A == nullptr or B == nullptr) return nullptr;
-
-    uint64_t sizeA = A->numTuples;
-    uint64_t sizeB = B->numTuples;
-
-    Radixsort(A,0,sizeA-1);
-    Radixsort(B,0,sizeB-1);
-
-    if(!A->isSorted() or !B->isSorted()) return nullptr;
-
-    Tuple* tupA = A->getTuples();
-    Tuple* tupB = B->getTuples();
-
-    Vector** vectors = new Vector*[2];
-    vectors[0] = new Vector();
-    vectors[1] = new Vector();
-
-    uint64_t j =0;
-    bool flag = false;
-    for(int64_t i =0; i < sizeA; i++){
-        if(tupA[i].key == tupB[j].key){
-            vectors[0]->push_back(i);
-            vectors[1]->push_back(j);
-            if(j == sizeB-1) continue;
-            while(tupA[i].key == tupB[++j].key){
-                vectors[1]->push_back(j);
-                if(j == sizeB-1) {
-                    j++;
-                    break;
-                }
-            }
-            j--;
-            if(i == sizeA-1) break;
-            while(tupA[++i].key == tupB[j].key){
-                vectors[0]->push_back(i);
-                if(i == sizeA-1) {
-                    break;
-                }
-            }
-        }
-        else if(tupA[i].key > tupB[j].key) {
-            if(j == sizeB-1) break;
-            while(tupA[i].key > tupB[++j].key){
-                if(j == sizeB-1){
-                    flag = true;
-                    break;
-                }
-            }
-            if(flag) break;
-            i--;
-        }
-    }
-
-    return vectors;
 }
