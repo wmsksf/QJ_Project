@@ -11,18 +11,11 @@
 
 Tuple::Tuple() { key = 0; }
 
-//void Tuple::setKey(uint64_t key_) { key = key_; }
-//uint64_t Tuple::getKey() { return key; }
-
 void Tuple::setPayload(uint64_t payload_) { payloads.push_back(payload_); }
 Vector& Tuple::getPayloads() { return payloads; }
 
 void Tuple::swap(Tuple *tpl)
 {
-//    std::cout << "before swap:" << this->key << " payloads: "; this->payloads.print();
-//    std::cout << "next " << tpl->getKey() << " payloads:"; tpl->payloads.print();
-//    std::cout << std::endl;
-
     uint64_t tmp = key;
     this->key = tpl->key;
     tpl->key = tmp;
@@ -38,10 +31,6 @@ void Tuple::swap(Tuple *tpl)
     tpl->payloads.clear();
     for (uint64_t i = 0; i < tmpayl.size(); i++)
         tpl->payloads.push_back(tmpayl[i]);
-
-//    std::cout << "after swap:" << this->key << " payloads: "; this->payloads.print();
-//    std::cout << "next " << tpl->getKey() << " payloads:"; tpl->payloads.print();
-//    std::cout << std::endl;
 }
 
 void Tuple::print()
@@ -104,10 +93,7 @@ void Relation::clean(uint64_t start, uint64_t end)
     }
 }
 void Relation::print() {
-    if (!numTuples) {
-        log("Empty Relation object\n");
-        return;
-    }
+    if (!numTuples) return;
     uint64_t j = numTuples;
     Tuple *t = tuples;
     for (uint64_t i = 0; i < j; i++)
@@ -116,17 +102,12 @@ void Relation::print() {
 
 bool Relation::isSorted() {
     uint64_t  size = numTuples;
-    if(!size){
-        log("Relation is empty\n");
-        return false;
-    }
+    if(!size) return false;
+
     uint64_t a = tuples[0].key;
     for (uint64_t i =1; i<size; i++){
         uint64_t b = tuples[i].key;
-        if(a > b){
-            log("Relation is not sorted\n");
-            return false;
-        }
+        if(a > b) return false;
         a = b;
     }
 //    std::cout << "Relation is sorted" << std::endl;
@@ -215,11 +196,7 @@ bool Matrix::setMatrix(char* fileName)
 }
 
 Relation *Matrix::getRelation(long unsigned int columnNumber) {
-    if(columnNumber >=numOfColumns)
-    {
-        log("Out of Matrix object data array bounds\n");
-        return nullptr;
-    }
+    if(columnNumber >=numOfColumns) return nullptr;
 
     long unsigned int offset = columnNumber*numOfRows;
     auto* R = new Relation();
@@ -254,27 +231,10 @@ void Matrix::printMatrix() {
 uint64_t *Matrix::getData() { return data; }
 
 Relation *Matrix::getRelation(List* list,int index, long int numOfRows_, int columnNumber) {
-    if(list == nullptr or list->getHead() == nullptr)
-    {
-        log("No List object\n");
-        return nullptr;
-    }
-    if(numOfRows_ == 0)
-    {
-        log("No rows\n");
-        return nullptr;
-    }
-    if(index >= list->getHead()->data.size())
-    {
-        log("Index of Vector class vec array out of bounds in struct Node\n");
-        return nullptr;
-    }
-
-    if(columnNumber >=numOfColumns)
-    {
-        log("Out of Matrix object data array bounds\n");
-        return nullptr;
-    }
+    if(list == nullptr or list->getHead() == nullptr) return nullptr;
+    if(numOfRows_ == 0) return nullptr;
+    if(index >= list->getHead()->data.size()) return nullptr;
+    if(columnNumber >=numOfColumns) return nullptr;
 
     long unsigned int offset = columnNumber*numOfRows;
     auto* R = new Relation();
@@ -290,27 +250,10 @@ Relation *Matrix::getRelation(List* list,int index, long int numOfRows_, int col
 
 Relation* Matrix::getRelationKeys(List* list,int index, long int numOfRows_, int columnNumber)
 {
-    if(list == nullptr or list->getHead() == nullptr)
-    {
-        log("No List object\n");
-        return nullptr;
-    }
-    if(numOfRows_ == 0)
-    {
-        log("No rows\n");
-        return nullptr;
-    }
-    if(index >= list->getHead()->data.size())
-    {
-        log("Index of Vector class vec array out of bounds in struct Node\n");
-        return nullptr;
-    }
-
-    if(columnNumber >=numOfColumns)
-    {
-        log("Out of Matrix object data array bounds\n");
-        return nullptr;
-    }
+    if(list == nullptr or list->getHead() == nullptr) return nullptr;
+    if(numOfRows_ == 0) return nullptr;
+    if(index >= list->getHead()->data.size()) return nullptr;
+    if(columnNumber >=numOfColumns) return nullptr;
 
     long unsigned int offset = columnNumber*numOfRows;
     auto* R = new Relation();
@@ -324,50 +267,4 @@ Relation* Matrix::getRelationKeys(List* list,int index, long int numOfRows_, int
     }
 
     return R;
-}
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-Results::Results() { Buffer = nullptr; Buffersize = 0; }
-Results::~Results() { delete[] Buffer; }
-
-void Results::setBuffersize(uint64_t buffersize) { Buffersize = buffersize; }
-
-void Results::initBuffer()
-{
-    if (!Buffersize)
-    {
-        std::cout << "Empty Results object." << std::endl <<
-                  "Tip: call setBuffersize() of object first!" << std::endl;
-
-        exit(EXIT_FAILURE);
-    }
-
-    Buffer = new Tuple[Buffersize];
-}
-
-void Results::add(uint64_t x, uint64_t y)
-{
-    Buffer[index].key = x;
-    Buffer[index].setPayload(y);
-
-    index++;
-}
-bool Results::isFull() { return (index == BUFFERSIZE-1); }
-bool Results::isEmpty() { return (index == 0); }
-
-void Results::print()
-{
-    for (uint64_t i = 0; i < index; i++) {
-        std::cout << Buffer[i].key << "\t";
-        Buffer[i].getPayloads().print();
-    }
-
-    std::cout << std::endl;
-}
-
-Tuple *Results::getBuffer() {
-    return Buffer;
-}
-
-uint64_t Results::getIndex() {
-    return index;
 }

@@ -5,9 +5,7 @@
 #include <stdint-gcc.h>
 #include "Vector.h"
 #include "../project_jj_lib/DataTypes.h"
-#include "../project_jj_lib/LinkedList.h"
 #include "List.h"
-
 
 #ifndef PROJECT_JJ_DATATYPES_PART2_H
 #define PROJECT_JJ_DATATYPES_PART2_H

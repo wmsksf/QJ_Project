@@ -8,7 +8,6 @@
 #include <iostream>
 #include <getopt.h>
 #include "Utils.h"
-#include "LinkedList.h"
 #include "Stack.h"
 #include "../project_jj_lib_part2/MACROS.h"
 
@@ -180,204 +179,56 @@ Tuple getMatrixSize(char *fileName) {
     return tmp;
 }
 
-LinkedList* SortMergeJoin(Relation* relA, Relation* relB, uint64_t& count, bool test) {
-
-    if(relA == nullptr or relB == nullptr){
-        std::cout << "Relations can't be NULL!" << std::endl;
-        return nullptr;
-    }
-
-    uint64_t sizeA = relA->numTuples;
-    uint64_t sizeB = relB->numTuples;
-
-    Radixsort(relA,0,sizeA-1);
-    Radixsort(relB,0,sizeB-1);
-
-    relA->isSorted();
-    relB->isSorted();
-
-//    if(!test) {
-//        LinkedList *results = JoinSortedRelations(relA, relB, count);
-////        std::cout << "Number of tuples after join: " << count << std::endl;
-//        return results;
-//    }
-//    else{
-//        JoinSortedRelationsTest(relA,relB,count);
-////        std::cout << "Number of tuples after join: " << count << std::endl;
-//        return nullptr;
-//    }
-return nullptr;
-}
-
-void clean_up(Matrix **matrix1, Matrix **matrix2, Relation **R1, Relation **R2,
-        LinkedList **ResultsList, char **file1, char **file2)
-{
-    delete *matrix1; *matrix1 = nullptr;
-    delete *matrix2; *matrix2 = nullptr;
-    delete *R1; *R1 = nullptr;
-    delete *R2;  *R2 = nullptr;
-    delete *ResultsList; *ResultsList = nullptr;
-    free(*file1); *file1 = nullptr;
-    free(*file2); *file2 = nullptr;
-}
+//void JoinSortedRelationsTest(Relation *relA, Relation *relB, uint64_t& count) {
 //
-//LinkedList* JoinSortedRelations(Relation *relA, Relation *relB, uint64_t& count) {
-//
+//    FILE *file;
 //    if (!relA->isSorted() || !relB->isSorted())
-//        return nullptr;
+//        return;
 //
 //    Tuple* tupA = relA->getTuples();
 //    Tuple* tupB = relB->getTuples();
 //
 //    if(tupA == nullptr or tupB == nullptr)
-//        return nullptr;
+//        return;
 //
-//    uint64_t sizeA = relA->getNumTuples();
-//    uint64_t sizeB = relB->getNumTuples();
+//    uint64_t sizeA = relA->numTuples;
+//    uint64_t sizeB = relB->numTuples;
 //    uint64_t j=0;
 //    uint64_t jj=0;
 //    bool flag = false;
 //    uint64_t counter = 0;
 //
-//    LinkedList *Results = new LinkedList(BUFFERSIZE);
 //    for(uint64_t i = 0; i<sizeA; i++){
 //
-//        if(tupA[i].getKey() == tupB[j].getKey()){
-//            Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
+//        if(tupA[i].key == tupB[j].key){
 //            counter++;
 //
-//            if(j == sizeB-1) continue;
-//            while(tupA[i].getKey() == tupB[++j].getKey()){
-//                Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
+//            while(tupA[i].key == tupB[++j].key){
 //                counter++;
 //                if(j == sizeB-1) break;
 //            }
 //            j = jj;
 //        }
-//        else if(tupA[i].getKey() > tupB[j].getKey()){
+//        else if(tupA[i].key > tupB[j].key){
 //
-//            if(j == sizeB-1) break;
-//            while(tupA[i].getKey() > tupB[++j].getKey()){
+//
+//            while(tupA[i].key > tupB[++j].key){
 //                if (j == sizeB-1) {
 //                    flag = true;
 //                    break;
 //                }
 //            }
+//
 //            if (j == sizeB-1) {
 //                break;
 //            }
 //            if(flag) break;
 //            jj = j--;
-//            while(tupA[i].getKey() == tupB[++j].getKey()){
-//                Results->insert(tupA[i].getPayload(), tupB[j].getPayload());
+//            while(tupA[i].key == tupB[++j].key){
 //                counter++;
 //            }
 //            j = jj;
 //        }
 //    }
 //    count = counter;
-//    return Results;
 //}
-
-void JoinSortedRelationsTest(Relation *relA, Relation *relB, uint64_t& count) {
-
-    FILE *file;
-    if (!relA->isSorted() || !relB->isSorted())
-        return;
-
-    Tuple* tupA = relA->getTuples();
-    Tuple* tupB = relB->getTuples();
-
-    if(tupA == nullptr or tupB == nullptr)
-        return;
-
-    uint64_t sizeA = relA->numTuples;
-    uint64_t sizeB = relB->numTuples;
-    uint64_t j=0;
-    uint64_t jj=0;
-    bool flag = false;
-    uint64_t counter = 0;
-
-    for(uint64_t i = 0; i<sizeA; i++){
-
-        if(tupA[i].key == tupB[j].key){
-            counter++;
-
-            while(tupA[i].key == tupB[++j].key){
-                counter++;
-                if(j == sizeB-1) break;
-            }
-            j = jj;
-        }
-        else if(tupA[i].key > tupB[j].key){
-
-
-            while(tupA[i].key > tupB[++j].key){
-                if (j == sizeB-1) {
-                    flag = true;
-                    break;
-                }
-            }
-
-            if (j == sizeB-1) {
-                break;
-            }
-            if(flag) break;
-            jj = j--;
-            while(tupA[i].key == tupB[++j].key){
-                counter++;
-            }
-            j = jj;
-        }
-    }
-    count = counter;
-}
-
-static char* copy_chars(char *givenChars)
-{
-    char *chars = (char*) malloc((strlen(givenChars) + 1) * sizeof(char));
-    if (chars == NULL)
-    {
-        std::cerr << "Memory allocation for char* failed." << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    memcpy(chars, givenChars, (strlen(givenChars) + 1) * sizeof(char));
-    return chars;
-}
-
-void GetfromCmd(int argc, char **argv, char **file1, char **file2, long long unsigned int *rel1, long long unsigned  int *rel2)
-{
-    if (argc < 9) USAGE(argv[0]);
-
-    int opt;
-    struct option long_options[] =
-            {
-                    {"f1", required_argument, nullptr, 'f'},
-                    {"rel1", required_argument, nullptr, 'g'},
-                    {"f2", required_argument, nullptr, 'k'},
-                    {"rel2", required_argument, nullptr, 'l'},
-                    {nullptr, 0, nullptr, 0}
-            };
-
-    while ((opt = getopt_long_only(argc, argv, "", long_options, nullptr)) != -1)
-    {
-        switch (opt)
-        {
-            case 'f':
-                *file1 = copy_chars(optarg);
-                break;
-            case 'g':
-                *rel1 = atoll(optarg);
-                break;
-            case 'k':
-                *file2 = copy_chars(optarg);
-                break;
-            case 'l':
-                *rel2 = atoll(optarg);
-                break;
-            default:
-                USAGE(argv[0]);
-        }
-    }
-}

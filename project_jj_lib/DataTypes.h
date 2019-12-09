@@ -10,7 +10,6 @@
 #include "../project_jj_lib_part2/List.h"
 
 #define L1_CACHESIZE 64*1024
-#define BUFFERSIZE (1024*1024)/sizeof(Tuple)
 
 class Tuple
 {
@@ -74,24 +73,4 @@ public:
     uint64_t * getData();
 };
 //    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-class Results
-{
-    Tuple *Buffer;
-    uint64_t index = 0, Buffersize;
-
-public:
-    Results();
-    ~Results();
-
-    void setBuffersize(uint64_t buffersize);
-    void initBuffer();
-    Tuple* getBuffer();
-    uint64_t getIndex();
-
-    void add(uint64_t x, uint64_t y);
-    bool isFull();
-    bool isEmpty();
-    void print();
-};
-
 #endif //PROJECT_JJ_DATATYPES_H
