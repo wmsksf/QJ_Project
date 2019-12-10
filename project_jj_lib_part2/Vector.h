@@ -7,6 +7,7 @@
 
 #include <stdint-gcc.h>
 
+
 class Vector
 {
     uint64_t *vec;

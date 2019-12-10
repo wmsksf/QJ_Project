@@ -8,6 +8,7 @@
 #include "Datatypes_part2.h"
 #include "MACROS.h"
 #include "../project_jj_lib/Utils.h"
+#include <time.h>
 
 Predicate::Predicate() {
     operation = '\0';
@@ -263,6 +264,7 @@ void Query::exec()
             }
 
             ListOfResults = join(R1, R2);
+
         }
         else if (MatricesJoined->search(Predicates[i].MatricesIndex[0]))
         {
@@ -369,8 +371,18 @@ void Query::equality_filter(Relation *r1, Relation *r2)
 
 List* Query::join(Relation *relA, Relation *relB) {
 
-    Radixsort(relA,0,relA->numTuples-1);
-    Radixsort(relB,0,relB->numTuples-1);
+    clock_t start,end;
+    start = clock();
+    if(!relA->isSorted())
+        Radixsort(relA,0,relA->numTuples-1);
+    end = clock();
+    std::cout << "Radix 1: " << ((double) end-start)/CLOCKS_PER_SEC << std::endl;
+    start = end;
+    if(!relB->isSorted())
+        Radixsort(relB,0,relB->numTuples-1);
+    end = clock();
+    std::cout << "Radix 2: " << ((double) end-start)/CLOCKS_PER_SEC << std::endl;
+    start = end;
 
     if (!relA->isSorted() || !relB->isSorted()) return nullptr;
 
@@ -433,6 +445,9 @@ List* Query::join(Relation *relA, Relation *relB) {
             j = jj;
         }
     }
+    end = clock();
+    std::cout << "Join part: " << ((double) end-start)/CLOCKS_PER_SEC << std::endl;
+    start = end;
 
     if(!counter) return nullptr;
     rowsInResults = counter;
