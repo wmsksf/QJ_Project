@@ -20,7 +20,7 @@ Vector::Vector()
 Vector::~Vector() {
     delete[] vec; }
 
-uint64_t Vector::size()
+uint32_t Vector::size()
 {
     return index;
 }
@@ -32,7 +32,7 @@ void Vector::push_back(uint64_t x)
         capacity *= 2;
         uint64_t *tmp = new uint64_t[capacity];
 
-        for (uint64_t i = 0; i < index; i++) tmp[i] = vec[i];
+        for (uint32_t i = 0; i < index; i++) tmp[i] = vec[i];
         delete[] vec;
         vec = tmp;
     }
@@ -54,13 +54,13 @@ uint64_t Vector::operator[](uint64_t indx)
 
 bool Vector::search(uint64_t x) {
 
-    for(uint64_t i =0; i<index; i++)
+    for(uint32_t i =0; i<index; i++)
         if(vec[i] == x) return true;
 
     return false;
 }
 
-int Vector::getIndex(uint64_t x)
+uint32_t Vector::getIndex(uint64_t x)
 {
     for (uint64_t i = 0; i < index; i++)
         if (vec[i] == x) return i;
