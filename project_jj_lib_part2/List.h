@@ -15,9 +15,8 @@ struct Node
 
 class List
 {
-    struct Node *head, *tail;
-
 public:
+    struct Node *head, *tail;
     List();
     ~List();
 
@@ -26,7 +25,6 @@ public:
 
     void remove_node(struct Node *nd);
 
-    struct Node* getHead();
     void print();
 };
 

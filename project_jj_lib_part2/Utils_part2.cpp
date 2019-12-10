@@ -50,7 +50,6 @@ char** Get_Input(bool flag, uint64_t *size)
         }
         else
         {
-//          TODO:  corrupted size vs prev_size : misuse of realloc !!WILL BE FIXED LATER ON
             More_Datasets = (char**) realloc(Datasets, sizeof(char*)*count);
             if (More_Datasets != nullptr)
             {
@@ -122,11 +121,7 @@ void Set_output()
     while (1)
     {
         Queries = Get_Input(true, &nqueries);
-        if (Queries == nullptr)
-        {
-            std::cout << "End of batches of queries!" << std::endl;
-            break;
-        }
+        if (Queries == nullptr) break;
 
         execQ(Queries, nqueries);
     }

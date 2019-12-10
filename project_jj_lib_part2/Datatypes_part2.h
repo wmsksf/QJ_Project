@@ -19,7 +19,6 @@ public:
     uint64_t filter;
 
     Predicate();
-    char getOperation();
 };
 
 class Query{
@@ -40,7 +39,8 @@ public:
     void parse(char *inq);
 
     bool filtering(uint64_t &filters);
-    bool prev_predicate(int cur1, int cur2);
+    bool prev_predicate(int cur1, int cur2, int i);
+    void rearrange_predicates();
 
     Relation* FltrRel(uint64_t mat,uint64_t  index,uint64_t rel);
     void exec();

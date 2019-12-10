@@ -91,8 +91,6 @@ void List::remove_node(struct Node *nd)
     }
 }
 
-struct Node* List::getHead() { return head; }
-
 void List::print()
 {
     uint64_t n = 0;

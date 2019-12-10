@@ -20,10 +20,6 @@ Predicate::Predicate() {
     filter = 0;
 }
 
-char Predicate::getOperation() {
-    return operation;
-}
-
 Query::Query() {
     NumOfMatrices = NumOfPredicates = NumOfResults = 0;
     Matrices = nullptr;
@@ -218,18 +214,59 @@ Relation* Query::FltrRel(uint64_t mat, uint64_t index,uint64_t rel)
     return R;
 }
 
-bool Query::prev_predicate(int cur1, int cur2)
+bool Query::prev_predicate(int cur1, int cur2, int i)
 {
-    for (int i = 0;  i < NumOfPredicates; i++)
+    if ((Predicates[i-1].Matrices[0] == cur1 && Predicates[i-1].Matrices[1] == cur2)
+                   || (Predicates[i-1].Matrices[0] == cur2 && Predicates[i-1].Matrices[1] == cur1))
+            return true;
+    return false;
+}
+
+void Query::rearrange_predicates()
+{
+    int c = 0;
+    for (int i = 0; i < NumOfPredicates; i++)
+        if (Predicates[i].operation == 'j') c++;
+
+    if (c <= 2) return;
+
+    for (int i = 0; i < NumOfPredicates; i++)
     {
         if (Predicates[i].operation != 'j') continue;
+        for (int j = i+1; j < NumOfPredicates; j++)
+        {
+            if (Predicates[j].operation != 'j') continue;
+            if ((Predicates[i].Matrices[0] == Predicates[j].Matrices[0] && Predicates[i].Matrices[1] == Predicates[j].Matrices[1])
+                || (Predicates[i].Matrices[0] == Predicates[j].Matrices[1] && Predicates[i].Matrices[1] == Predicates[j].Matrices[0]))
+                if (j == i+1) continue;
+                else
+                {
+                    int tmp = Predicates[j-1].Matrices[0];
+                    Predicates[j-1].Matrices[0] = Predicates[j].Matrices[0];
+                    Predicates[j].Matrices[0] = tmp;
 
-        if (i && ( (Predicates[i-1].Matrices[0] == cur1 && Predicates[i-1].Matrices[1] == cur2)
-                   || (Predicates[i-1].Matrices[0] == cur2 && Predicates[i-1].Matrices[1] == cur1)))
-            return true;
+                    tmp = Predicates[j-1].Matrices[1];
+                    Predicates[j-1].Matrices[1] =  Predicates[j].Matrices[1];
+                    Predicates[j].Matrices[1] = tmp;
+
+                    tmp = Predicates[j-1].RowIds[0];
+                    Predicates[j-1].RowIds[0] = Predicates[j].RowIds[0];
+                    Predicates[j].RowIds[0] = tmp;
+
+                    tmp = Predicates[j-1].RowIds[1];
+                    Predicates[j-1].RowIds[1] = Predicates[j].RowIds[1];
+                    Predicates[j].RowIds[1] = tmp;
+
+                    tmp = Predicates[j-1].MatricesIndex[0];
+                    Predicates[j-1].MatricesIndex[0] = Predicates[j].MatricesIndex[0];
+                    Predicates[j].MatricesIndex[0] = tmp;
+
+                    tmp = Predicates[j-1].MatricesIndex[1];
+                    Predicates[j-1].MatricesIndex[1] = Predicates[j].MatricesIndex[1];
+                    Predicates[j].MatricesIndex[1] = tmp;
+                }
+        }
     }
-
-    return false;
 }
 
 void Query::exec()
@@ -242,10 +279,10 @@ void Query::exec()
         return;
     }
 
+    rearrange_predicates();
     for (int i = 0; i < NumOfPredicates; i++)
     {
-        char operation = Predicates[i].getOperation();
-        if (operation != 'j') continue;
+        if (Predicates[i].operation != 'j') continue;
 
         Relation *R1 = nullptr, *R2 = nullptr;
         if (MatricesJoined == nullptr)
@@ -299,7 +336,7 @@ void Query::exec()
                     return;
                 }
 
-                if (prev_predicate(Predicates[i].Matrices[0], Predicates[i].Matrices[1]))
+                if (prev_predicate(Predicates[i].Matrices[0], Predicates[i].Matrices[1], i))
                     equality_filter(R1, R2);
                 else
                 {
@@ -352,7 +389,7 @@ void Query::equality_filter(Relation *r1, Relation *r2)
     Tuple *tup2 = r2->getTuples();
 
     struct Node* j = nullptr;
-    struct Node* n = ListOfResults->getHead();
+    struct Node* n = ListOfResults->head;
     int i =0;
     while(n != nullptr)
     {
@@ -369,20 +406,13 @@ void Query::equality_filter(Relation *r1, Relation *r2)
     }
 }
 
-List* Query::join(Relation *relA, Relation *relB) {
-
-    clock_t start,end;
-    start = clock();
+List* Query::join(Relation *relA, Relation *relB)
+{
     if(!relA->isSorted())
         Radixsort(relA,0,relA->numTuples-1);
-    end = clock();
-    std::cout << "Radix 1: " << ((double) end-start)/CLOCKS_PER_SEC << std::endl;
-    start = end;
+
     if(!relB->isSorted())
         Radixsort(relB,0,relB->numTuples-1);
-    end = clock();
-    std::cout << "Radix 2: " << ((double) end-start)/CLOCKS_PER_SEC << std::endl;
-    start = end;
 
     if (!relA->isSorted() || !relB->isSorted()) return nullptr;
 
@@ -445,9 +475,6 @@ List* Query::join(Relation *relA, Relation *relB) {
             j = jj;
         }
     }
-    end = clock();
-    std::cout << "Join part: " << ((double) end-start)/CLOCKS_PER_SEC << std::endl;
-    start = end;
 
     if(!counter) return nullptr;
     rowsInResults = counter;
@@ -486,7 +513,7 @@ void Query::calc_sum()
         {
             Relation *rel = MATRICES[Matrices[x]].getRelation(y);
             data = rel->getTuples();
-            for (struct Node *h = ListOfResults->getHead(); h != nullptr; h = h->next)
+            for (struct Node *h = ListOfResults->head; h != nullptr; h = h->next)
             {
                 if (h->data[indx] > rel->numTuples) return;
                 s += data[h->data[indx]].key;
