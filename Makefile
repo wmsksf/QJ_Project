@@ -3,8 +3,8 @@ SOURCE0	= main.cpp project_jj_lib/DataTypes.cpp project_jj_lib/Utils.cpp project
 HEADER0	= project_jj_lib/DataTypes.h project_jj_lib/Utils.h project_jj_lib/Stack.h project_jj_lib_part2/Utils_part2.h project_jj_lib_part2/Datatypes_part2.h project_jj_lib_part2/Vector.h project_jj_lib_part2/List.h MACROS.h
 OUT0	= ExecQueries
 
-OBJS1	= AbsoluteTests.o project_jj_lib_part2/Vector.o project_jj_lib_part2/List.o
-SOURCE1	= Catch_tests/AbsoluteTests.cpp project_jj_lib_part2/Vector.cpp project_jj_lib_part2/List.o
+OBJS1	= AbsoluteTests.o Vector.o List.o
+SOURCE1	= Catch_tests/AbsoluteTests.cpp project_jj_lib_part2/Vector.cpp project_jj_lib_part2/List.cpp
 HEADER1	= project_jj_lib_part2/Vector.h project_jj_lib_part2/List.h
 OUT1	= Catch_tests_run
 

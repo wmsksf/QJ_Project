@@ -216,8 +216,8 @@ Relation* Query::FltrRel(uint64_t mat, uint64_t index,uint64_t rel)
 
 bool Query::prev_predicate(int cur1, int cur2, int i)
 {
-    if ((Predicates[i-1].Matrices[0] == cur1 && Predicates[i-1].Matrices[1] == cur2)
-                   || (Predicates[i-1].Matrices[0] == cur2 && Predicates[i-1].Matrices[1] == cur1))
+    if (((Predicates[i-1].Matrices[0] == cur1 && Predicates[i-1].Matrices[1] == cur2))
+                   || ((Predicates[i-1].Matrices[0] == cur2 && Predicates[i-1].Matrices[1] == cur1)))
             return true;
     return false;
 }
@@ -238,6 +238,7 @@ void Query::rearrange_predicates()
             if (Predicates[j].operation != 'j') continue;
             if ((Predicates[i].Matrices[0] == Predicates[j].Matrices[0] && Predicates[i].Matrices[1] == Predicates[j].Matrices[1])
                 || (Predicates[i].Matrices[0] == Predicates[j].Matrices[1] && Predicates[i].Matrices[1] == Predicates[j].Matrices[0]))
+            {
                 if (j == i+1) continue;
                 else
                 {
@@ -265,6 +266,7 @@ void Query::rearrange_predicates()
                     Predicates[j-1].MatricesIndex[1] = Predicates[j].MatricesIndex[1];
                     Predicates[j].MatricesIndex[1] = tmp;
                 }
+            }
         }
     }
 }
