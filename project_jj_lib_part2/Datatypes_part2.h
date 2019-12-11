@@ -51,4 +51,6 @@ public:
     void calc_sum();
 };
 
+int fracto_int(double number, int dec_num);
+
 #endif //PROJECT_JJ_DATATYPES_PART2_H

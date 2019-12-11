@@ -3,9 +3,9 @@ SOURCE0	= main.cpp project_jj_lib/DataTypes.cpp project_jj_lib/Utils.cpp project
 HEADER0	= project_jj_lib/DataTypes.h project_jj_lib/Utils.h project_jj_lib/Stack.h project_jj_lib_part2/Utils_part2.h project_jj_lib_part2/Datatypes_part2.h project_jj_lib_part2/Vector.h project_jj_lib_part2/List.h MACROS.h
 OUT0	= ExecQueries
 
-OBJS1	= AbsoluteTests.o Vector.o List.o
-SOURCE1	= Catch_tests/AbsoluteTests.cpp project_jj_lib_part2/Vector.cpp project_jj_lib_part2/List.cpp
-HEADER1	= project_jj_lib_part2/Vector.h project_jj_lib_part2/List.h
+OBJS1	= AbsoluteTests.o Vector.o List.o Datatypes_part2.o DataTypes.o Utils_part2.o Utils.o Stack.o
+SOURCE1	= Catch_tests/AbsoluteTests.cpp project_jj_lib_part2/Vector.cpp project_jj_lib_part2/List.cpp /project_jj_lib_part2/DataTypes_part2.cpp /project_jj_lib/Datatypes.cpp /project_jj_lib_part2/Utils_part2.cpp /project_jj_lib/Utils.cpp project_jj_lib/Stack.cpp
+HEADER1	= project_jj_lib_part2/Vector.h project_jj_lib_part2/List.h /project_jj_lib_part2/Datatypes_part2.h /project_jj_lib/DataTypes.h /project_jj_lib_part2/Utils_part2.h /project_jj_lib/Utils.h project_jj_lib/Stack.h
 OUT1	= Catch_tests_run
 
 CC	 = g++

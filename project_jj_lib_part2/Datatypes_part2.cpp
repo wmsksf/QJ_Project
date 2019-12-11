@@ -483,7 +483,8 @@ List* Query::join(Relation *relA, Relation *relB)
     return results;
 }
 
-int fracto_int(double number, int dec_num) {
+int fracto_int(double number, int dec_num)
+{
     double dummy;
     double frac = modf(number, &dummy);
     return round(frac * pow(10, dec_num));
