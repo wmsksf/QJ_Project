@@ -182,7 +182,7 @@ TEST_CASE("Query join() method", "[Q_JOIN]")
 
     SECTION("Join of Relation objects of same values and size")
     {
-        Relation *rel1, *rel2;
+        Relation *rel1;
 
         rel1 = new Relation;
         rel1->numTuples = SIZE;
@@ -194,27 +194,16 @@ TEST_CASE("Query join() method", "[Q_JOIN]")
             REQUIRE(rel1->getTuples()[i].payloads[0] == i);
         }
 
-        rel2 = new Relation;
-        rel2->numTuples = SIZE;
-        rel2->initTuples();
-        rel2->copyTuplesVal(rel1, 0, SIZE-1);
-        for (int i = 0; i < SIZE; i++)
-        {
-            REQUIRE(rel2->getTuples()[i].key == i);
-            REQUIRE(rel2->getTuples()[i].payloads[0] == i);
-        }
-
         Query q;
         List *l;
-        l = q.join(rel1, rel2);
+        l = q.join(rel1, rel1);
         REQUIRE(q.rowsInResults == SIZE);
 
         delete l;
         delete rel1;
-        delete rel2;
     }
 
-    SECTION("Join")
+    SECTION("Join with relation of single value")
     {
         Relation *rel1, *rel2;
 
@@ -244,5 +233,48 @@ TEST_CASE("Query join() method", "[Q_JOIN]")
         delete l;
         delete rel1;
         delete rel2;
+    }
+}
+
+TEST_CASE("Query equality_filter() method", "[Q_EQ_FLTR]")
+{
+    SECTION("Equality filtering after join of same relations")
+    {
+        Relation *rel1;
+
+        rel1 = new Relation;
+        rel1->numTuples = SIZE;
+        rel1->initTuples();
+        for (int i = 0; i < SIZE; i++)
+            rel1->setTupleVal(i, i, i);
+
+        Query q;
+        q.ListOfResults = q.join(rel1, rel1);
+        q.equality_filter(rel1, rel1);
+        REQUIRE(q.rowsInResults == SIZE);
+
+        delete rel1;
+    }
+
+    SECTION("Equality filtering after join with relation of single value")
+    {
+        Relation *rel1, *rel2;
+
+        rel1 = new Relation;
+        rel1->numTuples = SIZE;
+        rel1->initTuples();
+        for (int i = 0; i < SIZE; i++)
+            rel1->setTupleVal(i, i, i);
+
+        rel2 = new Relation;
+        rel2->numTuples = 1;
+        rel2->initTuples();
+        rel2->setTupleVal(0, 0, 0);
+
+        Query q;
+        q.ListOfResults = q.join(rel1, rel2);
+        q.equality_filter(rel1, rel2);
+        REQUIRE(q.rowsInResults == 1);
+
     }
 }
