@@ -201,7 +201,6 @@ bool Query::filtering(uint64_t &size){
                     std::cerr << "Invalid operation for filtering!" << std::endl;
                     return false;
             }
-
             FilteredMatrices[Predicates[i].MatricesIndex[0]] = vector;
             delete rel;
         }
