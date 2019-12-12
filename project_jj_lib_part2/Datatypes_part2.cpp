@@ -194,7 +194,7 @@ bool Query::filtering(uint64_t &size){
                             vector->push_back(tuples[j].getPayloads()[0]);
                     break;
                 default:
-                    std::cout << "Invalid operation for filtering!" << std::endl;
+                    std::cerr << "Invalid operation for filtering!" << std::endl;
                     return false;
             }
 
@@ -342,7 +342,7 @@ void Query::exec()
                     equality_filter(R1, R2);
                 else
                 {
-                    std::cout << "Should not reach this else!" << std::endl;
+                    std::cerr << "Should not reach this else!" << std::endl;
                     return;
                 }
             }
@@ -369,7 +369,7 @@ void Query::exec()
         }
         else
         {
-            std::cout << "Shouldn't reach here!" << std::endl;
+            std::cerr << "Shouldn't reach here!" << std::endl;
             return;
         }
 
@@ -387,6 +387,9 @@ void Query::exec()
 
 void Query::equality_filter(Relation *r1, Relation *r2)
 {
+    clock_t start,end;
+    start = clock();
+
     Tuple *tup1 = r1->getTuples();
     Tuple *tup2 = r2->getTuples();
 
@@ -406,15 +409,27 @@ void Query::equality_filter(Relation *r1, Relation *r2)
         else n = n->next;
         i++;
     }
+
+    end = clock();
+    std::cout << "Equality filter part: " << ((double) end-start)/CLOCKS_PER_SEC << "s" << std::endl;
 }
 
 List* Query::join(Relation *relA, Relation *relB)
 {
+    clock_t start,end;
+
+    start = clock();
     if(!relA->isSorted())
         Radixsort(relA,0,relA->numTuples-1);
+    end = clock();
+    std::cout << "Radix 1: " << ((double) end-start)/CLOCKS_PER_SEC  << "s" << std::endl;
 
+    start = clock();
     if(!relB->isSorted())
         Radixsort(relB,0,relB->numTuples-1);
+    end = clock();
+    std::cout << "Radix 2: " << ((double) end-start)/CLOCKS_PER_SEC << "s" << std::endl;
+    start = clock();
 
     if (!relA->isSorted() || !relB->isSorted()) return nullptr;
 
@@ -477,6 +492,8 @@ List* Query::join(Relation *relA, Relation *relB)
             j = jj;
         }
     }
+    end = clock();
+    std::cout << "Join part: " << ((double) end-start)/CLOCKS_PER_SEC << "s" << std::endl;
 
     if(!counter) return nullptr;
     rowsInResults = counter;
@@ -490,7 +507,9 @@ int fracto_int(double number, int dec_num)
     return round(frac * pow(10, dec_num));
 }
 
-void Query::empty_sum() {
+void Query::empty_sum()
+{
+    std::cout << "RESULT:";
     for (int i = 0; i < NumOfResults; i++)
         std::cout << "NULL ";
     std::cout << std::endl;
@@ -498,6 +517,9 @@ void Query::empty_sum() {
 
 void Query::calc_sum()
 {
+    clock_t start, end;
+    start = clock();
+
     Vector sum;
     Tuple *data;
     for (int i = 0; i < NumOfResults; i++)
@@ -526,8 +548,12 @@ void Query::calc_sum()
         else return;
     }
 
-    for (uint64_t i = 0; i < sum.size(); i++)
-        std::cout << sum[i] << " ";
+    end = clock();
+    std::cout << "Calculation of sum part: " << ((double) end-start)/CLOCKS_PER_SEC << "s" << std::endl;
 
+    std::cout << "RESULT:";
+    for (uint64_t i = 0; i < sum.size(); i++) {
+        std::cout << sum[i] << " ";
+    }
     std::cout << std::endl;
 }

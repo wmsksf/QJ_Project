@@ -20,7 +20,7 @@ void Stack::push(uint64_t x)
 {
     if (isFull())
     {
-        std::cout << "Full stack object." << std::endl;
+        std::cerr << "Full stack object." << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -31,7 +31,7 @@ uint64_t Stack::pop()
 {
     if (isEmpty())
     {
-        std::cout << "Empty stack object." << std::endl;
+        std::cerr << "Empty stack object." << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -44,7 +44,7 @@ uint64_t Stack::peek()
         return stack[top-1];
     else
     {
-        std::cout << "Empty stack object. Nothing to peek!" << std::endl;
+        std::cerr << "Empty stack object. Nothing to peek!" << std::endl;
         exit(EXIT_FAILURE);
 
     }

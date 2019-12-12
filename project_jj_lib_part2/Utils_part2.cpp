@@ -105,8 +105,8 @@ void execQ(char** Q, uint64_t size)
         q = new Query;
 
         q->parse(Q[i]);
+        std::cout << std::endl << "Execution of query:" << std::endl;
         q->exec();
-
         delete q;
     }
 
