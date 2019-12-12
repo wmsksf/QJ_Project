@@ -231,9 +231,9 @@ void Matrix::printMatrix() {
 uint64_t *Matrix::getData() { return data; }
 
 Relation *Matrix::getRelation(List* list,int index, long int numOfRows_, int columnNumber) {
-    if(list == nullptr or list->getHead() == nullptr) return nullptr;
+    if(list == nullptr or list->head == nullptr) return nullptr;
     if(numOfRows_ == 0) return nullptr;
-    if((uint64_t) index >= list->getHead()->data.size()) return nullptr;
+    if((uint64_t) index >= list->head->data.size()) return nullptr;
     if((uint64_t) columnNumber >=numOfColumns) return nullptr;
 
     long unsigned int offset = columnNumber*numOfRows;
@@ -241,7 +241,7 @@ Relation *Matrix::getRelation(List* list,int index, long int numOfRows_, int col
     R->numTuples = numOfRows_;
     R->initTuples();
     long int i = 0;
-    for(struct Node* N = list->getHead(); N != nullptr; N = N->next){
+    for(struct Node* N = list->head; N != nullptr; N = N->next){
         R->setTupleVal(i,data[offset+N->data[index]],N->data);
         i++;
     }
@@ -250,9 +250,9 @@ Relation *Matrix::getRelation(List* list,int index, long int numOfRows_, int col
 
 Relation* Matrix::getRelationKeys(List* list,int index, long int numOfRows_, int columnNumber)
 {
-    if(list == nullptr or list->getHead() == nullptr) return nullptr;
+    if(list == nullptr or list->head == nullptr) return nullptr;
     if(numOfRows_ == 0) return nullptr;
-    if((uint64_t) index >= list->getHead()->data.size()) return nullptr;
+    if((uint64_t) index >= list->head->data.size()) return nullptr;
     if((uint64_t) columnNumber >=numOfColumns) return nullptr;
 
     long unsigned int offset = columnNumber*numOfRows;
@@ -260,7 +260,7 @@ Relation* Matrix::getRelationKeys(List* list,int index, long int numOfRows_, int
     R->numTuples = numOfRows_;
     R->initTuples();
     long int i = 0;
-    for(struct Node* N = list->getHead(); N != nullptr; N = N->next, i++)
+    for(struct Node* N = list->head; N != nullptr; N = N->next, i++)
     {
         R->getTuples()[i].key = data[offset+N->data[index]];
         R->getTuples()[i].setPayload(N->data[index]);

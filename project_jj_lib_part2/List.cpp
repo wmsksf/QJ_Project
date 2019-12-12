@@ -49,7 +49,7 @@ void List::remove_node(struct Node *nd)
 {
     if (head == nullptr)
     {
-        std::cout << "Empty List object!" << std::endl;
+        std::cerr << "Empty List object!" << std::endl;
         return;
     }
 
@@ -81,7 +81,7 @@ void List::remove_node(struct Node *nd)
 
         if (prev == nullptr)
         {
-            std::cout << "Given Node not in List object!" << std::endl;
+            std::cerr << "Given Node not in List object!" << std::endl;
             return;
         }
 
@@ -90,8 +90,6 @@ void List::remove_node(struct Node *nd)
         delete nd;
     }
 }
-
-struct Node* List::getHead() { return head; }
 
 void List::print()
 {
