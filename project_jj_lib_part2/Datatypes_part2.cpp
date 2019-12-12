@@ -321,6 +321,7 @@ void Query::exec()
             if (!MatricesJoined->search(Predicates[i].MatricesIndex[1]))
             {
                 delete ListOfResults;
+                ListOfResults = nullptr;
                 MatricesJoined->push_back(Predicates[i].MatricesIndex[1]);
 
                 R2 = FltrRel(Predicates[i].Matrices[1],Predicates[i].MatricesIndex[1], Predicates[i].RowIds[1]);
@@ -361,6 +362,7 @@ void Query::exec()
             }
 
             delete ListOfResults;
+            ListOfResults = nullptr;
             MatricesJoined->push_back(Predicates[i].MatricesIndex[0]);
             R2 = FltrRel(Predicates[i].Matrices[0],Predicates[i].MatricesIndex[0], Predicates[i].RowIds[0]);
             if (!R2->numTuples)
