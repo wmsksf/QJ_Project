@@ -43,6 +43,10 @@ Query::~Query()
 
     delete MatricesJoined;
     delete ListOfResults;
+
+    for(auto & FilteredMatrice : FilteredMatrices){
+        delete FilteredMatrice;
+    }
 }
 
 inline void parse_err() {
@@ -203,6 +207,7 @@ bool Query::filtering(uint64_t &size){
             }
 
             FilteredMatrices[Predicates[i].MatricesIndex[0]] = vector;
+            delete rel;
         }
 
     size = v;
@@ -492,6 +497,7 @@ void Query::calc_sum()
                 s += data[h->data[indx]].key;
             }
             sum.push_back(s);
+            delete rel;
         }
         else return;
     }
