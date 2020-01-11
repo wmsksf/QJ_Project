@@ -268,3 +268,41 @@ Relation* Matrix::getRelationKeys(List* list,int index, long int numOfRows_, int
 
     return R;
 }
+
+void Matrix::calcStats() {
+
+    stats = new Stats[numOfColumns];
+
+    for(int i =0; i<numOfColumns; i++){
+        uint64_t offset = i*numOfRows;
+
+        stats[i].I = data[offset];
+        stats[i].U = data[offset];
+        stats[i].f = numOfRows;
+        stats[i].d = 0;
+        for(int j =1; j<numOfRows;j++){
+            if(data[offset+j] < stats[i].I) stats[i].I = data[offset+j];
+            if(data[offset+j] > stats[i].U) stats[i].U = data[offset+j];
+        }
+        if(stats[i].U-stats[i].I+1 > MAX_DISTINCT_VALUES){
+            auto *temp = new bool[MAX_DISTINCT_VALUES];
+            for(int j =0; j < MAX_DISTINCT_VALUES; j++)
+                temp[j] = false;
+            for(int j =0; j < MAX_DISTINCT_VALUES; j++)
+                temp[(data[offset+j]-stats[i].I)%MAX_DISTINCT_VALUES] = true;
+            for(int j =0; j < MAX_DISTINCT_VALUES; j++)
+                if(temp[j]) stats[i].d++;
+        }else {
+            uint64_t size = stats[i].U - stats[i].I + 1;
+            auto *temp = new bool[size];
+            for(int j =0; j < size; j++)
+                temp[j] = false;
+            for(int j =0; j < size; j++)
+                temp[data[offset+j]-stats[i].I] = true;
+            uint64_t count = 0;
+            for(int j =0; j < size; j++)
+                if(temp[j]) stats[i].d++;
+        }
+    }
+
+}

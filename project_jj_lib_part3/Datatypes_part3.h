@@ -6,6 +6,8 @@
 #define PROJECT_JJ_DATATYPES_PART3_H
 
 #include <pthread.h>
+#include <cstdint>
+#define MAX_DISTINCT_VALUES 50000000
 
 
 // Abstract Class Job
@@ -32,7 +34,7 @@ public:
 // Waits Until executed all jobs in the queue.
     void Barrier();
 // Add a job in the queue and returns a JobId
-    JobID Schedule(Job* job);
+   // JobID Schedule(Job* job);
 // Waits until all threads finish their job, and after that close all threads.
     void Stop();
 
@@ -50,5 +52,10 @@ public:
 };
 
 void* thread_work(void*);
+
+class Stats{
+public:
+    uint64_t I, U, f, d; // min, max, # of rows, # of unique values
+};
 
 #endif //PROJECT_JJ_DATATYPES_PART3_H

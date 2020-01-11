@@ -8,6 +8,7 @@
 #include <cstdint>
 #include "../project_jj_lib_part2/Vector.h"
 #include "../project_jj_lib_part2/List.h"
+#include "../project_jj_lib_part3/Datatypes_part3.h"
 
 #define L1_CACHESIZE 64*1024
 
@@ -57,6 +58,7 @@ class Matrix
     long unsigned int numOfRows = 0;
     long unsigned int numOfColumns = 0;
     uint64_t* data = nullptr;
+    Stats* stats;
 
 public:
 //    Matrix(long unsigned int, long unsigned int);
@@ -64,12 +66,13 @@ public:
     ~Matrix();
 //    Initializes the matrix data, given an input file
     bool setMatrix(char* fileName);
+    void calcStats();
 
     Relation* getRelation(long unsigned int);
     Relation* getRelation(List* list,int index, long int numOfRows, int columnNumber);
     Relation* getRelationKeys(List* list,int index, long int numOfRows_, int columnNumber);
 
-        void printMatrix();
+    void printMatrix();
     uint64_t * getData();
 };
 //    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
