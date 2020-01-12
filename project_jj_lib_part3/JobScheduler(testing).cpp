@@ -8,6 +8,32 @@
 #include <pthread.h>
 
 //TESTING
+#include <iostream>
+#include <unistd.h>
+#include <vector>
+#include <pthread.h>
+
+#include <sstream>
+/** Thread safe cout class
+  * Exemple of use:
+  *    s_cout{} << "Hello world!" << std::endl;
+  */
+class s_cout: public std::ostringstream
+{
+public:
+    s_cout() = default;
+    ~s_cout()
+    {
+        pthread_mutex_lock(&s_mux);
+        std::cout << this->str();
+        pthread_mutex_unlock(&s_mux);
+    }
+
+private:
+    static pthread_mutex_t s_mux;
+};
+pthread_mutex_t s_cout::s_mux{};
+
 
 class Job {
 public:
@@ -21,6 +47,7 @@ public:
     ~JobScheduler();
 
     void schedule(Job &job);
+    void barrier();
 
     pthread_mutex_t WorkerMux;
     pthread_cond_t WorkerCond;
@@ -32,6 +59,7 @@ public:
 
 void* worker_thread(void*);
 
+// get max #threads of h/w
 JobScheduler::JobScheduler() : ThreadPoolSize{4}
 {
     pthread_t thread;
@@ -46,8 +74,9 @@ JobScheduler::JobScheduler() : ThreadPoolSize{4}
 
 JobScheduler::~JobScheduler()
 {
-    std::cout << "~JobScheduler start\n";
+    s_cout{} << "~JobScheduler start\n";
     pthread_mutex_lock(&WorkerMux);
+    // in barrier!
     // in order to wake up waiting threads so as cond to be destroyed
     // pthread_cond_broadcast(&WorkerCond);
     for (auto &t : ThreadPool)
@@ -69,6 +98,11 @@ void JobScheduler::schedule(Job &Job)
     pthread_mutex_unlock(&WorkerMux);
 }
 
+void JobScheduler::barrier()
+{
+
+}
+
 void* worker_thread(void *arg)
 {
     auto* scheduler = (JobScheduler*)arg;
@@ -76,7 +110,10 @@ void* worker_thread(void *arg)
     {
         pthread_mutex_lock(&(scheduler->WorkerMux));
 
-        pthread_cond_wait(&(scheduler->WorkerCond), &(scheduler->WorkerMux));
+        while(!scheduler->JobsReadyToRunQueue.size())
+        {
+            pthread_cond_wait(&(scheduler->WorkerCond), &(scheduler->WorkerMux));
+        }
         Job *p = scheduler->JobsReadyToRunQueue.front();
         scheduler->JobsReadyToRunQueue.erase(scheduler->JobsReadyToRunQueue.begin());
 
@@ -93,9 +130,9 @@ public:
     job(int n=0) : n{n} { }
     void run() override
     {
-        std::cout << "Start of job " << n << std::endl;;
+        s_cout{} << "Start of job " << n << std::endl;;
         sleep(2);
-        std::cout << "End of job " << n << std::endl;;
+        s_cout{} << "End of job " << n << std::endl;;
     }
 };
 
@@ -117,5 +154,5 @@ int main()
     scheduler.schedule(*t4);
     scheduler.schedule(*t5);
 
-    return 0;
+    sleep(20);
 }
