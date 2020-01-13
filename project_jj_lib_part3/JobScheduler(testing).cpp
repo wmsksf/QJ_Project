@@ -7,6 +7,7 @@
 #include <queue>
 #include <unistd.h>
 #include <pthread.h>
+#include <semaphore.h>
 #include <vector>
 
 #include <sstream>
@@ -26,6 +27,55 @@ private:
 };
 pthread_mutex_t s_cout::s_mux{};
 
+// from Little Book of Semaphores
+// typedef struct {
+//   int n;
+//   int count;
+//   sem_t mutex;
+//   sem_t turnstile;
+//   sem_t turnstile2;
+// } barrier_t;
+
+// void init_barrier(barrier_t *barrier, int n)
+// {
+//   barrier->n = n;
+//   barrier->count = 0;
+//   sem_init(&barrier->mutex, 0, 1);
+//   sem_init(&barrier->turnstile, 0, 0);
+//   sem_init(&barrier->turnstile2, 0, 0);
+// }
+
+// void phase1_barrier(barrier_t *barrier)
+// {
+//   sem_wait(&barrier->mutex);
+//   if (++barrier->count == barrier->n) {
+//     int i;
+//     for (i = 0; i < barrier->n; i++) {
+//       sem_post(&barrier->turnstile);
+//     }
+//   }
+//   sem_post(&barrier->mutex);
+//   sem_wait(&barrier->turnstile);
+// }
+
+// void phase2_barrier(barrier_t *barrier)
+// {
+//   sem_wait(&barrier->mutex);
+//   if (--barrier->count == 0) {
+//     int i;
+//     for (i = 0; i < barrier->n; i++) {
+//       sem_post(&barrier->turnstile2);
+//     }
+//   }
+//   sem_post(&barrier->mutex);
+//   sem_wait(&barrier->turnstile2);
+// }
+
+// void wait_barrier(barrier_t *barrier)
+// {
+//   phase1_barrier(barrier);
+//   phase2_barrier(barrier);
+// }
 
 class Job {
 public:
@@ -38,49 +88,34 @@ public:
     JobScheduler();
     ~JobScheduler();
 
+    void init(int threads);
     void schedule(Job &Job);
+    void barrier();
 
-    const int ThreadPoolSize;
+    int ThreadPoolSize;
     std::vector<pthread_t> ThreadPool;
-    std::vector<Job*> JobsReadyToRunQueue;
-    std::queue<Job*> allJobsQueue;
+    std::queue<Job*> JobsQueue;
 
-    pthread_t ManagerThr;
-    pthread_mutex_t ManagerMtx, WorkerMtx;
-    pthread_cond_t ManagerCV, WorkerCV;
+    pthread_mutex_t WorkerMtx;
+    pthread_cond_t WorkerCV;
 
     bool WorkerIsRunning;
-    bool ManagerIsRunning;
+
+    // barrier_t barrier_var;
 };
 
 void* worker_thread(void*);
 void* manager_thread(void*);
 
-JobScheduler::JobScheduler() : ThreadPoolSize{16}, WorkerIsRunning{true}, ManagerIsRunning{true}
+JobScheduler::JobScheduler() : WorkerIsRunning{true}
 {
-    pthread_t thread;
-    for (int i = 0; i <ThreadPoolSize; ++i) {
-        pthread_create(&thread,nullptr,worker_thread, (void*)this);
-        ThreadPool.push_back(thread);
-    }
-    pthread_create(&ManagerThr,nullptr,manager_thread, (void*)this);
-
     pthread_mutex_init(&WorkerMtx,nullptr);
     pthread_cond_init(&WorkerCV,nullptr);
-    pthread_mutex_init(&ManagerMtx,nullptr);
-    pthread_cond_init(&ManagerCV,nullptr);
 }
 
 JobScheduler::~JobScheduler()
 {
     s_cout{} << "~JobScheduler start\n";
-    pthread_mutex_lock(&ManagerMtx);
-    ManagerIsRunning = false;
-    pthread_cond_signal(&ManagerCV);
-    pthread_mutex_unlock(&ManagerMtx);
-    pthread_join(ManagerThr, nullptr);
-    s_cout{} << "cleaning of manager done\n";
-    s_cout{} << "cleaning of workers...\n";
     pthread_mutex_lock(&WorkerMtx);
     WorkerIsRunning = false;
     pthread_cond_broadcast(&WorkerCV);
@@ -92,12 +127,27 @@ JobScheduler::~JobScheduler()
     s_cout{} << "~JobScheduler end\n";
 }
 
+void JobScheduler::init(int threads)
+{
+    ThreadPoolSize = threads;
+    pthread_t thread;
+    for (int i = 0; i <ThreadPoolSize; ++i) {
+        pthread_create(&thread,nullptr,worker_thread, (void*)this);
+        ThreadPool.push_back(thread);
+    }
+}
+
 void JobScheduler::schedule(Job &Job)
 {
-    pthread_mutex_lock(&ManagerMtx);
-    allJobsQueue.push(&Job);
-    pthread_cond_signal(&ManagerCV);
-    pthread_mutex_unlock(&ManagerMtx);
+    pthread_mutex_lock(&WorkerMtx);
+    JobsQueue.push(&Job);
+    pthread_cond_signal(&WorkerCV);
+    pthread_mutex_unlock(&WorkerMtx);
+}
+
+void JobScheduler::barrier()
+{
+
 }
 
 void* worker_thread(void *arg)
@@ -107,7 +157,7 @@ void* worker_thread(void *arg)
     {
         pthread_mutex_lock(&(scheduler->WorkerMtx));
 
-        while (!scheduler->JobsReadyToRunQueue.size() && scheduler->WorkerIsRunning) {
+        while (!scheduler->JobsQueue.size() && scheduler->WorkerIsRunning) {
             pthread_cond_wait(&(scheduler->WorkerCV), &(scheduler->WorkerMtx));
         }
         if (!scheduler->WorkerIsRunning) {
@@ -115,38 +165,12 @@ void* worker_thread(void *arg)
             break;
         }
 
-        Job *p = scheduler->JobsReadyToRunQueue.back();
-        scheduler->JobsReadyToRunQueue.pop_back();
+        Job *p = scheduler->JobsQueue.front();
+        scheduler->JobsQueue.pop();
         pthread_mutex_unlock(&(scheduler->WorkerMtx));
 
         p->run();
         delete p;
-    }
-}
-
-void* manager_thread(void *arg)
-{
-    auto* scheduler = (JobScheduler*)arg;
-    for (;;)
-    {
-        pthread_mutex_lock(&(scheduler->ManagerMtx));
-        if (!scheduler->ManagerIsRunning) {
-            pthread_mutex_unlock(&(scheduler->ManagerMtx));
-            break;
-        }
-
-        if (scheduler->allJobsQueue.size() != 0)
-        {
-            Job *p = scheduler->allJobsQueue.front();
-
-            pthread_mutex_lock(&(scheduler->WorkerMtx));
-            scheduler->JobsReadyToRunQueue.push_back(p);
-            pthread_cond_signal(&(scheduler->WorkerCV));
-            pthread_mutex_unlock(&(scheduler->WorkerMtx));
-
-            scheduler->allJobsQueue.pop();
-        }
-        pthread_mutex_unlock(&(scheduler->ManagerMtx));
     }
 }
 
@@ -162,9 +186,14 @@ public:
     }
 };
 
-int main()
+int main(int argc, char **argv)
 {
+    if (argc < 2) {
+        s_cout{} << "give #threads...\n";
+        exit(1);
+    }
     JobScheduler sched;
+    sched.init(atoi(argv[1]));
 
     Job *t0 = new job{0};
     Job *t1 = new job{1};
