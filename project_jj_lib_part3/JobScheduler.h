@@ -30,7 +30,9 @@ public:
 
     int ThreadPoolSize;
     std::vector<pthread_t> ThreadPool;
-//    std::vector<bool> ThreadPoolIdle;
+    std::vector<bool> ThreadPoolIdle;
+    std::vector<class args> tmp;
+
 
     std::queue<Job*> JobsQueue;
 
@@ -38,6 +40,7 @@ public:
     pthread_cond_t WorkerCV, IdleCV;
 
     bool WorkerIsRunning;
+    bool allIdle();
 };
 
 void* worker_thread(void*);
@@ -59,8 +62,7 @@ public:
     JobScheduler *scheduler;
     int i;
 
-    args();
-    void set(JobScheduler *scheduler, int i);
+    args(JobScheduler *scheduler_, int i_);
 };
 
 class s_cout: public std::ostringstream

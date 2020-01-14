@@ -42,6 +42,7 @@ int main(int argc, char **argv)
     sched.schedule(*t4);
     sched.schedule(*t5);
 
+//    sched.barrier();
     // sleep(10);
     sched.stop();
 }

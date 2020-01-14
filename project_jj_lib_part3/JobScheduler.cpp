@@ -27,11 +27,19 @@ JobScheduler::~JobScheduler()
 void JobScheduler::init(int threads)
 {
     ThreadPoolSize = threads;
+    for (int i = 0; i < ThreadPoolSize; ++i){
+        ThreadPoolIdle.push_back(true);
+        args arg(this, i);
+        tmp.push_back(arg);
+    }
+
     pthread_t thread;
     for (int i = 0; i <ThreadPoolSize; ++i) {
-        pthread_create(&thread,nullptr,worker_thread, (void*)this);
+        pthread_create(&thread,nullptr,worker_thread, (void*)&(tmp[i]));
         ThreadPool.push_back(thread);
     }
+
+    tmp.clear();
 }
 
 void JobScheduler::stop()
@@ -58,23 +66,34 @@ void JobScheduler::schedule(Job &Job)
     pthread_mutex_unlock(&WorkerMtx);
 }
 
+bool JobScheduler::allIdle()
+{
+    for (int i = 0; i < ThreadPoolSize; ++i) {
+        if (!ThreadPoolIdle[i]) return false;
+    }
+    return true;
+}
+
 void JobScheduler::barrier()
 {
     s_cout{} << "barrier...\n";
 
-    pthread_mutex_lock(&WorkerMtx);
-    WorkerIsRunning = false;
-    pthread_cond_broadcast(&WorkerCV);
-    s_cout{} << "broadcast...\n";
-    pthread_mutex_unlock(&WorkerMtx);
-
+    pthread_mutex_lock(&IdleMtx);
+    while(allIdle()) {
+        pthread_cond_wait(&IdleCV, &IdleMtx);
+    }
+    pthread_mutex_unlock(&IdleMtx);
 
     s_cout{} << "barrier.\n";
+
 }
 
 void* worker_thread(void *arg)
 {
-    auto* scheduler = (JobScheduler*)arg;
+    auto* argm = (args*) arg;
+    auto* scheduler = (JobScheduler*)argm->scheduler;
+    auto i = argm->i;
+
     for (;;)
     {
         pthread_mutex_lock(&(scheduler->WorkerMtx));
@@ -85,7 +104,16 @@ void* worker_thread(void *arg)
         if (!scheduler->WorkerIsRunning && !scheduler->JobsQueue.size()) {
             pthread_mutex_unlock(&(scheduler->WorkerMtx));
             break;
+        } else if (!scheduler->JobsQueue.size()) {
+            pthread_mutex_lock(&(scheduler->IdleMtx));
+            scheduler->ThreadPoolIdle[i] = true;
+            pthread_cond_signal(&(scheduler->IdleCV));
+            pthread_mutex_unlock(&(scheduler->IdleMtx));
         }
+
+        pthread_mutex_lock(&(scheduler->IdleMtx));
+        scheduler->ThreadPoolIdle[i] = false;
+        pthread_mutex_unlock(&(scheduler->IdleMtx));
 
         Job *p = scheduler->JobsQueue.front();
         scheduler->JobsQueue.pop();
@@ -113,10 +141,5 @@ s_cout::~s_cout()
     pthread_mutex_unlock(&s_mux);
 }
 
-args::args() : scheduler{nullptr}, i{-1}
+args::args(JobScheduler *scheduler_, int i_) : scheduler{scheduler_}, i{i_}
 {}
-void args::set(JobScheduler *scheduler, int i)
-{
-    this->scheduler = scheduler;
-    this->i = i;
-}
