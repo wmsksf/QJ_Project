@@ -652,8 +652,8 @@ void Query::plan_predicates() {
             startingPrediction[i].stats[j].copy(&stats[i][j]);
     }
 
-    int totalPermutations = 20;
-    Prediction** predictions = new Prediction*[20];
+    int totalPermutations = 50;
+    Prediction** predictions = new Prediction*[totalPermutations];
     c=0;
 
     for(int i=0; i<NumOfMatrices; i++){
@@ -669,17 +669,17 @@ void Query::plan_predicates() {
         for(int j=0 ; j<numOfJoins; j++){
             if(predictions[i]->matrixInPrediction(joins[j].MatricesIndex[0])){
                 if(predictions[i]->matrixInPrediction(joins[j].MatricesIndex[1])){
-                    //self join
+                    //self join or already joined
                 }
                 else{
                     //join with the other matrix
                     predictions[c++] = predictions[i]->JoinPrediction(predictions[joins[j].MatricesIndex[1]],
-                    joins[j].MatricesIndex[0],joins[j].RowIds[0],joins[j].MatricesIndex[1],joins[j].RowIds[1]);
+                    joins[j].MatricesIndex[0],joins[j].RowIds[0],joins[j].MatricesIndex[1],joins[j].RowIds[1],j);
                 }
             }
             else if(predictions[i]->matrixInPrediction(joins[j].MatricesIndex[1])){
                 predictions[c++] = predictions[i]->JoinPrediction(predictions[joins[j].MatricesIndex[0]],
-                joins[j].MatricesIndex[1],joins[j].RowIds[1],joins[j].MatricesIndex[0],joins[j].RowIds[0]);
+                joins[j].MatricesIndex[1],joins[j].RowIds[1],joins[j].MatricesIndex[0],joins[j].RowIds[0],j);
 
             }
         }
@@ -688,5 +688,73 @@ void Query::plan_predicates() {
     for(int i =0; i<c; i++)
         if(predictions[i] != nullptr) predictions[i]->print();
 
+    int* bestPredicateOrder = new int[numOfJoins];
 
+    for(int i = numOfJoins-1; i > 0; i--){
+        int cost = 0;
+        Prediction* bestPrediction = nullptr;
+        for( int j =NumOfMatrices; j< c; j++){
+            if(predictions[j] == nullptr) continue;
+            if(predictions[j]->numOfPredicates == i) {
+                bool valid = true;
+                for(int x = numOfJoins-1; x>i;x--){
+                    if(predictions[j]->predicateInPrediction(bestPredicateOrder[x])){
+                        valid = false;
+                        break;
+                    }
+                }
+                if(valid) {
+                    if (cost == 0) {
+                        cost = predictions[j]->getCost();
+                        bestPrediction = predictions[j];
+                    } else if (cost > predictions[j]->getCost()) {
+                        cost = predictions[j]->getCost();
+                        bestPrediction = predictions[j];
+                    }
+                }
+            }
+        }
+
+        for(int j =0; j<numOfJoins; j++){
+            bool missing = true;
+            if(bestPrediction->predicateInPrediction(j)) continue;
+            for(int x = numOfJoins-1; x>i;x--) {
+                if(bestPredicateOrder[x] == j) {
+                    missing = false;
+                    break;
+                }
+            }
+            if(missing)
+                bestPredicateOrder[i] = j;
+        }
+    }
+    for(int j =0; j<numOfJoins; j++){
+        bool missing = true;
+        for(int x = numOfJoins-1; x>0;x--) {
+            if(bestPredicateOrder[x] == j) {
+                missing = false;
+                break;
+            }
+        }
+        if(missing)
+            bestPredicateOrder[0] = j;
+    }
+
+
+
+    std::cout << "Best predicate order: " ;
+    for(int i =0; i<numOfJoins; i++){
+        std::cout << bestPredicateOrder[i] << " " ;
+    }
+    std::cout << std::endl;
+
+    c=0;
+    for(int i =0; i<numOfJoins;i++){
+       for(int j =c; c<NumOfPredicates;i++){
+           if(Predicates[c++].operation == 'j') {
+               Predicates[c-1] = joins[i];
+               break;
+           }
+       }
+    }
 }

@@ -53,12 +53,18 @@ void* thread_work(void* scheduler_){
     pthread_exit(nullptr);
 }
 
-Prediction *Prediction::JoinPrediction(Prediction *predB,uint64_t indexA,uint64_t colA,uint64_t indexB,uint64_t colB) {
+Prediction *Prediction::JoinPrediction(Prediction *predB,uint64_t indexA,uint64_t colA,uint64_t indexB,uint64_t colB, int predicateIndex) {
     if(predB== nullptr) return nullptr;
 
     auto* newPr = new Prediction();
     newPr->numOfMatrices = this->numOfMatrices + predB->numOfMatrices;
-    newPr->matrices = new MatrixPrediction[numOfMatrices];
+    newPr->matrices = new MatrixPrediction[newPr->numOfMatrices];
+    newPr->numOfPredicates = this->numOfPredicates + predB->numOfPredicates + 1;
+    newPr->predicateOrder = new int[newPr->numOfPredicates];
+    for(uint64_t  i =0; i < this->numOfPredicates; i++)
+        newPr->predicateOrder[i] = this->predicateOrder[i];
+    newPr->predicateOrder[newPr->numOfPredicates-1] = predicateIndex;
+
     //copy matricesPredictions data
     for(uint64_t i=0; i< this->numOfMatrices;i++)
         newPr->matrices[i].copy(&this->matrices[i]);
@@ -90,15 +96,18 @@ Prediction *Prediction::JoinPrediction(Prediction *predB,uint64_t indexA,uint64_
 
     uint64_t n = s1->U - s1->I + 1;
 
+    double fraction1 = s1->f;
+    double fraction2 = s2->f;
+
     s1->f = s2->f = (s1->f*s2->f)/n;
 
-    double fraction1 = s1->d;
-    double fraction2 = s2->d;
+    if(s1->f == 0) return nullptr;
+
+    if(fraction1 != 0) fraction1 = (double)s1->f/fraction1;
+    if(fraction2 != 0) fraction2 = (double)s2->f/fraction2;
 
     s1->d = s2->d = (s1->d*s2->d)/n;
 
-    fraction1 = (double)s1->d/fraction1;
-    fraction2 = (double)s2->d/fraction2;
 
     //update the rest
     //Rest from matrixPrediction A
@@ -117,7 +126,7 @@ Prediction *Prediction::JoinPrediction(Prediction *predB,uint64_t indexA,uint64_
 
         Stats* s = &B->stats[i];
 
-        s->d = (uint64_t)((double)s->d*(1-pow(1-fraction2,(double)s->f/(double)s->d)));
+        s->d = (uint64_t)((double)s->d*((double)1.0-pow(1.0-fraction2,(double)s->f/(double)s->d)));
 
         s->f = s2->f;
     }
@@ -129,7 +138,7 @@ Prediction *Prediction::JoinPrediction(Prediction *predB,uint64_t indexA,uint64_
         for(uint64_t i =0; i<A->numOfColumns;i++){
             Stats* s = &A->stats[i];
 
-            s->d = (uint64_t)((double)s->d*(1-pow(1-fraction1,(double)s->f/(double)s->d)));
+            s->d = (uint64_t)((double)s->d*(1.0-pow(1.0-fraction1,(double)s->f/(double)s->d)));
 
             s->f = s1->f;
         }
@@ -141,7 +150,7 @@ Prediction *Prediction::JoinPrediction(Prediction *predB,uint64_t indexA,uint64_
         for(uint64_t i =0; i<B->numOfColumns;i++){
             Stats* s = &B->stats[i];
 
-            s->d = (uint64_t)((double)s->d*(1-pow(1-fraction2,(double)s->f/(double)s->d)));
+            s->d = (uint64_t)((double)s->d*(1.0-pow(1.0-fraction2,(double)s->f/(double)s->d)));
 
             s->f = s2->f;
         }
@@ -166,6 +175,18 @@ void Prediction::print() {
         std::cout << matrices[i].matrixIndex << " " ;
 
     std::cout <<": " << matrices[0].stats[0].f << std::endl;
+}
+
+int Prediction::getCost() {
+    if(numOfMatrices==0) return 0;
+    else return matrices[0].stats[0].f;
+}
+
+bool Prediction::predicateInPrediction(int predicate) {
+    for(int i=0; i<numOfPredicates;i++)
+        if(predicateOrder[i]==predicate)
+            return true;
+    return false;
 }
 
 void MatrixPrediction::copy( MatrixPrediction* p2) {

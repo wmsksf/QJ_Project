@@ -2,14 +2,16 @@
 // Created by karolos on 26/11/19.
 //
 
+
+#ifndef PROJECT_JJ_DATATYPES_PART2_H
+#define PROJECT_JJ_DATATYPES_PART2_H
+
 #include <stdint-gcc.h>
 #include "Vector.h"
 #include "../project_jj_lib/DataTypes.h"
 #include "../project_jj_lib_part3/Datatypes_part3.h"
 #include "List.h"
 
-#ifndef PROJECT_JJ_DATATYPES_PART2_H
-#define PROJECT_JJ_DATATYPES_PART2_H
 
 class Predicate{
 public:

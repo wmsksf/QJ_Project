@@ -7,6 +7,8 @@
 
 #include <pthread.h>
 #include <cstdint>
+//#include "../project_jj_lib_part2/Datatypes_part2.h"
+
 #define MAX_DISTINCT_VALUES 49979693
 
 
@@ -75,8 +77,12 @@ class Prediction{
 public:
     uint64_t numOfMatrices;
     MatrixPrediction* matrices = nullptr;
+    uint64_t numOfPredicates = 0;
+    int* predicateOrder = nullptr;
+    int getCost();
+    bool predicateInPrediction(int predicate);
 
-    Prediction* JoinPrediction(Prediction* predB,uint64_t indexA,uint64_t colA,uint64_t indexB,uint64_t colB);
+    Prediction* JoinPrediction(Prediction* predB,uint64_t indexA,uint64_t colA,uint64_t indexB,uint64_t colB, int predicateIndex);
     ~Prediction();
     bool matrixInPrediction(int index);
     void print();

@@ -12,6 +12,7 @@
 
 #define L1_CACHESIZE 64*1024
 
+
 class Tuple
 {
 public:
