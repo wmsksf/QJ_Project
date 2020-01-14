@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.13)
 project(project_jj)
 
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_FLAGS -pthread)
 
-add_executable(project_jj main.cpp project_jj_lib/DataTypes.cpp project_jj_lib/DataTypes.h project_jj_lib/Utils.cpp project_jj_lib/Utils.h project_jj_lib/Stack.cpp project_jj_lib/Stack.h project_jj_lib_part2/Utils_part2.cpp project_jj_lib_part2/Utils_part2.h project_jj_lib_part2/Datatypes_part2.cpp project_jj_lib_part2/Datatypes_part2.h project_jj_lib_part2/MACROS.h project_jj_lib_part2/Vector.cpp project_jj_lib_part2/Vector.h project_jj_lib_part2/List.cpp project_jj_lib_part2/List.h)
+add_executable(project_jj main.cpp project_jj_lib/DataTypes.cpp project_jj_lib/DataTypes.h project_jj_lib/Utils.cpp project_jj_lib/Utils.h project_jj_lib/Stack.cpp project_jj_lib/Stack.h project_jj_lib_part2/Utils_part2.cpp project_jj_lib_part2/Utils_part2.h project_jj_lib_part2/Datatypes_part2.cpp project_jj_lib_part2/Datatypes_part2.h project_jj_lib_part2/MACROS.h project_jj_lib_part2/Vector.cpp project_jj_lib_part2/Vector.h project_jj_lib_part2/List.cpp project_jj_lib_part2/List.h project_jj_lib_part3/Datatypes_part3.cpp project_jj_lib_part3/Datatypes_part3.h)
 
 #   >>>>>>>>>>>>>>>>
 #   in order to BUILD executable for testing in project

@@ -5,6 +5,7 @@
 #include <stdint-gcc.h>
 #include "Vector.h"
 #include "../project_jj_lib/DataTypes.h"
+#include "../project_jj_lib_part3/Datatypes_part3.h"
 #include "List.h"
 
 #ifndef PROJECT_JJ_DATATYPES_PART2_H
@@ -33,6 +34,7 @@ public:
     Vector* FilteredMatrices[4];  //max 4 matrices per query
     List* ListOfResults;
     Vector* MatricesJoined;
+    Stats* stats[4] = {nullptr};
 
     Query();
     ~Query();
@@ -41,6 +43,7 @@ public:
     bool filtering(uint64_t &filters);
     bool prev_predicate(int cur1, int cur2, int i);
     void rearrange_predicates();
+    void plan_predicates();
 
     Relation* FltrRel(uint64_t mat,uint64_t  index,uint64_t rel);
     void exec();

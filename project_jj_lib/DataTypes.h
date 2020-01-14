@@ -55,12 +55,12 @@ public:
 //    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 class Matrix
 {
+public:
     long unsigned int numOfRows = 0;
     long unsigned int numOfColumns = 0;
     uint64_t* data = nullptr;
     Stats* stats;
 
-public:
 //    Matrix(long unsigned int, long unsigned int);
     Matrix();
     ~Matrix();

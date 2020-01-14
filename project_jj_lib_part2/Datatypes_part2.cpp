@@ -43,6 +43,9 @@ Query::~Query()
     for(auto & FilteredMatrice : FilteredMatrices){
         delete FilteredMatrice;
     }
+
+    for(int i = 0 ; i < NumOfMatrices; i++)
+        delete[] stats[i];
 }
 
 inline void parse_err() {
@@ -182,21 +185,72 @@ bool Query::filtering(uint64_t &size){
             Tuple *tuples = rel->getTuples();
             uint64_t numOfTuples = rel->numTuples;
             switch (Predicates[i].operation) {
-                case '>':
+                case '>': {
                     for (uint64_t j = 0; j < numOfTuples; j++)
                         if (tuples[j].key > Predicates[i].filter)
                             vector->push_back(tuples[j].getPayloads()[0]);
+                    //updating stats
+                    Stats *s = &stats[Predicates[i].MatricesIndex[0]][Predicates[i].RowIds[0]];
+                    if(Predicates[i].filter+1 > s->I){
+                        double fraction =(double)(s->U - Predicates[i].filter+1)/(double)(s->U - s->I);
+                        s->I = Predicates[i].filter+1;
+                        s->d = (uint64_t)(fraction*(double)s->d);
+                        uint64_t f = s->f;
+                        s->f = (uint64_t)(fraction*(double)s->f);
+                        double fraction2 = (double)s->f/(double)f;
+                        for(int j = 0; j<MATRICES[Predicates[i].Matrices[0]].numOfColumns;j++){
+                            if(Predicates[i].RowIds[0] == j) continue;
+                            Stats* s2 = &stats[Predicates[i].MatricesIndex[0]][j];
+                            s2->d=(uint64_t)((double)s2->d*(1-pow(1-fraction2,(double)s2->f/(double)s2->d)));
+                            s2->f = s->f;
+                        }
+                    }
                     break;
-                case '<':
+                }
+                case '<': {
                     for (uint64_t j = 0; j < rel->numTuples; j++)
                         if (tuples[j].key < Predicates[i].filter)
                             vector->push_back(tuples[j].getPayloads()[0]);
+                    //updating stats
+                    Stats *s = &stats[Predicates[i].MatricesIndex[0]][Predicates[i].RowIds[0]];
+                    if(Predicates[i].filter-1 < s->I){
+                        double fraction =(double)(Predicates[i].filter-1-s->I)/(double)(s->U - s->I);
+                        s->U = Predicates[i].filter-1;
+                        s->d = (uint64_t)(fraction*(double)s->d);
+                        uint64_t f = s->f;
+                        s->f = (uint64_t)(fraction*(double)s->f);
+                        double fraction2 = (double)s->f/(double)f;
+                        for(int j = 0; j<MATRICES[Predicates[i].Matrices[0]].numOfColumns;j++){
+                            if(Predicates[i].RowIds[0] == j) continue;
+                            Stats* s2 = &stats[Predicates[i].MatricesIndex[0]][j];
+                            s2->d=(uint64_t)((double)s2->d*(1-pow(1-fraction2,(double)s2->f/(double)s2->d)));
+                            s2->f = s->f;
+                        }
+                    }
                     break;
-                case '=':
+                }
+                case '=': {
                     for (uint64_t j = 0; j < rel->numTuples; j++)
                         if (tuples[j].key == Predicates[i].filter)
                             vector->push_back(tuples[j].getPayloads()[0]);
+                    //updating stats
+                    Stats *s = &stats[Predicates[i].MatricesIndex[0]][Predicates[i].RowIds[0]];
+                    if(vector->size() > 0){
+                        s->I = Predicates[i].filter;
+                        s->U = Predicates[i].filter;
+                        uint64_t f = s->f;
+                        s->f = (uint64_t)((double)s->f/(double)s->d);
+                        double fraction2 = (double)s->f/(double)f;
+                        s->d = 1;
+                        for(int j = 0; j<MATRICES[Predicates[i].Matrices[0]].numOfColumns;j++){
+                            if(Predicates[i].RowIds[0] == j) continue;
+                            Stats* s2 = &stats[Predicates[i].MatricesIndex[0]][j];
+                            s2->d=(uint64_t)((double)s2->d*(1-pow(1-fraction2,(double)s2->f/(double)s2->d)));
+                            s2->f = s->f;
+                        }
+                    }
                     break;
+                }
                 default:
                     std::cerr << "Invalid operation for filtering!" << std::endl;
                     return false;
@@ -277,6 +331,14 @@ void Query::rearrange_predicates()
 
 void Query::exec()
 {
+    //get matrices stats
+    for(int i = 0 ; i < NumOfMatrices; i++){
+        stats[i] = new Stats[MATRICES[Matrices[i]].numOfColumns];
+        for(int j=0; j<MATRICES[Matrices[i]].numOfColumns;j++){
+            stats[i][j].copy(&MATRICES[Matrices[i]].stats[j]);
+        }
+    }
+
     uint64_t f = 0;
     bool filters = filtering(f);
     if (!filters)
@@ -284,6 +346,8 @@ void Query::exec()
         empty_sum();
         return;
     }
+
+    plan_predicates();
 
     rearrange_predicates();
     for (int i = 0; i < NumOfPredicates; i++)
@@ -563,4 +627,66 @@ void Query::calc_sum()
         std::cout << sum[i] << " ";
     }
     std::cout << std::endl;
+}
+
+void Query::plan_predicates() {
+    int numOfJoins = 0;
+    for(int i =0; i < NumOfPredicates; i++)
+        if(Predicates[i].operation == 'j')
+            numOfJoins++;
+
+    auto* joins = new Predicate[numOfJoins];
+
+    int c = 0;
+    for(int i =0; i < NumOfPredicates; i++)
+        if(Predicates[i].operation == 'j')
+            joins[c++] = Predicates[i];
+
+    auto* startingPrediction = new MatrixPrediction[NumOfMatrices];
+    for(int i=0 ; i < NumOfMatrices;i++){
+        Matrix* m = &MATRICES[Matrices[i]];
+        startingPrediction[i].numOfColumns = m->numOfColumns;
+        startingPrediction[i].matrixIndex = i;
+        startingPrediction[i].stats = new Stats[m->numOfColumns];
+        for(int j =0 ; j<startingPrediction[i].numOfColumns; j++)
+            startingPrediction[i].stats[j].copy(&stats[i][j]);
+    }
+
+    int totalPermutations = 20;
+    Prediction** predictions = new Prediction*[20];
+    c=0;
+
+    for(int i=0; i<NumOfMatrices; i++){
+        predictions[c] = new Prediction();
+        predictions[c]->numOfMatrices = 1;
+        predictions[c]->matrices = new MatrixPrediction[1];
+        predictions[c]->matrices->copy(&startingPrediction[i]);
+        c++;
+    }
+
+    for(int i =0; i<c; i++){
+        if(predictions[i] == nullptr)continue;
+        for(int j=0 ; j<numOfJoins; j++){
+            if(predictions[i]->matrixInPrediction(joins[j].MatricesIndex[0])){
+                if(predictions[i]->matrixInPrediction(joins[j].MatricesIndex[1])){
+                    //self join
+                }
+                else{
+                    //join with the other matrix
+                    predictions[c++] = predictions[i]->JoinPrediction(predictions[joins[j].MatricesIndex[1]],
+                    joins[j].MatricesIndex[0],joins[j].RowIds[0],joins[j].MatricesIndex[1],joins[j].RowIds[1]);
+                }
+            }
+            else if(predictions[i]->matrixInPrediction(joins[j].MatricesIndex[1])){
+                predictions[c++] = predictions[i]->JoinPrediction(predictions[joins[j].MatricesIndex[0]],
+                joins[j].MatricesIndex[1],joins[j].RowIds[1],joins[j].MatricesIndex[0],joins[j].RowIds[0]);
+
+            }
+        }
+    }
+
+    for(int i =0; i<c; i++)
+        if(predictions[i] != nullptr) predictions[i]->print();
+
+
 }

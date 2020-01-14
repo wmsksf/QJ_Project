@@ -192,6 +192,8 @@ bool Matrix::setMatrix(char* fileName)
     for (uint64_t j = 0; j < numOfColumns*numOfRows; j++)
         infile.read((char*)(data+j), sizeof(uint64_t));
 
+    calcStats();
+
     return true;
 }
 
@@ -288,20 +290,21 @@ void Matrix::calcStats() {
             auto *temp = new bool[MAX_DISTINCT_VALUES];
             for(int j =0; j < MAX_DISTINCT_VALUES; j++)
                 temp[j] = false;
-            for(int j =0; j < MAX_DISTINCT_VALUES; j++)
+            for(int j =0; j < numOfRows; j++)
                 temp[(data[offset+j]-stats[i].I)%MAX_DISTINCT_VALUES] = true;
             for(int j =0; j < MAX_DISTINCT_VALUES; j++)
                 if(temp[j]) stats[i].d++;
+            delete[] temp;
         }else {
             uint64_t size = stats[i].U - stats[i].I + 1;
             auto *temp = new bool[size];
             for(int j =0; j < size; j++)
                 temp[j] = false;
-            for(int j =0; j < size; j++)
+            for(int j =0; j < numOfRows; j++)
                 temp[data[offset+j]-stats[i].I] = true;
-            uint64_t count = 0;
             for(int j =0; j < size; j++)
                 if(temp[j]) stats[i].d++;
+            delete[] temp;
         }
     }
 

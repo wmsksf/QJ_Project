@@ -7,7 +7,7 @@
 
 #include <pthread.h>
 #include <cstdint>
-#define MAX_DISTINCT_VALUES 50000000
+#define MAX_DISTINCT_VALUES 49979693
 
 
 // Abstract Class Job
@@ -56,6 +56,30 @@ void* thread_work(void*);
 class Stats{
 public:
     uint64_t I, U, f, d; // min, max, # of rows, # of unique values
+
+    void copy(Stats*);
+};
+
+class MatrixPrediction{
+public:
+    uint64_t matrixIndex;
+    uint64_t numOfColumns;
+    Stats* stats = nullptr;
+
+    void copy(MatrixPrediction* p2);
+    ~MatrixPrediction();
+
+};
+
+class Prediction{
+public:
+    uint64_t numOfMatrices;
+    MatrixPrediction* matrices = nullptr;
+
+    Prediction* JoinPrediction(Prediction* predB,uint64_t indexA,uint64_t colA,uint64_t indexB,uint64_t colB);
+    ~Prediction();
+    bool matrixInPrediction(int index);
+    void print();
 };
 
 #endif //PROJECT_JJ_DATATYPES_PART3_H
