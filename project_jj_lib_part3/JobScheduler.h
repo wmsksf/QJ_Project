@@ -32,10 +32,11 @@ public:
     std::vector<pthread_t> ThreadPool;
     std::queue<Job*> JobsQueue;
 
-    pthread_mutex_t WorkerMtx;
-    pthread_cond_t WorkerCV;
+    pthread_mutex_t WorkerMtx, mtx;
+    pthread_cond_t WorkerCV, cv;
 
     bool WorkerIsRunning;
+    int JobsToRun, JobsCompleted;
 };
 
 void* worker_thread(void*);
@@ -57,55 +58,5 @@ public:
 private:
     static pthread_mutex_t s_mux;
 };
-
-// from Little Book of Semaphores
-// typedef struct {
-//   int n;
-//   int count;
-//   sem_t mutex;
-//   sem_t turnstile;
-//   sem_t turnstile2;
-// } barrier_t;
-
-// void init_barrier(barrier_t *barrier, int n)
-// {
-//   barrier->n = n;
-//   barrier->count = 0;
-//   sem_init(&barrier->mutex, 0, 1);
-//   sem_init(&barrier->turnstile, 0, 0);
-//   sem_init(&barrier->turnstile2, 0, 0);
-// }
-
-// void phase1_barrier(barrier_t *barrier)
-// {
-//   sem_wait(&barrier->mutex);
-//   if (++barrier->count == barrier->n) {
-//     int i;
-//     for (i = 0; i < barrier->n; i++) {
-//       sem_post(&barrier->turnstile);
-//     }
-//   }
-//   sem_post(&barrier->mutex);
-//   sem_wait(&barrier->turnstile);
-// }
-
-// void phase2_barrier(barrier_t *barrier)
-// {
-//   sem_wait(&barrier->mutex);
-//   if (--barrier->count == 0) {
-//     int i;
-//     for (i = 0; i < barrier->n; i++) {
-//       sem_post(&barrier->turnstile2);
-//     }
-//   }
-//   sem_post(&barrier->mutex);
-//   sem_wait(&barrier->turnstile2);
-// }
-
-// void wait_barrier(barrier_t *barrier)
-// {
-//   phase1_barrier(barrier);
-//   phase2_barrier(barrier);
-// }
 
 #endif //PROJECT_JJ_JOBSCHEDULER_H

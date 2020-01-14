@@ -4,10 +4,13 @@
 
 #include "JobScheduler.h"
 
-JobScheduler::JobScheduler() : WorkerIsRunning{true}
+JobScheduler::JobScheduler() : WorkerIsRunning{true}, JobsToRun{0}, JobsCompleted{0}
 {
     pthread_mutex_init(&WorkerMtx,nullptr);
     pthread_cond_init(&WorkerCV,nullptr);
+
+    pthread_mutex_init(&mtx,nullptr);
+    pthread_cond_init(&cv,nullptr);
 }
 
 JobScheduler::~JobScheduler()
@@ -16,6 +19,9 @@ JobScheduler::~JobScheduler()
 
     pthread_mutex_destroy(&WorkerMtx);
     pthread_cond_destroy(&WorkerCV);
+
+    pthread_mutex_destroy(&mtx);
+    pthread_cond_destroy(&cv);
 
     s_cout{} << "~JobScheduler.\n";
 }
@@ -36,9 +42,11 @@ void JobScheduler::stop()
 
     pthread_mutex_lock(&WorkerMtx);
     WorkerIsRunning = false;
-    pthread_cond_broadcast(&WorkerCV);
+
     s_cout{} << "broadcast...\n";
+    pthread_cond_broadcast(&WorkerCV);
     pthread_mutex_unlock(&WorkerMtx);
+
     s_cout{} << "join...\n";
     for (auto &t : ThreadPool)
         pthread_join(t, nullptr);
@@ -49,14 +57,28 @@ void JobScheduler::stop()
 void JobScheduler::schedule(Job &Job)
 {
     pthread_mutex_lock(&WorkerMtx);
+
+    pthread_mutex_lock(&mtx);
+    JobsToRun++;
+    pthread_mutex_unlock(&mtx);
+
     JobsQueue.push(&Job);
     pthread_cond_signal(&WorkerCV);
     pthread_mutex_unlock(&WorkerMtx);
 }
 
-
 void JobScheduler::barrier()
 {
+    s_cout{} << "barrier...\n";
+
+    pthread_mutex_lock(&mtx);
+    while(JobsToRun-JobsCompleted != 0) {
+        pthread_cond_wait(&cv, &mtx);
+    }
+
+    pthread_mutex_unlock(&mtx);
+
+    s_cout{} << "barrier.\n";
 
 }
 
@@ -81,6 +103,13 @@ void* worker_thread(void *arg)
 
         p->run();
         delete p;
+
+        pthread_mutex_lock(&(scheduler->mtx));
+        (scheduler->JobsCompleted)++;
+        if (!scheduler->JobsCompleted - scheduler->JobsToRun) {
+            pthread_cond_signal(&(scheduler->cv));
+        }
+        pthread_mutex_unlock(&(scheduler->mtx));
     }
 }
 
