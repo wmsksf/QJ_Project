@@ -30,17 +30,12 @@ public:
 
     int ThreadPoolSize;
     std::vector<pthread_t> ThreadPool;
-    std::vector<bool> ThreadPoolIdle;
-    std::vector<class args> tmp;
-
-
     std::queue<Job*> JobsQueue;
 
-    pthread_mutex_t WorkerMtx, IdleMtx;
-    pthread_cond_t WorkerCV, IdleCV;
+    pthread_mutex_t WorkerMtx;
+    pthread_cond_t WorkerCV;
 
     bool WorkerIsRunning;
-    bool allIdle();
 };
 
 void* worker_thread(void*);
@@ -52,18 +47,6 @@ public:
     void run() override;
 };
 //----------------------------------------------------------------------------------------------------------------------
-class arguments {
-public:
-    virtual ~arguments() {}
-};
-
-class args : public arguments {
-public:
-    JobScheduler *scheduler;
-    int i;
-
-    args(JobScheduler *scheduler_, int i_);
-};
 
 class s_cout: public std::ostringstream
 {
