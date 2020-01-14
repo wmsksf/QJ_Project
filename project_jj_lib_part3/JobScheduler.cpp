@@ -113,13 +113,15 @@ void* worker_thread(void *arg)
     }
 }
 
-job::job(int n) : n{n} { }
-void job::run()
-{
-    s_cout{} << "Start Job " << n << std::endl;
-    sleep(2);
-    s_cout{} << " Stop Job " << n << std::endl;
+queryJob::queryJob(char *inq) {
+    q.parse(inq);
 }
+void queryJob::run() {
+    q.exec();
+}
+
+queryJob::~queryJob() {}
+
 //----------------------------------------------------------------------------------------------------------------------
 pthread_mutex_t s_cout::s_mux{};
 s_cout::~s_cout()

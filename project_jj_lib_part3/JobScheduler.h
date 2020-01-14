@@ -11,6 +11,10 @@
 #include <iostream>
 #include <queue>
 
+#include "../project_jj_lib_part2/Datatypes_part2.h"
+
+typedef pthread_t JOBID;
+
 class Job {
 public:
     virtual void run() = 0;
@@ -31,6 +35,7 @@ public:
     int ThreadPoolSize;
     std::vector<pthread_t> ThreadPool;
     std::queue<Job*> JobsQueue;
+//    std::vector<class buffer_data> buffer;
 
     pthread_mutex_t WorkerMtx, mtx;
     pthread_cond_t WorkerCV, cv;
@@ -47,6 +52,14 @@ public:
     job(int n=0);
     void run() override;
 };
+
+class queryJob : public Job {
+    Query q;
+public:
+    queryJob(char *inq);
+    ~queryJob();
+    void run() override;
+};
 //----------------------------------------------------------------------------------------------------------------------
 
 class s_cout: public std::ostringstream
@@ -58,5 +71,11 @@ public:
 private:
     static pthread_mutex_t s_mux;
 };
+
+//class buffer_data {
+//public:
+//    JOBID job_id;
+//    Vector sum;
+//};
 
 #endif //PROJECT_JJ_JOBSCHEDULER_H

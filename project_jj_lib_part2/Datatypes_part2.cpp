@@ -481,7 +481,7 @@ void Query::equality_filter(Relation *r1, Relation *r2)
     }
 
     end = clock();
-    std::cout << "Equality filter part: " << ((double) end-start)/CLOCKS_PER_SEC << "s" << std::endl;
+//    std::cout << "Equality filter part: " << ((double) end-start)/CLOCKS_PER_SEC << "s" << std::endl;
 }
 
 List* Query::join(Relation *relA, Relation *relB)
@@ -492,13 +492,13 @@ List* Query::join(Relation *relA, Relation *relB)
     if(!relA->isSorted())
         Radixsort(relA,0,relA->numTuples-1);
     end = clock();
-    std::cout << "Radix 1: " << ((double) end-start)/CLOCKS_PER_SEC  << "s" << std::endl;
+//    std::cout << "Radix 1: " << ((double) end-start)/CLOCKS_PER_SEC  << "s" << std::endl;
 
     start = clock();
     if(!relB->isSorted())
         Radixsort(relB,0,relB->numTuples-1);
     end = clock();
-    std::cout << "Radix 2: " << ((double) end-start)/CLOCKS_PER_SEC << "s" << std::endl;
+//    std::cout << "Radix 2: " << ((double) end-start)/CLOCKS_PER_SEC << "s" << std::endl;
     start = clock();
 
     if (!relA->isSorted() || !relB->isSorted()) return nullptr;
@@ -563,7 +563,7 @@ List* Query::join(Relation *relA, Relation *relB)
         }
     }
     end = clock();
-    std::cout << "Join part: " << ((double) end-start)/CLOCKS_PER_SEC << "s" << std::endl;
+//    std::cout << "Join part: " << ((double) end-start)/CLOCKS_PER_SEC << "s" << std::endl;
 
     if(!counter) return nullptr;
     rowsInResults = counter;
@@ -620,7 +620,7 @@ void Query::calc_sum()
     }
 
     end = clock();
-    std::cout << "Calculation of sum part: " << ((double) end-start)/CLOCKS_PER_SEC << "s" << std::endl;
+//    std::cout << "Calculation of sum part: " << ((double) end-start)/CLOCKS_PER_SEC << "s" << std::endl;
 
     std::cout << "RESULT:";
     for (uint64_t i = 0; i < sum.size(); i++) {
@@ -742,11 +742,11 @@ void Query::plan_predicates() {
 
 
 
-    std::cout << "Best predicate order: " ;
-    for(int i =0; i<numOfJoins; i++){
-        std::cout << bestPredicateOrder[i] << " " ;
-    }
-    std::cout << std::endl;
+//    std::cout << "Best predicate order: " ;
+//    for(int i =0; i<numOfJoins; i++){
+//        std::cout << bestPredicateOrder[i] << " " ;
+//    }
+//    std::cout << std::endl;
 
     c=0;
     for(int i =0; i<numOfJoins;i++){

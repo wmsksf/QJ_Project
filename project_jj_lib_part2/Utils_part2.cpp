@@ -8,6 +8,7 @@
 #include <iostream>
 #include "Utils_part2.h"
 #include "MACROS.h"
+#include "../project_jj_lib_part3/JobScheduler.h"
 
 uint64_t MATRICES_SIZE = 0;
 Matrix *MATRICES = nullptr;
@@ -97,32 +98,32 @@ char** Get_Input(bool flag, uint64_t *size)
     }
 }
 
-void execQ(char** Q, uint64_t size)
+void execQ(char** Q, uint64_t size, JobScheduler *job_scheduler)
 {
-    Query *q;
-    for (uint64_t i = 0; i < size; i++)
-    {
-        q = new Query;
-
-        q->parse(Q[i]);
-        std::cout << std::endl << "Execution of query:" << std::endl;
-        q->exec();
-        delete q;
+    for (uint64_t i = 0; i < size; i++) {
+        queryJob *q = new queryJob(Q[i]);
+        job_scheduler->schedule(*q);
     }
+    job_scheduler->barrier();
 
     for (uint64_t i = 0; i < size; i++) free(Q[i]);
     free(Q);
 }
 
-void Set_output()
+void Set_output(int threads)
 {
     uint64_t nqueries = 0;
     char **Queries;
+
+    JobScheduler job_scheduler;
+    job_scheduler.init(threads);
     while (1)
     {
         Queries = Get_Input(true, &nqueries);
-        if (Queries == nullptr) break;
-
-        execQ(Queries, nqueries);
+        if (Queries == nullptr) {
+            job_scheduler.stop();
+            break;
+        }
+        execQ(Queries, nqueries, &job_scheduler);
     }
 }

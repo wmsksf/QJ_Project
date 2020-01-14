@@ -12,6 +12,6 @@
 #define MAX_DATASETS 128
 
 char** Get_Input(bool flag = false, uint64_t *size = nullptr);
-void Set_output();
+void Set_output(int threads);
 
 #endif //PROJECT_JJ_UTILS_PART2_H

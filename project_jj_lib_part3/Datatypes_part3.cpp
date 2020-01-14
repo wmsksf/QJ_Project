@@ -7,52 +7,6 @@
 #include <iostream>
 #include "Datatypes_part3.h"
 
-bool JobScheduler::Init(int num_of_threads) {
-
-    if(num_of_threads < 1) return false;
-
-    //Initialize variables
-    queueSize = 0;
-    num_of_threads = num_of_threads;
-    totalJobs = 0;
-    jobsCompleted = 0;
-    pthread_mutex_init(&mutex,nullptr);
-    pthread_cond_init(&cond_signal,nullptr);
-
-    // Create threads
-    threads = new pthread_t[num_of_threads];
-
-    for(int i = 0; i < num_of_threads; i++){
-        if(pthread_create(&threads[i],nullptr,thread_work,(void*)this) != 0){
-            perror("Error creating thread\n");
-            return false;
-        }
-    }
-
-
-
-    return true;
-}
-
-bool JobScheduler::Destroy() {
-    pthread_mutex_destroy(&mutex);
-    pthread_cond_destroy(&cond_signal);
-
-    delete[] threads;
-}
-
-void* thread_work(void* scheduler_){
-    auto* scheduler = (JobScheduler*)scheduler_;
-
-    while(true){
-        //get a job to execute...
-
-        break;
-    }
-
-    pthread_exit(nullptr);
-}
-
 Prediction *Prediction::JoinPrediction(Prediction *predB,uint64_t indexA,uint64_t colA,uint64_t indexB,uint64_t colB, int predicateIndex) {
     if(predB== nullptr) return nullptr;
 
@@ -170,11 +124,11 @@ bool Prediction::matrixInPrediction(int index) {
 }
 
 void Prediction::print() {
-    std::cout << "Prediction: " ;
-    for(int i =0; i < numOfMatrices; i++)
-        std::cout << matrices[i].matrixIndex << " " ;
-
-    std::cout <<": " << matrices[0].stats[0].f << std::endl;
+//    std::cout << "Prediction: " ;
+//    for(int i =0; i < numOfMatrices; i++)
+//        std::cout << matrices[i].matrixIndex << " " ;
+//
+//    std::cout <<": " << matrices[0].stats[0].f << std::endl;
 }
 
 int Prediction::getCost() {
