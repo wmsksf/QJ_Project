@@ -36,9 +36,10 @@ public:
     uint64_t numOfPredicates = 0;
     int* predicateOrder = nullptr;
     int getCost();
-    bool predicateInPrediction(int predicate);
 
+    bool predicateInPrediction(int predicate);
     Prediction* JoinPrediction(Prediction* predB,uint64_t indexA,uint64_t colA,uint64_t indexB,uint64_t colB, int predicateIndex);
+    Prediction* EqualityFilterPrediction(uint64_t indexA,uint64_t colA,uint64_t indexB,uint64_t colB, int predicateIndex);
     ~Prediction();
     bool matrixInPrediction(int index);
     void print();
