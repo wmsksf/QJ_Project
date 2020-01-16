@@ -3,6 +3,7 @@
 //
 
 #include "JobScheduler.h"
+#include "../project_jj_lib/Utils.h"
 
 JobScheduler::JobScheduler() : WorkerIsRunning{true}, JobsToRun{0}, JobsCompleted{0}
 {
@@ -122,6 +123,34 @@ void queryJob::run() {
 
 queryJob::~queryJob() {}
 
+
+sortJob::sortJob(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte, Relation *RR)
+{
+    this->R = R;
+    this->RR = RR;
+    this->start = start;
+    this->end = end;
+    this->current_byte = current_byte;
+
+    quick = false;
+}
+
+sortJob::sortJob(Tuple *A, uint64_t lo, uint64_t hi)
+{
+    this->A = A;
+    this->lo = lo;
+    this->hi = hi;
+
+    quick = true;
+}
+void sortJob::run() {
+    if (!quick)
+        Radixsort(R, start, end, current_byte, RR);
+    else
+        OptQuicksort(A, lo, hi);
+}
+
+sortJob::~sortJob() {}
 //----------------------------------------------------------------------------------------------------------------------
 pthread_mutex_t s_cout::s_mux{};
 s_cout::~s_cout()

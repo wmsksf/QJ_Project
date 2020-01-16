@@ -10,6 +10,7 @@
 #include "Utils.h"
 #include "Stack.h"
 #include "../project_jj_lib_part2/MACROS.h"
+#include "../project_jj_lib_part3/JobScheduler.h"
 
 static uint64_t partition(Tuple* A, uint64_t p, uint64_t r)
 {
@@ -65,6 +66,8 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
     if (current_byte == 56 && (end+1 - start) * sizeof(Tuple) < L1_CACHESIZE)
     {
         OptQuicksort(R->getTuples(), start, end);
+//        sortJob *sort = new sortJob(R->getTuples(), start, end);
+//        job_scheduler.schedule(*sort);
         return;
     }
 
@@ -78,6 +81,12 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
     uint64_t Hist[256] = {0};
     for (uint64_t i = start; i <= end; i++)
         Hist[(R->getTuples()[i].key >> current_byte) & 0xff]++; // for byte 0 same as A[i] & 0xff
+
+
+    std::cout << current_byte << " bits\n";
+    for (int i = 0; i<256; i++)
+        std::cout  << "i " << i << " " << Hist[i] << std::endl;
+    std::cout << std::endl;
 
     uint64_t Psum[256] = {start};
     for (int i = 1; i < 256; i++)
@@ -105,13 +114,22 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
         {
             if (!current_byte) {
                 OptQuicksort(RR->getTuples(), Psum[i - 1], Psum[i]-1);
+//                sortJob *sort = new sortJob(RR->getTuples(), Psum[i - 1], Psum[i]-1);
+//                job_scheduler.schedule(*sort);
             }
             else
+            {
                 Radixsort(RR, Psum[i - 1], Psum[i]-1, current_byte - 8, R);
+//                sortJob *sort =  new sortJob(RR, Psum[i - 1], Psum[i]-1, current_byte - 8, R);
+//                job_scheduler.schedule(*sort);
+            }
         }
         else{
-            if(Psum[i] > Psum[i-1])
+            if(Psum[i] > Psum[i-1]) {
                 OptQuicksort(RR->getTuples(), Psum[i-1], Psum[i]-1);
+//                sortJob *sort = new sortJob(RR->getTuples(), Psum[i-1], Psum[i]-1);
+//                job_scheduler.schedule(*sort);
+            }
         }
     }
 

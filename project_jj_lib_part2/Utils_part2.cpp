@@ -98,25 +98,24 @@ char** Get_Input(bool flag, uint64_t *size)
     }
 }
 
-void execQ(char** Q, uint64_t size, JobScheduler *job_scheduler)
+void execQ(char** Q, uint64_t size)
 {
     for (uint64_t i = 0; i < size; i++) {
         queryJob *q = new queryJob(Q[i]);
-        job_scheduler->schedule(*q);
+        job_scheduler.schedule(*q);
+        job_scheduler.barrier();
     }
-    job_scheduler->barrier();
+//    job_scheduler->barrier();
 
     for (uint64_t i = 0; i < size; i++) free(Q[i]);
     free(Q);
 }
 
-void Set_output(int threads)
+void Set_output()
 {
     uint64_t nqueries = 0;
     char **Queries;
 
-    JobScheduler job_scheduler;
-    job_scheduler.init(threads);
     while (1)
     {
         Queries = Get_Input(true, &nqueries);
@@ -124,6 +123,6 @@ void Set_output(int threads)
             job_scheduler.stop();
             break;
         }
-        execQ(Queries, nqueries, &job_scheduler);
+        execQ(Queries, nqueries);
     }
 }

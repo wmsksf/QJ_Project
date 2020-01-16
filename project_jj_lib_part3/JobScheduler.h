@@ -46,13 +46,6 @@ public:
 
 void* worker_thread(void*);
 
-class job : public Job {
-    int n;
-public:
-    job(int n=0);
-    void run() override;
-};
-
 class queryJob : public Job {
     Query q;
 public:
@@ -60,6 +53,21 @@ public:
     ~queryJob();
     void run() override;
 };
+
+class sortJob : public Job {
+    Relation *R, *RR;
+    uint64_t start, end, current_byte;
+    Tuple* A;
+    uint64_t lo, hi;
+    bool quick;
+
+public:
+    sortJob(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte, Relation* RR);
+    sortJob(Tuple* A, uint64_t lo, uint64_t hi);
+    ~sortJob();
+    void run() override;
+};
+
 //----------------------------------------------------------------------------------------------------------------------
 
 class s_cout: public std::ostringstream
@@ -77,5 +85,7 @@ private:
 //    JOBID job_id;
 //    Vector sum;
 //};
+
+extern JobScheduler job_scheduler;
 
 #endif //PROJECT_JJ_JOBSCHEDULER_H
