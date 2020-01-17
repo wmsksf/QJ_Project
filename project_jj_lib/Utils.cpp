@@ -7,10 +7,62 @@
 #include <cstring>
 #include <iostream>
 #include <getopt.h>
+#include <semaphore.h>
 #include "Utils.h"
 #include "Stack.h"
 #include "../project_jj_lib_part2/MACROS.h"
 #include "../project_jj_lib_part3/JobScheduler.h"
+
+
+typedef struct {
+    int n;
+    int count;
+    sem_t mutex;
+    sem_t turnstile;
+    sem_t turnstile2;
+} barrier_t;
+
+void init_barrier(barrier_t *barrier, int n)
+{
+    barrier->n = n;
+    barrier->count = 0;
+    sem_init(&barrier->mutex, 0, 1);
+    sem_init(&barrier->turnstile, 0, 0);
+    sem_init(&barrier->turnstile2, 0, 0);
+}
+
+void phase1_barrier(barrier_t *barrier)
+{
+    sem_wait(&barrier->mutex);
+    if (++barrier->count == barrier->n) {
+        int i;
+        for (i = 0; i < barrier->n; i++) {
+            sem_post(&barrier->turnstile);
+        }
+    }
+    sem_post(&barrier->mutex);
+    sem_wait(&barrier->turnstile);
+}
+
+void phase2_barrier(barrier_t *barrier)
+{
+    sem_wait(&barrier->mutex);
+    if (--barrier->count == 0) {
+        int i;
+        for (i = 0; i < barrier->n; i++) {
+            sem_post(&barrier->turnstile2);
+        }
+    }
+    sem_post(&barrier->mutex);
+    sem_wait(&barrier->turnstile2);
+}
+
+void wait_barrier(barrier_t *barrier)
+{
+    phase1_barrier(barrier);
+    phase2_barrier(barrier);
+}
+//----------------------------------------------------------------------------------------------------------------------
 
 static uint64_t partition(Tuple* A, uint64_t p, uint64_t r)
 {
@@ -61,13 +113,49 @@ void OptQuicksort(Tuple *A, uint64_t lo, uint64_t hi)
     }
 }
 
+//todo: set to false again before next Query::join() ++ this aint right place to be initialized change place-> add in datatypes_part2 in class Query
+bool called_threads = false;
+uint64_t byte, next_byte;
+barrier_t barrier;
+//pthread_barrier_t barrier;
+
+//void check(const uint64_t *hist, Relation *R, uint64_t start, uint64_t end, uint64_t current_byte, Relation *RR, int threads)
+void check(const uint64_t *hist, Relation *R, uint64_t start, uint64_t end, uint64_t current_byte, Relation *RR)
+{
+//    init_barrier(&barrier, threads);
+
+    init_barrier(&barrier, 2);
+//    pthread_barrier_init (&barrier, NULL, 2);
+
+    int count = 0;
+    for(int i = 0; i < 256; i++) {
+        if (!hist[i]) continue;
+        count++;
+    }
+    if (count == 1) {
+        Radixsort(R, start, end, current_byte-8, RR);
+//        return;
+    }
+
+    called_threads = true;
+
+    uint64_t Psum[256] = {start};
+    for (int i = 1; i < 256; i++) {
+        Psum[i] = Psum[i-1] + hist[i-1];
+    }
+
+    byte = current_byte;
+    next_byte = current_byte - 8;
+
+    sortJob *sort = new sortJob(R, start, end, current_byte-8, RR);
+    job_scheduler.schedule(*sort);
+}
+
 void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte, Relation* RR)
 {
     if (current_byte == 56 && (end+1 - start) * sizeof(Tuple) < L1_CACHESIZE)
     {
         OptQuicksort(R->getTuples(), start, end);
-//        sortJob *sort = new sortJob(R->getTuples(), start, end);
-//        job_scheduler.schedule(*sort);
         return;
     }
 
@@ -82,15 +170,33 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
     for (uint64_t i = start; i <= end; i++)
         Hist[(R->getTuples()[i].key >> current_byte) & 0xff]++; // for byte 0 same as A[i] & 0xff
 
-
-    std::cout << current_byte << " bits\n";
-    for (int i = 0; i<256; i++)
-        std::cout  << "i " << i << " " << Hist[i] << std::endl;
-    std::cout << std::endl;
-
     uint64_t Psum[256] = {start};
     for (int i = 1; i < 256; i++)
         Psum[i] = Psum[i-1] + Hist[i-1];
+
+    std::cout << "current_byte " << current_byte  << " with flag " << called_threads << std::endl;
+    if (!called_threads) {
+        std::cout << "check yet to be called\n";
+//        check(Hist, R, start, end, current_byte, RR, 4);
+        check(Hist, R, start, end, current_byte, RR);
+    }
+    if (current_byte == byte) {
+        std::cout << "main thread wait on barrier\n";
+        wait_barrier(&barrier);
+//        pthread_barrier_wait (&barrier);
+
+        std::cout << "main thread waiting on barrier done\n";
+        R->clean(start,end);
+        R->copyTuplesVal(RR, start, end);
+        if(current_byte/8==7) {
+            delete RR;
+        }
+
+        called_threads = false;
+//        pthread_barrier_destroy(&barrier);
+        std::cout << "leave\n";
+        return;
+    }
 
 //    utility in copying R to RR
     uint64_t tmp[256] = {0};
@@ -114,41 +220,44 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
         {
             if (!current_byte) {
                 OptQuicksort(RR->getTuples(), Psum[i - 1], Psum[i]-1);
-//                sortJob *sort = new sortJob(RR->getTuples(), Psum[i - 1], Psum[i]-1);
-//                job_scheduler.schedule(*sort);
             }
-            else
-            {
+            else {
                 Radixsort(RR, Psum[i - 1], Psum[i]-1, current_byte - 8, R);
-//                sortJob *sort =  new sortJob(RR, Psum[i - 1], Psum[i]-1, current_byte - 8, R);
-//                job_scheduler.schedule(*sort);
             }
         }
         else{
             if(Psum[i] > Psum[i-1]) {
                 OptQuicksort(RR->getTuples(), Psum[i-1], Psum[i]-1);
-//                sortJob *sort = new sortJob(RR->getTuples(), Psum[i-1], Psum[i]-1);
-//                job_scheduler.schedule(*sort);
             }
         }
     }
 
     if(end > Psum[255]) {
         if ((end - Psum[255]) * sizeof(Tuple) > L1_CACHESIZE) {
-            if (!current_byte)
+            if (!current_byte) {
                 OptQuicksort(RR->getTuples(), Psum[255], end);
-            else
+            }
+            else {
                 Radixsort(RR, Psum[255], end, current_byte - 8, R);
+            }
         } else {
             OptQuicksort(RR->getTuples(), Psum[255], end);
         }
     }
+
+//    wait here
     R->clean(start,end);
     R->copyTuplesVal(RR, start, end);
 
-    if(nth_byte==7) {
-        delete RR;
-    }
+   if (current_byte == next_byte) {
+       std::cout << "thread wait...\n";
+       wait_barrier(&barrier);
+//       pthread_barrier_wait (&barrier);
+       std::cout << "thread waiting done\n";
+   }
+//    if(nth_byte==7) {
+//        delete RR;
+//    }
 }
 
 Tuple getMatrixSize(char *fileName) {

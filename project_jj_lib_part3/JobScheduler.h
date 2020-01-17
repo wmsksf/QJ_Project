@@ -57,13 +57,13 @@ public:
 class sortJob : public Job {
     Relation *R, *RR;
     uint64_t start, end, current_byte;
-    Tuple* A;
-    uint64_t lo, hi;
+//    Tuple* A;
+//    uint64_t lo, hi;
     bool quick;
 
 public:
     sortJob(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte, Relation* RR);
-    sortJob(Tuple* A, uint64_t lo, uint64_t hi);
+//    sortJob(Tuple* A, uint64_t lo, uint64_t hi);
     ~sortJob();
     void run() override;
 };

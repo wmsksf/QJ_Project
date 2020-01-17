@@ -131,23 +131,24 @@ sortJob::sortJob(Relation *R, uint64_t start, uint64_t end, uint64_t current_byt
     this->start = start;
     this->end = end;
     this->current_byte = current_byte;
+    std::cout << this->R->numTuples << " " << this->RR->numTuples << "\n";
 
-    quick = false;
+//    quick = false;
 }
 
-sortJob::sortJob(Tuple *A, uint64_t lo, uint64_t hi)
-{
-    this->A = A;
-    this->lo = lo;
-    this->hi = hi;
-
-    quick = true;
-}
+//sortJob::sortJob(Tuple *A, uint64_t lo, uint64_t hi)
+//{
+//    this->A = A;
+//    this->lo = lo;
+//    this->hi = hi;
+//
+//    quick = true;
+//}
 void sortJob::run() {
-    if (!quick)
+//    if (!quick)
         Radixsort(R, start, end, current_byte, RR);
-    else
-        OptQuicksort(A, lo, hi);
+//    else
+//        OptQuicksort(A, lo, hi);
 }
 
 sortJob::~sortJob() {}

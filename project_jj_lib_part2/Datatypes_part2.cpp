@@ -489,14 +489,20 @@ List* Query::join(Relation *relA, Relation *relB)
     clock_t start,end;
 
     start = clock();
-    if(!relA->isSorted())
+    if(!relA->isSorted()) {
+        std::cout << "fisrt radix\n";
         Radixsort(relA,0,relA->numTuples-1);
+        std::cout << "out of first radix\n";
+    }
     end = clock();
 //    std::cout << "Radix 1: " << ((double) end-start)/CLOCKS_PER_SEC  << "s" << std::endl;
 
     start = clock();
-    if(!relB->isSorted())
+    if(!relB->isSorted()) {
+        std::cout << "second radix\n";
         Radixsort(relB,0,relB->numTuples-1);
+        std::cout << "out of second radix\n";
+    }
     end = clock();
 //    std::cout << "Radix 2: " << ((double) end-start)/CLOCKS_PER_SEC << "s" << std::endl;
     start = clock();
@@ -757,11 +763,11 @@ void Query::plan_predicates() {
 
 
 
-    std::cout << "Best predicate order: " ;
-    for(int i =0; i<numOfJoins; i++){
-        std::cout << bestPredicateOrder[i] << " " ;
-    }
-    std::cout << std::endl;
+//    std::cout << "Best predicate order: " ;
+//    for(int i =0; i<numOfJoins; i++){
+//        std::cout << bestPredicateOrder[i] << " " ;
+//    }
+//    std::cout << std::endl;
 
     c=0;
     for(int i =0; i<numOfJoins;i++){

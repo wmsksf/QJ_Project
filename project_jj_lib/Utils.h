@@ -10,6 +10,8 @@
 
 #define SIZE 1024
 
+extern bool called_threads;
+
 class Tuple;
 
 void OptQuicksort(Tuple* A, uint64_t lo, uint64_t hi);

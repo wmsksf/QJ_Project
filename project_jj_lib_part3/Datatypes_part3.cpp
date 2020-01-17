@@ -115,7 +115,7 @@ Prediction *Prediction::JoinPrediction(Prediction *predB,uint64_t indexA,uint64_
         }
     }
     else{   //self join
-        std::cout << "Self join" << std::endl;
+//        std::cout << "Self join" << std::endl;
         Stats* s1 = &A->stats[colA];
 
         uint64_t n = s1->U - s1->I + 1;
@@ -172,11 +172,11 @@ bool Prediction::matrixInPrediction(int index) {
 }
 
 void Prediction::print() {
-    std::cout << "Prediction: " ;
-    for(int i =0; i < numOfMatrices; i++)
-        std::cout << matrices[i].matrixIndex << " " ;
-
-    std::cout <<": " << matrices[0].stats[0].f << std::endl;
+//    std::cout << "Prediction: " ;
+//    for(int i =0; i < numOfMatrices; i++)
+//        std::cout << matrices[i].matrixIndex << " " ;
+//
+//    std::cout <<": " << matrices[0].stats[0].f << std::endl;
 }
 
 int Prediction::getCost() {
