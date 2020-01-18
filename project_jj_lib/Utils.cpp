@@ -167,17 +167,17 @@ void check(const uint64_t *hist, Relation *R, uint64_t start, uint64_t end, uint
             if (i+step > last) {
                 sort = new sortJob(R, Psum[i], Psum[last]-1, current_byte - 8, RR);
                 jobs.push_back(sort);
-                std::cout << i << " ++ " << last << " psums " << Psum[i] << " " << Psum[last]-1<< std::endl;
+                std::cout << i << " ++ " << last << " " << Psum[i] << " " << Psum[last]-1<< std::endl;
 
             } else {
                 sort = new sortJob(R, Psum[i], Psum[i+step]-1, current_byte - 8, RR);
                 jobs.push_back(sort);
-                std::cout << i << " ++ " << i+step << " psums " << Psum[i] << " " << Psum[i+step]-1<< std::endl;
+                std::cout << i << " ++ " << i+step << " " << Psum[i] << " " << Psum[i+step]-1<< std::endl;
 
             }
             job_scheduler.schedule(*sort);
         }
-        std::cout << "vector size: " << jobs.size() << std::endl;
+//        std::cout << "vector size: " << jobs.size() << std::endl;
         std::cout << "main thread wait on barrier\n";
         wait_barrier(&barrier);
         std::cout << "main thread waiting on barrier done\n";
@@ -214,6 +214,9 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
     if (!called_threads) {
         std::cout << "check yet to be called\n";
         check(Hist, R, start, end, current_byte, RR);
+    }
+    if (current_byte != next_byte+8 && current_byte > next_byte) {
+        return;
     }
 
 //    utility in copying R to RR
