@@ -131,7 +131,6 @@ sortJob::sortJob(Relation *R, uint64_t start, uint64_t end, uint64_t current_byt
     this->start = start;
     this->end = end;
     this->current_byte = current_byte;
-    std::cout << this->R->numTuples << " " << this->RR->numTuples << "\n";
 
 //    quick = false;
 }

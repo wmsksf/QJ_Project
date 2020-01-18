@@ -8,6 +8,7 @@
 #include <iostream>
 #include <getopt.h>
 #include <semaphore.h>
+#include <math.h>
 #include "Utils.h"
 #include "Stack.h"
 #include "../project_jj_lib_part2/MACROS.h"
@@ -113,46 +114,80 @@ void OptQuicksort(Tuple *A, uint64_t lo, uint64_t hi)
     }
 }
 
-//todo: set to false again before next Query::join() ++ this aint right place to be initialized change place-> add in datatypes_part2 in class Query
-bool called_threads = false;
+//    dummy
+int thread_check(int first, int last, int threads) {
+    int thrds = 0;
+    for (int i = first; i < last; i += ceil((float)(last-first)/(float)threads), thrds++) {}
+    return thrds;
+}
+
+bool called_threads;
 uint64_t byte, next_byte;
 barrier_t barrier;
-//pthread_barrier_t barrier;
-
-//void check(const uint64_t *hist, Relation *R, uint64_t start, uint64_t end, uint64_t current_byte, Relation *RR, int threads)
 void check(const uint64_t *hist, Relation *R, uint64_t start, uint64_t end, uint64_t current_byte, Relation *RR)
 {
-//    init_barrier(&barrier, threads);
+    int threads = 4;
 
-    init_barrier(&barrier, 2);
-//    pthread_barrier_init (&barrier, NULL, 2);
-
-    int count = 0;
+    int count = 0, first = -1, last = 0;
     for(int i = 0; i < 256; i++) {
         if (!hist[i]) continue;
+        if (first == -1) first = i;
+        last = i;
         count++;
     }
+    last++;
+    std::cout << first << " " << last << std::endl;
+
     if (count == 1) {
         Radixsort(R, start, end, current_byte-8, RR);
-//        return;
     }
+    else {
+        called_threads = true;
 
-    called_threads = true;
+        uint64_t Psum[256] = {start};
+        for (int i = 1; i < 256; i++) {
+            Psum[i] = Psum[i - 1] + hist[i - 1];
+        }
 
-    uint64_t Psum[256] = {start};
-    for (int i = 1; i < 256; i++) {
-        Psum[i] = Psum[i-1] + hist[i-1];
+        byte = current_byte;
+        next_byte = current_byte - 8;
+        std::cout << "size of rel: " << R->numTuples << std::endl;
+
+        int thrds = thread_check(first, last, threads);
+        if (thrds < threads) {
+            init_barrier(&barrier, thrds+1);
+        } else {
+            init_barrier(&barrier, threads+1);
+        }
+
+        sortJob *sort;
+        std::vector<class sortJob*> jobs;
+        int step = (int) ceil((float)(last-first)/(float)threads);
+        for (int i = first; i < last; i+=step) {
+            if (i+step > last) {
+                sort = new sortJob(R, Psum[i], Psum[last]-1, current_byte - 8, RR);
+                jobs.push_back(sort);
+                std::cout << i << " ++ " << last << " psums " << Psum[i] << " " << Psum[last]-1<< std::endl;
+
+            } else {
+                sort = new sortJob(R, Psum[i], Psum[i+step]-1, current_byte - 8, RR);
+                jobs.push_back(sort);
+                std::cout << i << " ++ " << i+step << " psums " << Psum[i] << " " << Psum[i+step]-1<< std::endl;
+
+            }
+            job_scheduler.schedule(*sort);
+        }
+        std::cout << "vector size: " << jobs.size() << std::endl;
+        std::cout << "main thread wait on barrier\n";
+        wait_barrier(&barrier);
+        std::cout << "main thread waiting on barrier done\n";
+        jobs.clear();
     }
-
-    byte = current_byte;
-    next_byte = current_byte - 8;
-
-    sortJob *sort = new sortJob(R, start, end, current_byte-8, RR);
-    job_scheduler.schedule(*sort);
 }
 
 void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte, Relation* RR)
 {
+    if (current_byte == 56 ) called_threads = false;
     if (current_byte == 56 && (end+1 - start) * sizeof(Tuple) < L1_CACHESIZE)
     {
         OptQuicksort(R->getTuples(), start, end);
@@ -174,28 +209,11 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
     for (int i = 1; i < 256; i++)
         Psum[i] = Psum[i-1] + Hist[i-1];
 
-    std::cout << "current_byte " << current_byte  << " with flag " << called_threads << std::endl;
+    std::cout << "current_byte " << current_byte  << " with flag " << called_threads << " next byte " << next_byte << std::endl;
+    if (called_threads && current_byte > next_byte) return;
     if (!called_threads) {
         std::cout << "check yet to be called\n";
-//        check(Hist, R, start, end, current_byte, RR, 4);
         check(Hist, R, start, end, current_byte, RR);
-    }
-    if (current_byte == byte) {
-        std::cout << "main thread wait on barrier\n";
-        wait_barrier(&barrier);
-//        pthread_barrier_wait (&barrier);
-
-        std::cout << "main thread waiting on barrier done\n";
-        R->clean(start,end);
-        R->copyTuplesVal(RR, start, end);
-        if(current_byte/8==7) {
-            delete RR;
-        }
-
-        called_threads = false;
-//        pthread_barrier_destroy(&barrier);
-        std::cout << "leave\n";
-        return;
     }
 
 //    utility in copying R to RR
@@ -245,19 +263,17 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
         }
     }
 
-//    wait here
     R->clean(start,end);
     R->copyTuplesVal(RR, start, end);
+    if(nth_byte==7) {
+        delete RR;
+    }
 
-   if (current_byte == next_byte) {
-       std::cout << "thread wait...\n";
-       wait_barrier(&barrier);
-//       pthread_barrier_wait (&barrier);
-       std::cout << "thread waiting done\n";
-   }
-//    if(nth_byte==7) {
-//        delete RR;
-//    }
+    if (current_byte == next_byte) {
+        std::cout << "thread wait...\n";
+        wait_barrier(&barrier);
+        std::cout << "thread waiting done\n";
+    }
 }
 
 Tuple getMatrixSize(char *fileName) {
