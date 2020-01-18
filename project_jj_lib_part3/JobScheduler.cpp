@@ -145,7 +145,7 @@ sortJob::sortJob(Relation *R, uint64_t start, uint64_t end, uint64_t current_byt
 //}
 void sortJob::run() {
 //    if (!quick)
-        Radixsort(R, start, end, current_byte, RR);
+    parallerRadixsort(R, start, end, current_byte, RR);
 //    else
 //        OptQuicksort(A, lo, hi);
 }
@@ -158,4 +158,28 @@ s_cout::~s_cout()
     pthread_mutex_lock(&s_mux);
     std::cout << this->str();
     pthread_mutex_unlock(&s_mux);
+}
+
+JoinJob::JoinJob(Relation* A,Relation* B,int AStart, int AEnd, int BStart, int BEnd, List** result, long int* resultRows) {
+    this->A = A;
+    this->B = B;
+    this->Bstart = BStart;
+    this->Aend = AEnd;
+    this->Astart = AStart;
+    this->Bend = BEnd;
+    this->result = result;
+    this->resultRows = resultRows;
+}
+
+void JoinJob::run() {
+//    std::ostringstream oss;
+//    s_cout{} << "join job: " << Astart << "-" << Aend << "  " << Bstart << "-" << Bend << std::endl;
+//    std::string var = oss.str();
+//    std::cout << var;
+
+    Query::parallerJoin(A,B,Astart,Aend,Bstart,Bend,result,resultRows);
+}
+
+JoinJob::~JoinJob() {
+
 }

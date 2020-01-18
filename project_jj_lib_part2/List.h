@@ -22,6 +22,7 @@ public:
 
     struct Node* insert_node();
     void insert(struct Node* nd, uint64_t rowId);
+    void appendAndDelete(List*);
 
     void remove_node(struct Node *nd);
 

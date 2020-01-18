@@ -10,7 +10,6 @@
 #include <sstream>
 #include <iostream>
 #include <queue>
-
 #include "../project_jj_lib_part2/Datatypes_part2.h"
 
 typedef pthread_t JOBID;
@@ -65,6 +64,22 @@ public:
     sortJob(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte, Relation* RR);
 //    sortJob(Tuple* A, uint64_t lo, uint64_t hi);
     ~sortJob();
+    void run() override;
+};
+
+class JoinJob : public Job {
+    Relation *A, *B;
+    uint64_t Astart, Aend,Bstart,Bend;
+    List** result;
+    long int* resultRows;
+//    Tuple* A;
+//    uint64_t lo, hi;
+//    bool quick;
+
+public:
+    JoinJob(Relation* A,Relation* B,int , int ,int ,int,List**,long int*);
+//    sortJob(Tuple* A, uint64_t lo, uint64_t hi);
+    ~JoinJob();
     void run() override;
 };
 

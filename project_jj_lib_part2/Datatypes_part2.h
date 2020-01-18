@@ -11,6 +11,7 @@
 #include "../project_jj_lib/DataTypes.h"
 #include "../project_jj_lib_part3/Datatypes_part3.h"
 #include "List.h"
+# define NUMOFJOINTHREADS 4
 
 
 class Predicate{
@@ -51,6 +52,9 @@ public:
     void exec();
     void equality_filter(Relation *r1, Relation *r2);
     List* join(Relation*, Relation*);
+    List* parallerJoin(Relation*,Relation*,int,int,int,int);
+    static void parallerJoin(Relation*,Relation*,int,int,int,int,List**,long int*);
+    List* prepareJoin(Relation* A, Relation* B);
 
     void empty_sum();
     void calc_sum();

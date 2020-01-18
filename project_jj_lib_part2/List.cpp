@@ -102,3 +102,18 @@ void List::print()
         std::cout << std::endl;
     }
 }
+
+void List::appendAndDelete(List * B) {
+    if(B == nullptr) return;
+    if(head == nullptr){
+        head = B->head;
+        tail = B->tail;
+    }else{
+        tail->next = B->head;
+        B->head->prev = tail;
+        tail = B->tail;
+    }
+    B->head = nullptr;
+    B->tail = nullptr;
+    delete B;
+}

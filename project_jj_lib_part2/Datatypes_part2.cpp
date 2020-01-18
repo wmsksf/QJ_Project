@@ -8,7 +8,10 @@
 #include "Datatypes_part2.h"
 #include "MACROS.h"
 #include "../project_jj_lib/Utils.h"
+#include "../project_jj_lib_part3/JobScheduler.h"
 #include <time.h>
+#include "../project_jj_lib_part3/Barrier.h"
+
 
 Predicate::Predicate() {
     operation = '\0';
@@ -370,7 +373,8 @@ void Query::exec()
                 return;
             }
 
-            ListOfResults = join(R1, R2);
+//            ListOfResults = join(R1, R2);
+            ListOfResults = prepareJoin(R1, R2);
 
         }
         else if (MatricesJoined->search(Predicates[i].MatricesIndex[0]))
@@ -395,7 +399,8 @@ void Query::exec()
                     delete R1; delete R2;
                     return;
                 }
-                ListOfResults = join(R1, R2);
+//                ListOfResults = join(R1, R2);
+                ListOfResults = prepareJoin(R1, R2);
             }
             else
             {
@@ -435,7 +440,8 @@ void Query::exec()
                 delete R1; delete R2;
                 return;
             }
-            ListOfResults = join(R1, R2);
+//            ListOfResults = join(R1, R2);
+            ListOfResults = prepareJoin(R1, R2);
         }
         else
         {
@@ -490,18 +496,18 @@ List* Query::join(Relation *relA, Relation *relB)
 
     start = clock();
     if(!relA->isSorted()) {
-        std::cout << "fisrt radix\n";
+//        std::cout << "fisrt radix\n";
         Radixsort(relA,0,relA->numTuples-1);
-        std::cout << "out of first radix\n";
+//        std::cout << "out of first radix\n";
     }
     end = clock();
 //    std::cout << "Radix 1: " << ((double) end-start)/CLOCKS_PER_SEC  << "s" << std::endl;
 
     start = clock();
     if(!relB->isSorted()) {
-        std::cout << "second radix\n";
+//        std::cout << "second radix\n";
         Radixsort(relB,0,relB->numTuples-1);
-        std::cout << "out of second radix\n";
+//        std::cout << "out of second radix\n";
     }
     end = clock();
 //    std::cout << "Radix 2: " << ((double) end-start)/CLOCKS_PER_SEC << "s" << std::endl;
@@ -788,4 +794,284 @@ void Query::plan_predicates() {
     }
     delete[] predictions;
     delete[] startingPrediction;
+}
+
+//============== JOIN/THREADS ==========================
+
+barrier_t joinBarrier;
+
+
+List* Query::prepareJoin(Relation *relA, Relation *relB){
+    if(NUMOFJOINTHREADS == 1) return join(relA,relB);
+
+    clock_t start,end;
+
+    start = clock();
+    if(!relA->isSorted()) {
+//        std::cout << "fisrt radix\n";
+        Radixsort(relA,0,relA->numTuples-1);
+//        std::cout << "out of first radix\n";
+    }
+    end = clock();
+//    std::cout << "Radix 1: " << ((double) end-start)/CLOCKS_PER_SEC  << "s" << std::endl;
+
+    start = clock();
+    if(!relB->isSorted()) {
+//        std::cout << "second radix\n";
+        Radixsort(relB,0,relB->numTuples-1);
+//        std::cout << "out of second radix\n";
+    }
+    end = clock();
+//    std::cout << "Radix 2: " << ((double) end-start)/CLOCKS_PER_SEC << "s" << std::endl;
+    start = clock();
+
+    if (!relA->isSorted() || !relB->isSorted()) return nullptr;
+
+    Tuple* tupA = relA->getTuples();
+    Tuple* tupB = relB->getTuples();
+
+    if(tupA == nullptr or tupB == nullptr) return nullptr;
+
+    uint64_t sizeA = relA->numTuples;
+    uint64_t sizeB = relB->numTuples;
+
+    if(sizeA < 100*NUMOFJOINTHREADS or sizeB < 100*NUMOFJOINTHREADS){
+        return parallerJoin(relA,relB,0,sizeA-1,0,sizeB-1);
+    }
+
+    init_barrier(&joinBarrier, NUMOFJOINTHREADS+1);
+
+    uint64_t last = 0;
+    List** results = new List*[NUMOFJOINTHREADS];
+    long int* Row = new long int[NUMOFJOINTHREADS];
+    for(int i =0;i<NUMOFJOINTHREADS;i++)
+        Row[i]=0;
+    for(uint64_t i =0; i < NUMOFJOINTHREADS;i++){
+        uint64_t startA =i*(sizeA/NUMOFJOINTHREADS);
+        uint64_t endA = (i+1)*(sizeA/NUMOFJOINTHREADS)-1;
+        uint64_t startB = last;
+        uint64_t endB;
+        if(i == NUMOFJOINTHREADS-1) {
+            endB = sizeB - 1;
+            endA = sizeA - 1;
+            last = endB;
+        }
+        else {
+            uint64_t temp = endA;
+            do{
+                if(temp == sizeA-1) break;
+                if(tupA[++temp].key != tupA[endA].key){
+                    temp--;
+                    break;
+                }
+            }while(true);
+            endA = temp;
+
+            uint64_t maxA = tupA[endA].key;
+            bool b = false;
+            for (uint64_t j = last; j < sizeB; j++) {
+                if (tupB[j].key > maxA) {
+                    if (j == 0) {
+                        endB = 0;
+                        b = true;
+                    } else {
+                        endB = j - 1;
+                        last = j;
+                        b = true;
+                    }
+                    break;
+                }
+            }
+            if (!b) {
+                endB = sizeB - 1;
+                last = endB;
+            }
+        }
+        JoinJob* join = new JoinJob(relA,relB,startA,endA,startB,endB,&results[i],&Row[i]);
+        job_scheduler.schedule(*join);
+    }
+
+    wait_barrier(&joinBarrier);
+//    std::cout<< "Main join" << std::endl;
+
+    rowsInResults = 0;
+    List* list = new List();
+    for(int i =0;i<NUMOFJOINTHREADS;i++){
+        if(results[i] != nullptr){
+            list->appendAndDelete(results[i]);
+            rowsInResults += Row[i];
+        }
+    }
+//    s_cout{} << "ROWS: " << rowsInResults << std::endl;
+
+    return list;
+
+    //todo calculate results and RowsInResults
+}
+
+void Query::parallerJoin(Relation *relA, Relation *relB,int AStart, int AEnd, int BStart, int BEnd,List** returnList,long int* resultRows)
+{
+    if (!relA->isSorted() || !relB->isSorted()){
+        *returnList = nullptr;
+        wait_barrier(&joinBarrier);
+//        std::cout << "join job1" << std::endl;
+        return;
+    }
+    if(AStart>AEnd or BStart>BEnd){
+        *returnList = nullptr;
+        wait_barrier(&joinBarrier);
+//        std::cout << "join job2" << std::endl;
+        return;
+    }
+
+    Tuple* tupA = relA->getTuples();
+    Tuple* tupB = relB->getTuples();
+
+    if(tupA == nullptr or tupB == nullptr){
+        *returnList = nullptr;
+        wait_barrier(&joinBarrier);
+//        std::cout << "join job3" << std::endl;
+        return;
+    }
+
+
+
+    uint64_t j=BStart;
+    uint64_t jj=BStart;
+    bool flag = false;
+    uint64_t counter = 0;
+    struct Node* N;
+
+    List* results = new List();
+    for(uint64_t i = AStart; i<=AEnd; i++){
+
+        if(tupA[i].key == tupB[j].key){
+            N = results->insert_node();
+            for(int x =0; x < (int) tupA[i].payloads.size(); x++)
+                results->insert(N,tupA[i].payloads[x]);
+            results->insert(N,tupB[j].payloads[0]);
+            counter++;
+
+            if(j == BEnd) continue;
+            jj = j;
+            while(tupA[i].key == tupB[++j].key){
+                N = results->insert_node();
+                for(int x =0; x < (int) tupA[i].payloads.size(); x++)
+                    results->insert(N,tupA[i].payloads[x]);
+                results->insert(N,tupB[j].payloads[0]);
+                counter++;
+                if(j == BEnd) break;
+            }
+            j = jj;
+        }
+        else if(tupA[i].key > tupB[j].key){
+
+            if(j == BEnd) break;
+            while(tupA[i].key > tupB[++j].key){
+                if (j == BEnd) {
+                    flag = true;
+                    break;
+                }
+            }
+            if(flag) break;
+            jj = j--;
+            while(tupA[i].key == tupB[++j].key){
+                N = results->insert_node();
+                for(int x =0; x < (int) tupA[i].payloads.size(); x++)
+                    results->insert(N,tupA[i].payloads[x]);
+                results->insert(N,tupB[j].payloads[0]);
+                counter++;
+                if (j == BEnd) {
+                    break;
+                }
+            }
+            j = jj;
+        }
+    }
+//    end = clock();
+//    std::cout << "Join part: " << ((double) end-start)/CLOCKS_PER_SEC << "s" << std::endl;
+
+    if(!counter) {
+        *returnList = nullptr;
+        wait_barrier(&joinBarrier);
+//        s_cout{} << "join job4" << std::endl;
+        return;
+    }
+    *returnList = results;
+    *resultRows = counter;
+    wait_barrier(&joinBarrier);
+//    s_cout{} << "join job " << counter << std::endl;
+}
+
+List* Query::parallerJoin(Relation *relA, Relation *relB,int AStart, int AEnd, int BStart, int BEnd)
+{
+    if (!relA->isSorted() || !relB->isSorted()) return nullptr;
+
+    Tuple* tupA = relA->getTuples();
+    Tuple* tupB = relB->getTuples();
+
+    if(tupA == nullptr or tupB == nullptr) return nullptr;
+
+
+
+    uint64_t j=BStart;
+    uint64_t jj=BStart;
+    bool flag = false;
+    uint64_t counter = 0;
+    struct Node* N;
+
+    List* results = new List();
+    for(uint64_t i = AStart; i<=AEnd; i++){
+
+        if(tupA[i].key == tupB[j].key){
+            N = results->insert_node();
+            for(int x =0; x < (int) tupA[i].payloads.size(); x++)
+                results->insert(N,tupA[i].payloads[x]);
+            results->insert(N,tupB[j].payloads[0]);
+            counter++;
+
+            if(j == BEnd) continue;
+            jj = j;
+            while(tupA[i].key == tupB[++j].key){
+                N = results->insert_node();
+                for(int x =0; x < (int) tupA[i].payloads.size(); x++)
+                    results->insert(N,tupA[i].payloads[x]);
+                results->insert(N,tupB[j].payloads[0]);
+                counter++;
+                if(j == BEnd) break;
+            }
+            j = jj;
+        }
+        else if(tupA[i].key > tupB[j].key){
+
+            if(j == BEnd) break;
+            while(tupA[i].key > tupB[++j].key){
+                if (j == BEnd) {
+                    flag = true;
+                    break;
+                }
+            }
+            if(flag) break;
+            jj = j--;
+            while(tupA[i].key == tupB[++j].key){
+                N = results->insert_node();
+                for(int x =0; x < (int) tupA[i].payloads.size(); x++)
+                    results->insert(N,tupA[i].payloads[x]);
+                results->insert(N,tupB[j].payloads[0]);
+                counter++;
+                if (j == BEnd) {
+                    break;
+                }
+            }
+            j = jj;
+        }
+    }
+//    end = clock();
+//    std::cout << "Join part: " << ((double) end-start)/CLOCKS_PER_SEC << "s" << std::endl;
+
+    if(!counter) {
+        return nullptr;
+    }
+    rowsInResults = counter;
+    return results;
 }
