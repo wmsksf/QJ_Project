@@ -12,7 +12,6 @@
 #include <time.h>
 #include "../project_jj_lib_part3/Barrier.h"
 
-
 Predicate::Predicate() {
     operation = '\0';
 
@@ -808,9 +807,10 @@ List* Query::prepareJoin(Relation *relA, Relation *relB){
 
     start = clock();
     if(!relA->isSorted()) {
-//        std::cout << "fisrt radix\n";
-        Radixsort(relA,0,relA->numTuples-1);
-//        std::cout << "out of first radix\n";
+        std::cout << "fisrt radix\n";
+        sort(relA);
+
+        std::cout << "out of first radix\n";
     }
     end = clock();
 //    std::cout << "Radix 1: " << ((double) end-start)/CLOCKS_PER_SEC  << "s" << std::endl;

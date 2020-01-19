@@ -27,4 +27,16 @@ inline uint64_t mcg64()
     return (i = (164603309694725029ull * i) % 14738995463583502973ull);
 }
 
+typedef struct bucks {
+    int first, last;
+    uint64_t byte;
+} bucks;
+
+void sort(Relation *rel);
+bucks* checkBuckets(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte = 56);
+//    dummy
+int thread_check(int first, int last, int threads);
+void splitBuckets(Relation *R, uint64_t start, uint64_t end, bucks *buck);
+void radix(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte, Relation* RR = nullptr);
+
 #endif //PROJECT_JJ_UTILS_H
