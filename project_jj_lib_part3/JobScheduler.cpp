@@ -145,7 +145,7 @@ sortJob::sortJob(Relation *R, uint64_t start, uint64_t end, uint64_t current_byt
 //}
 void sortJob::run() {
 //    if (!quick)
-//    s_cout{} << "Radix: " << start << "  " << end << std::endl;
+    s_cout{} << "Radix: " << start << "  " << end << std::endl;
     parallerRadixsort(R, start, end, current_byte, RR);
 //    else
 //        OptQuicksort(A, lo, hi);
