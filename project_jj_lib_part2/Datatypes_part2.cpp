@@ -12,6 +12,7 @@
 #include <time.h>
 #include "../project_jj_lib_part3/Barrier.h"
 
+
 Predicate::Predicate() {
     operation = '\0';
 
@@ -807,22 +808,21 @@ List* Query::prepareJoin(Relation *relA, Relation *relB){
 
     start = clock();
     if(!relA->isSorted()) {
-        std::cout << "fisrt radix\n";
-        sort(relA);
-
-        std::cout << "out of first radix\n";
+//        std::cout << "fisrt radix\n";
+        prepareRadix(relA);
+//        std::cout << "out of first radix\n";
     }
     end = clock();
-//    std::cout << "Radix 1: " << ((double) end-start)/CLOCKS_PER_SEC  << "s" << std::endl;
+    std::cout << "Radix 1: " << ((double) end-start)/CLOCKS_PER_SEC  << "s" << std::endl;
 
     start = clock();
     if(!relB->isSorted()) {
 //        std::cout << "second radix\n";
-        Radixsort(relB,0,relB->numTuples-1);
+        prepareRadix(relB);
 //        std::cout << "out of second radix\n";
     }
     end = clock();
-//    std::cout << "Radix 2: " << ((double) end-start)/CLOCKS_PER_SEC << "s" << std::endl;
+    std::cout << "Radix 2: " << ((double) end-start)/CLOCKS_PER_SEC << "s" << std::endl;
     start = clock();
 
     if (!relA->isSorted() || !relB->isSorted()) return nullptr;
@@ -903,6 +903,8 @@ List* Query::prepareJoin(Relation *relA, Relation *relB){
         }
     }
 //    s_cout{} << "ROWS: " << rowsInResults << std::endl;
+    end = clock();
+    std::cout << "Join part: " << ((double) end-start)/CLOCKS_PER_SEC << "s" << std::endl;
 
     return list;
 

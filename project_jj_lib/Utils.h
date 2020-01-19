@@ -10,6 +10,7 @@
 #include "../project_jj_lib_part3/Barrier.h"
 
 #define SIZE 1024
+#define NUMOFRADIXTHREADS 6
 
 extern bool called_threads;
 
@@ -18,6 +19,7 @@ class Tuple;
 void OptQuicksort(Tuple* A, uint64_t lo, uint64_t hi);
 void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte = 56, Relation* RR = nullptr);
 void parallerRadixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte = 56, Relation* RR = nullptr);
+void prepareRadix(Relation* R);
 
 Tuple getMatrixSize(char* fileName);
 
