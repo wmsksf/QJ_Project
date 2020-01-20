@@ -11,8 +11,7 @@
 #include "../project_jj_lib/DataTypes.h"
 #include "../project_jj_lib_part3/Datatypes_part3.h"
 #include "List.h"
-# define NUMOFJOINTHREADS 4
-
+# define NUMOFJOINTHREADS 3
 
 class Predicate{
 public:
