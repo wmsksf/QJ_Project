@@ -906,6 +906,8 @@ List* Query::prepareJoin(Relation *relA, Relation *relB){
     end = clock();
     std::cout << "Join part: " << ((double) end-start)/CLOCKS_PER_SEC << "s" << std::endl;
 
+    delete[] Row;
+    delete[] results;
     return list;
 
     //todo calculate results and RowsInResults

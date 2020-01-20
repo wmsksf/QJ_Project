@@ -10,7 +10,7 @@
 #include "../project_jj_lib_part2/List.h"
 #include "../project_jj_lib_part3/Datatypes_part3.h"
 
-#define L1_CACHESIZE 128*1024
+#define L1_CACHESIZE 32*1024
 
 
 class Tuple

@@ -143,6 +143,10 @@ void Radixsort(Relation *R, uint64_t start, uint64_t end, uint64_t current_byte,
 
 void prepareRadix(Relation* R){
     if(R == nullptr) return;
+    if(NUMOFRADIXTHREADS==1) {
+        Radixsort(R, 0, R->numTuples - 1);
+        return;
+    }
     if ((R->numTuples) * sizeof(Tuple) < L1_CACHESIZE)
     {
         OptQuicksort(R->getTuples(), 0, R->numTuples-1);
@@ -204,7 +208,7 @@ void prepareRadix(Relation* R){
             for(int i =0;i<last-first+1;i++) {
                 sortJob *job;
                 if(i!=last-first)
-                    job = new sortJob(R,Psum[first+i],Psum[first+i+1],current_byte,RR);
+                    job = new sortJob(R,Psum[first+i],Psum[first+i+1]-1,current_byte,RR);
                 else
                     job = new sortJob(R,Psum[first+i],end,current_byte,RR);
                 job_scheduler.schedule(*job);

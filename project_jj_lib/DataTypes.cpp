@@ -108,7 +108,7 @@ bool Relation::isSorted() {
     for (uint64_t i =1; i<size; i++){
         uint64_t b = tuples[i].key;
         if(a > b) {
-            std::cout << "should be: " << a << " < " << b << "  " << i << std::endl;
+//            std::cout << "should be: " << a << " < " << b << "  " << i << std::endl;
             return false;
         }
         a = b;
