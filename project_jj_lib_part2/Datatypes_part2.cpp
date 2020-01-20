@@ -12,6 +12,7 @@
 #include <time.h>
 #include "../project_jj_lib_part3/Barrier.h"
 
+JobScheduler job_scheduler;
 
 Predicate::Predicate() {
     operation = '\0';
@@ -278,7 +279,7 @@ Relation* Query::FltrRel(uint64_t mat, uint64_t index,uint64_t rel)
 bool Query::prev_predicate(int cur1, int cur2, int i)
 {
     if (((Predicates[i-1].Matrices[0] == cur1 && Predicates[i-1].Matrices[1] == cur2))
-                   || ((Predicates[i-1].Matrices[0] == cur2 && Predicates[i-1].Matrices[1] == cur1)))
+        || ((Predicates[i-1].Matrices[0] == cur2 && Predicates[i-1].Matrices[1] == cur1)))
             return true;
     return false;
 }
@@ -693,19 +694,19 @@ void Query::plan_predicates() {
                     if(!predictions[i]->predicateInPrediction(j) and    //self join
                     (joins[j].MatricesIndex[0] == joins[j].MatricesIndex[1] and joins[j].RowIds[0] == joins[j].RowIds[1]))
                         predictions[c++] = predictions[i]->JoinPrediction(predictions[joins[j].MatricesIndex[1]],
-                        joins[j].MatricesIndex[0],joins[j].RowIds[0],joins[j].MatricesIndex[1],joins[j].RowIds[1],j);
+                                joins[j].MatricesIndex[0],joins[j].RowIds[0],joins[j].MatricesIndex[1],joins[j].RowIds[1],j);
 //                    else if(!predictions[i]->predicateInPrediction(j))      //equality filter
 //                        predictions[i]->EqualityFilterPrediction(joins[j].MatricesIndex[0],joins[j].RowIds[0],joins[j].MatricesIndex[1],joins[j].RowIds[1],j);
                 }
                 else{
                     //join with the other matrix
                     predictions[c++] = predictions[i]->JoinPrediction(predictions[joins[j].MatricesIndex[1]],
-                    joins[j].MatricesIndex[0],joins[j].RowIds[0],joins[j].MatricesIndex[1],joins[j].RowIds[1],j);
+                                                                      joins[j].MatricesIndex[0],joins[j].RowIds[0],joins[j].MatricesIndex[1],joins[j].RowIds[1],j);
                 }
             }
             else if(predictions[i]->matrixInPrediction(joins[j].MatricesIndex[1])){
                 predictions[c++] = predictions[i]->JoinPrediction(predictions[joins[j].MatricesIndex[0]],
-                joins[j].MatricesIndex[1],joins[j].RowIds[1],joins[j].MatricesIndex[0],joins[j].RowIds[0],j);
+                                                                  joins[j].MatricesIndex[1],joins[j].RowIds[1],joins[j].MatricesIndex[0],joins[j].RowIds[0],j);
 
             }
         }
@@ -777,12 +778,12 @@ void Query::plan_predicates() {
 
     c=0;
     for(int i =0; i<numOfJoins;i++){
-       for(int j =c; c<NumOfPredicates;i++){
-           if(Predicates[c++].operation == 'j') {
-               Predicates[c-1] = joins[bestPredicateOrder[i]];
-               break;
-           }
-       }
+        for(int j =c; c<NumOfPredicates;i++){
+            if(Predicates[c++].operation == 'j') {
+                Predicates[c-1] = joins[bestPredicateOrder[i]];
+                break;
+            }
+        }
     }
 
     //freeing memory

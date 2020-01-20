@@ -16,15 +16,11 @@ JobScheduler::JobScheduler() : WorkerIsRunning{true}, JobsToRun{0}, JobsComplete
 
 JobScheduler::~JobScheduler()
 {
-    s_cout{} << "~JobScheduler...\n";
-
     pthread_mutex_destroy(&WorkerMtx);
     pthread_cond_destroy(&WorkerCV);
 
     pthread_mutex_destroy(&mtx);
     pthread_cond_destroy(&cv);
-
-    s_cout{} << "~JobScheduler.\n";
 }
 
 void JobScheduler::init(int threads)
@@ -39,20 +35,14 @@ void JobScheduler::init(int threads)
 
 void JobScheduler::stop()
 {
-    s_cout{} << "stop...\n";
-
     pthread_mutex_lock(&WorkerMtx);
     WorkerIsRunning = false;
 
-    s_cout{} << "broadcast...\n";
     pthread_cond_broadcast(&WorkerCV);
     pthread_mutex_unlock(&WorkerMtx);
 
-    s_cout{} << "join...\n";
     for (auto &t : ThreadPool)
         pthread_join(t, nullptr);
-
-    s_cout{} << "stop.\n";
 }
 
 void JobScheduler::schedule(Job &Job)
@@ -70,17 +60,12 @@ void JobScheduler::schedule(Job &Job)
 
 void JobScheduler::barrier()
 {
-//    s_cout{} << "barrier...\n";
-
     pthread_mutex_lock(&mtx);
     while(JobsToRun-JobsCompleted != 0) {
         pthread_cond_wait(&cv, &mtx);
     }
 
     pthread_mutex_unlock(&mtx);
-
-//    s_cout{} << "barrier.\n";
-
 }
 
 void* worker_thread(void *arg)
@@ -131,24 +116,10 @@ sortJob::sortJob(Relation *R, uint64_t start, uint64_t end, uint64_t current_byt
     this->start = start;
     this->end = end;
     this->current_byte = current_byte;
-
-//    quick = false;
 }
 
-//sortJob::sortJob(Tuple *A, uint64_t lo, uint64_t hi)
-//{
-//    this->A = A;
-//    this->lo = lo;
-//    this->hi = hi;
-//
-//    quick = true;
-//}
 void sortJob::run() {
-//    if (!quick)
-//    s_cout{} << "Radix: " << start << "  " << end << std::endl;
     parallerRadixsort(R, start, end, current_byte, RR);
-//    else
-//        OptQuicksort(A, lo, hi);
 }
 
 sortJob::~sortJob() {}
