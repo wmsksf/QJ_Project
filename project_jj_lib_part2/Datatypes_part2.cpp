@@ -909,6 +909,7 @@ List* Query::prepareJoin(Relation *relA, Relation *relB){
 
     delete[] Row;
     delete[] results;
+    if(NumOfResults == 0) return nullptr;
     return list;
 
     //todo calculate results and RowsInResults

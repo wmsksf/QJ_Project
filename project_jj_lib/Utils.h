@@ -10,7 +10,7 @@
 #include "../project_jj_lib_part3/Barrier.h"
 
 #define SIZE 1024
-#define NUMOFRADIXTHREADS 7
+#define NUMOFRADIXTHREADS 4
 
 class Tuple;
 
